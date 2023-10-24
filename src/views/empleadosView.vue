@@ -331,9 +331,9 @@ export default {
     },
     async created() {
         this.$emit('loadingSweet');
-        await this.listarEmpleados();
+        //await this.listarEmpleados();
         this.$emit('closeSweet');
-        this.listarCargos();
+        //this.listarCargos();
     }
 }
 </script>

@@ -4,7 +4,7 @@
         <v-app-bar theme="dark" prominent app>
             <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
-            <v-toolbar-title>Software de facturación</v-toolbar-title>
+            <v-toolbar-title>Mueblería</v-toolbar-title>
 
             <v-spacer></v-spacer>
             <v-btn icon @click="cerrarSesion">
@@ -73,15 +73,15 @@ export default {
             this.link = { ...item };
         },
         cerrarSesion() {
-            this.$store.commit('setusuario', null);
+            this.$store.commit('setusuario', { usuario: null, hora_login: null });
             this.$router.push('/');
         }
     },
     created() {
         if (this.$store.getters.usuario) {
-            this.title = this.$store.getters.usuario.empleado.nombre;
-            this.subtitle = this.$store.getters.usuario.empleado.tipoCargo;
-            const cargo = this.$store.getters.usuario.empleado.tipoCargo;
+            this.title = this.$store.getters.usuario.usuario.nombre;
+            this.subtitle = this.$store.getters.usuario.usuario.rol;
+            const cargo = this.$store.getters.usuario.usuario.rol;
             menuJSON.default.filter(menu => {
                 if (menu.cargo == cargo) {
                     this.menu = menu.menu;

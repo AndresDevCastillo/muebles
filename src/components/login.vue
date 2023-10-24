@@ -1,6 +1,6 @@
 <template>
-    <div class="login d-flex">
-        <v-card width="450" class="pt-6 mx-auto my-auto" elevation="5">
+    <v-row justify="center" no-gutters class="pa-5">
+        <v-card width="450" class="mt-5 my-4" elevation="5">
             <v-card-title primary-title>
                 <h3 class="headline text-center text-wrap">Iniciar sesión</h3>
             </v-card-title>
@@ -25,7 +25,7 @@
                 <v-btn color="success" variant="elevated" @click="ingresar" class="ml-auto">INGRESAR</v-btn>
             </v-card-actions>
         </v-card>
-    </div>
+    </v-row>
 </template>
 <script>
 import Swal from 'sweetalert2';
@@ -40,40 +40,30 @@ export default {
         paquete: {
             usuario: null,
             contrasena: null
-        }
+        },
+        api: process.env.VUE_APP_API_URL
     }),
     methods: {
         async ingresar() {
             if (this.paquete.usuario != null && this.paquete.usuario.trim().length > 0) {
                 this.loadingSweet();
-                await axios.post(`${process.env.VUE_APP_API_URL}/auth/login`, this.paquete).then(response => {
+                await axios.post(`${this.api}/auth/login`, this.paquete).then(response => {
                     this.closeSweet();
                     switch (response.status) {
                         case 401:
                             Swal.fire({ icon: 'warning', text: 'Algo paso, intenta otra vez o contacta con soporte', showConfirmButton: false, timer: 1740 });
                             break;
                         case 200:
-                            this.$store.commit('setusuario', response.data);
-                            switch (response.data.empleado.tipoCargo) {
-                                case 'Engineersoft':
-                                    this.$router.push('/inicio/empleados');
-                                    break;
-                                case 'Mesero':
-                                    this.$router.push('/inicio/agregarPedido');
-                                    break;
+                            this.$store.commit('setusuario', { usuario: response.data, hora_login: new Date() });
+                            switch (response.data.rol) {
                                 case 'Admin':
-                                    this.$router.push('/inicio/empleado');
-                                    break;
-                                case 'Cajero':
-                                    this.$router.push('/inicio/factura');
-                                    break;
-                                case 'Cocinero':
-                                    this.$router.push('/inicio/cocinero');
+                                    this.$router.push('/inicio/empleados');
                                     break;
                             }
                             break;
                     }
                 }).catch(error => {
+                    console.log(error);
                     this.closeSweet();
                     Swal.fire({ icon: 'error', text: error.response.data.message, showConfirmButton: false, timer: 1600 });
                 });
@@ -116,9 +106,9 @@ html {
     height: 100%;
     min-width: 100%;
     min-height: 100%;
-    background: url('../assets/login/fondo.jpg');
+    /* background: url('../assets/login/fondo.jpg');
     background-size: cover;
     background-attachment: fixed;
-    background-position: 50% 50%;
+    background-position: 50% 50%;*/
 }
 </style>

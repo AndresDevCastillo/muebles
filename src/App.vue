@@ -18,10 +18,6 @@ export default {
 </script>
 
 <style>
-body,
-html {
-    height: 100vh !important;
-}
 
 :root {
     --bg-table-header: #f3f2f7;
