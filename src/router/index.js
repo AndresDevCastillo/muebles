@@ -64,6 +64,23 @@ const routes = [{
                     next('/');
                 }
             },
+            {
+                path: '/inicio/inventario',
+                name: 'inventario',
+                component: () =>
+                    import ('@/views/inventarioView.vue'),
+                beforeEnter: (to, from, next) => {
+                    const data = store.getters.usuario;
+                    if (data) {
+                        const cargo = data.usuario.rol.toLowerCase();
+                        if (cargo == "cobrador" || cargo == undefined) {
+                            return next(from);
+                        }
+                        return next();
+                    }
+                    next('/');
+                }
+            },
             /*{
                 //Para Engineersoft
                 path: '/inicio/empleados',

@@ -4,7 +4,8 @@ let menu = [{
             icon: 'mdi mdi-table-furniture',
             title: 'Productos',
             href: '/inicio/productos'
-        }, {
+        },
+        /* {
             icon: 'mdi mdi-order-bool-descending-variant',
             title: 'Pedidos',
             href: '/inicio/pedidos'
@@ -33,17 +34,17 @@ let menu = [{
             icon: 'mdi mdi-account-group-outline',
             title: 'Clientes',
             href: '/inicio/clientes'
-        },
+        },*/
         {
             icon: 'mdi mdi-store-edit',
             title: 'Inventario',
-            href: '/inicio/Inventario'
+            href: '/inicio/inventario'
         },
-        {
+        /*{
             icon: 'mdi mdi-history',
             title: 'Historial',
             href: '/inicio/historial'
-        },
+        },*/
     ]
 }, ]
 

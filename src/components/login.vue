@@ -98,7 +98,7 @@ export default {
 <style>
 body,
 html {
-    overflow: auto;
+    overflow-y: auto;
 }
 
 .login {
