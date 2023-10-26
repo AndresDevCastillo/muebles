@@ -81,6 +81,23 @@ const routes = [{
             next('/');
         }
     },
+    {
+        path: '/inicio/productos',
+        name: 'productosVista',
+        component: () =>
+            import('@/views/productosView.vue'),
+        beforeEnter: (to, from, next) => {
+            const data = store.getters.usuario;
+            if (data) {
+                const cargo = data.usuario.rol.toLowerCase();
+                if (cargo == "cobrador" || cargo == undefined) {
+                    return next(from);
+                }
+                return next();
+            }
+            next('/');
+        }
+    },
 
         /*{
             //Para Engineersoft
