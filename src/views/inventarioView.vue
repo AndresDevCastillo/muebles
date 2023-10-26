@@ -1,21 +1,20 @@
 <template>
     <div class="inventario">
         <v-card class="ma-3">
-            <v-row class="d-flex  px-6 my-4">
-                <v-col lg="10" md="10" sm="9" style="min-width: 200px;">
+            <v-row class="px-6 my-4">
+                <v-col lg="10" md="10" sm="9">
                     <div class="d-flex align-center "><v-icon size="x-large" icon="mdi-store-edit"></v-icon>
                         <h1 class="px-3">Inventario</h1>
                     </div>
                 </v-col>
                 <v-col lg="2" md="2" sm="3">
-                    <v-btn prepend-icon="mdi-plus" style="min-width: 170px;" color="yellow" @click="dialogoI = true">Crear
+                    <v-btn prepend-icon="mdi-plus" color="yellow" @click="dialogoI = true">Crear
                         Stock</v-btn>
                 </v-col>
-
             </v-row>
             <v-row>
                 <v-card class="ma-3 w-100">
-                    <v-table fixed-header fixed-footer class="w-100" v-if="inventario.length > 0">
+                    <v-table fixed-header fixed-footer class="w-100">
                         <thead style="z-index: 1000;" class="bg-table-header">
                             <tr>
                                 <th class="text-left">
@@ -34,9 +33,12 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <tr>
+                                <td colspan="6" class="text-center">Sin productos</td>
+                            </tr>
                             <tr v-for="(item) in inventario" :key="item.id">
                                 <td class="text-left">{{ item.producto.nombre }}</td>
-                                <td class="text-left">{{ item.producto.precio.toLocaleString() }}</td>
+                                <td class="text-left">{{ item.producto.precio }}</td>
                                 <td class="text-left">{{ item.cantidad }}</td>
                                 <td class="text-left">{{ item.existencia }}</td>
                                 <td class="text-right"><v-btn density="comfortable"
@@ -59,12 +61,12 @@
                         <v-form ref="formInventario">
                             <v-row>
                                 <v-col cols="12">
-                                    <v-text-field class="inline-form-input-name" label="Existencia" type="number" required
+                                    <v-text-field label="Existencia" type="number" min="1" required
                                         variant="outlined" v-model="formInventario.existencia" :rules="existenciaRule"
                                         :counter="65"></v-text-field>
                                 </v-col>
                                 <v-col cols="12">
-                                    <v-select :items="productos" item-title="nombre" item-value="id" variant="outlined"
+                                    <v-select :items="productos" no-data-text="Sin productos" item-title="nombre" item-value="id" variant="outlined"
                                         label="Productos" required v-model="formInventario.producto"
                                         :rules="[v => !!v || 'Seleccione un Producto']"></v-select>
                                 </v-col>
@@ -72,12 +74,11 @@
                         </v-form>
                     </v-container>
                 </v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
+                <v-card-actions class="justify-end">
                     <v-btn color="red-darken-1" variant="tonal" @click="dialogoI = false">
                         Cerrar
                     </v-btn>
-                    <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtn" @click="crearInventario()">
+                    <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtn" @click="crearInventario">
                         Crear
                     </v-btn>
                 </v-card-actions>
@@ -90,7 +91,7 @@
                         <v-form ref="formInventarioEditar">
                             <v-row>
                                 <v-col cols="12">
-                                    <v-text-field class="inline-form-input-name" label="Existencia" type="number" required
+                                    <v-text-field label="Existencia" min="1" type="number" required
                                         variant="outlined" v-model="formInventarioEditar.existencia" :rules="existenciaRule"
                                         :counter="65"></v-text-field>
                                 </v-col>
@@ -118,6 +119,8 @@ import Swal from 'sweetalert2';
 export default {
     name: 'inventarioVista',
     data: () => ({
+        token: null,
+        api: process.env.VUE_APP_API_URL,
         inventario: [],
         productos: [],
         dialogoI: false,
@@ -145,17 +148,24 @@ export default {
     }),
     methods: {
         async listarInventario() {
-            await axios.get(`${process.env.VUE_APP_API_URL}/inventario`).then((resp) => {
+            await axios.get(`${this.api}/inventario`, {
+                headers: {
+                    Authorization: `Bearer ${this.token}`
+                }
+            }).then((resp) => {
                 console.log(resp.data)
                 this.inventario = resp.data;
             }).catch(error => {
                 console.log(error)
                 return Swal.fire({ icon: 'error', title: 'No se pudo obtener los productos en stock', showConfirmButton: false, timer: 1500 });
-
-            })
+            });
         },
         async listarProductos() {
-            await axios.get(`${process.env.VUE_APP_API_URL}/inventario/productos`).then(resp => {
+            await axios.get(`${this.api}/inventario/productos`, {
+                headers: {
+                    Authorization: `Bearer ${this.token}`
+                }
+            }).then(resp => {
                 this.productos = resp.data;
             }).catch(error => {
                 console.log(error)
@@ -172,7 +182,11 @@ export default {
             }).then(async (result) => {
                 /* Read more about isConfirmed, isDenied below */
                 if (result.isConfirmed) {
-                    await axios.delete(`${process.env.VUE_APP_API_URL}/inventario/${id}`).then(() => {
+                    await axios.delete(`${this.api}/inventario/${id}`, {
+                        headers: {
+                            Authorization: `Bearer ${this.token}`
+                        }
+                    }).then(() => {
                         Swal.fire({ icon: 'success', title: 'Se elimino correctamente', timer: 1500, showConfirmButton: false });
                     })
                 }
@@ -189,7 +203,11 @@ export default {
                 this.formInventario.existencia = parseInt(this.formInventario.existencia);
                 this.formInventario.cantidad = this.formInventario.existencia;
                 this.dialogoI = false;
-                await axios.post(`${process.env.VUE_APP_API_URL}/inventario/crear`, this.formInventario).then((resp) => {
+                await axios.post(`${this.api}/inventario/crear`, this.formInventario, {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`
+                    }
+                }).then((resp) => {
                     if (resp.status == 201) {
                         return Swal.fire({
                             icon: 'success',
@@ -231,7 +249,7 @@ export default {
                 this.dialogoE = false;
                 this.formInventarioEditar.existencia = parseInt(this.formInventarioEditar.existencia);
                 this.formInventarioEditar.cantidad = this.formInventarioEditar.existencia;
-                axios.put(`${process.env.VUE_APP_API_URL}/inventario/actualizar`, this.formInventarioEditar).then(async () => {
+                axios.put(`${this.api}/inventario/actualizar`, this.formInventarioEditar).then(async () => {
                     await this.listarInventario();
                     await this.listarProductos();
                     return Swal.fire({
@@ -250,6 +268,7 @@ export default {
         }
     },
     async created() {
+        this.token = this.$store.getters.usuario.usuario.access_token;
         this.$emit('loadingSweet');
         await this.listarInventario();
         await this.listarProductos();
