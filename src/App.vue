@@ -18,6 +18,12 @@ export default {
 </script>
 
 <style>
+body,
+html {
+    overflow: auto;
+    overflow-y: auto;
+}
+
 :root {
     --bg-table-header: #f3f2f7;
 
