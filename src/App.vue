@@ -18,7 +18,6 @@ export default {
 </script>
 
 <style>
-
 :root {
     --bg-table-header: #f3f2f7;
 
@@ -34,12 +33,17 @@ export default {
     font-weight: bold !important;
 }
 
+.v-data-table>tr>th {
+    background-color: var(--bg-table-header) !important;
+    font-weight: bold !important;
+}
+
 #app {
     height: 100%;
     color: #2c3e50;
 }
 
-.bg-table-header>tr>th {
+.v-data-table .v-table__wrapper>tr>th {
     background-color: var(--bg-table-header) !important;
     font-weight: bold !important;
 }
@@ -85,6 +89,7 @@ export default {
 body.swal2-shown.swal2-height-auto {
     height: 100vh !important;
 }
+
 div:where(.swal2-container).swal2-backdrop-show,
 div:where(.swal2-container).swal2-noanimation {
     background: rgba(0, 0, 0, .6) !important;
