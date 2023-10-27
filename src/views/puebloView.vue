@@ -22,12 +22,16 @@
                         class="elevation-1" :search="searchRuta">
                         <!-- eslint-disable-next-line vue/valid-v-slot -->
                         <template v-slot:item.actions="{ item }">
-                            <v-icon size="small" class="me-2" @click="preEditarRuta(item)">
+                            <v-icon size="small" class="me-2" @click="verRutaFunction(Object.assign({}, item))">
+                                mdi-information-outline
+                            </v-icon>
+                            <v-icon size="small" class="me-2" @click="preEditarRuta(Object.assign({}, item))">
                                 mdi-pencil
                             </v-icon>
                             <v-icon size="small" @click="eliminarRuta(item._id)">
                                 mdi-delete
                             </v-icon>
+
                         </template>
                     </v-data-table>
 
@@ -39,7 +43,7 @@
                 <v-card-title>Nuevo Ruta</v-card-title>
                 <v-card-text>
                     <v-container>
-                        <v-form ref="formProducto">
+                        <v-form ref="formRuta">
                             <v-row>
                                 <v-col cols="12">
                                     <v-text-field label="Nombre de la ruta" type="text" required variant="outlined"
@@ -72,8 +76,8 @@
                                         no-data-text="Escoja un dia"></v-select>
                                 </v-col>
                                 <v-col cols="12" sm="6" v-if="formRuta.opcRuta == 'Quincenal'">
-                                    <v-select :items="[1, 2, 3, 4]" variant="outlined" label="Semana 1" required
-                                        v-model="quincenaNumber.num1" :rules="[v => !!v || 'Seleccione la primera semana']"
+                                    <v-select variant="outlined" label="Semana 1" required v-model="quincenaNumber.num1"
+                                        :rules="[v => !!v || 'Seleccione la primera semana']"
                                         no-data-text="Escoja un semana"></v-select>
                                 </v-col>
                                 <v-col cols="12" sm="6" v-if="formRuta.opcRuta == 'Quincenal'">
@@ -87,9 +91,8 @@
                                         no-data-text="Escoja un dia"></v-select>
                                 </v-col>
                                 <v-col cols="12" sm="6" v-if="formRuta.opcRuta == 'Mensual'">
-                                    <v-select :items="[1, 2, 3, 4]" variant="outlined" label="Semana 1" required
-                                        v-model="formRuta.mensual.semanas"
-                                        :rules="[v => !!v || 'Seleccione la primera semana']"
+                                    <v-select :items="[1, 2, 3, 4]" variant="outlined" label="Semana" required
+                                        v-model="formRuta.mensual.semanas" :rules="[v => !!v || 'Seleccione la  semana']"
                                         no-data-text="Escoja un semana"></v-select>
                                 </v-col>
                             </v-row>
@@ -110,7 +113,7 @@
             <v-card>
                 <v-card-text>
                     <v-container>
-                        <v-form ref="formProducto">
+                        <v-form ref="formRutaEditar">
                             <v-row>
                                 <v-col cols="12">
                                     <v-text-field label="Nombre de la ruta" type="text" required variant="outlined"
@@ -160,9 +163,9 @@
                                         no-data-text="Escoja un dia"></v-select>
                                 </v-col>
                                 <v-col cols="12" sm="6" v-if="formRutaEditar.opcRuta == 'Mensual'">
-                                    <v-select :items="[1, 2, 3, 4]" variant="outlined" label="Semana 1" required
+                                    <v-select :items="[1, 2, 3, 4]" variant="outlined" label="Semana" required
                                         v-model="formRutaEditar.mensual.semanas"
-                                        :rules="[v => !!v || 'Seleccione la primera semana']"
+                                        :rules="[v => !!v || 'Seleccione la  semana']"
                                         no-data-text="Escoja un semana"></v-select>
                                 </v-col>
                             </v-row>
@@ -177,7 +180,64 @@
                         Editar
                     </v-btn>
                 </v-card-actions>
-                {{ formRutaEditar }}
+            </v-card>
+        </v-dialog>
+        <v-dialog v-model="dialogVerRuta" persistent width="700">
+            <v-card>
+                <v-card-text>
+                    <v-container>
+                        <v-form>
+                            <v-row>
+                                <v-col cols="12">
+                                    <v-text-field label="Nombre de la ruta" type="text" required variant="outlined"
+                                        v-model="verRuta.nombre" disabled></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <v-text-field variant="outlined" label="Departamento" disabled required
+                                        v-model="verRuta.departamento" item-title="departamento"
+                                        item-value="departamento"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <v-text-field variant="outlined" label="Ciudad" disabled required
+                                        v-model="verRuta.ciudad"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <v-text-field variant="outlined" label="Frecuencia de pago" disabled required
+                                        v-model="verRuta.opcRuta"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" v-if="verRuta.opcRuta == 'Semanal'">
+                                    <v-text-field variant="outlined" label="Día" required disabled
+                                        v-model="verRuta.semanal"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" v-if="verRuta.opcRuta == 'Quincenal'">
+                                    <v-text-field variant="outlined" label="Día" required disabled
+                                        v-model="verRuta.quincenal.dia"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" v-if="verRuta.opcRuta == 'Quincenal'">
+                                    <v-text-field variant="outlined" label="Semana 1" required disabled
+                                        v-model="verRuta.quincenal.semanas[0]"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" v-if="verRuta.opcRuta == 'Quincenal'">
+                                    <v-text-field variant="outlined" label="Semana 2" required disabled
+                                        v-model="verRuta.quincenal.semanas[1]"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" v-if="verRuta.opcRuta == 'Mensual'">
+                                    <v-text-field variant="outlined" label="Día" required disabled
+                                        v-model="verRuta.mensual.dia"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" v-if="verRuta.opcRuta == 'Mensual'">
+                                    <v-text-field variant="outlined" label="Semana" required disabled
+                                        v-model="verRuta.mensual.semanas"></v-text-field>
+                                </v-col>
+                            </v-row>
+                        </v-form>
+                    </v-container>
+                </v-card-text>
+                <v-card-actions class="justify-end">
+                    <v-btn color="red-darken-1" variant="tonal" @click="dialogVerRuta = false">
+                        Cerrar
+                    </v-btn>
+                </v-card-actions>
             </v-card>
         </v-dialog>
 
@@ -188,6 +248,7 @@
 <script>
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import Session from '@/validation/session';
 export default {
     name: 'puebloVista',
     data: () => ({
@@ -196,6 +257,7 @@ export default {
         token: null,
         dialogR: null,
         dialogReditar: null,
+        dialogVerRuta: null,
         searchRuta: null,
         opcCrearRuta: ['Diario', 'Semanal', 'Quincenal', 'Mensual'],
         diasSemana: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
@@ -231,6 +293,7 @@ export default {
                 semanas: []
             }
         },
+        verRuta: null,
         quincenaNumber: {
             num1: null,
             num2: null
@@ -265,10 +328,22 @@ export default {
             }).then((resp) => {
                 this.departamento = resp.data;
             }).catch(error => {
-                console.log(error);
-                return Swal.fire({ icon: 'error', title: 'No se pudo obtener los departamentos', showConfirmButton: false, timer: 1500 });
+                switch (error.response.status) {
+                    case 401:
+                        Session.expiredSession();
+                        break;
+                    default:
+                        Swal.fire({
+                            icon: 'info',
+                            text: 'No se pudo obtener los departamentos',
+                            showConfirmButton: false,
+                            timer: 1600
+                        });
+                        break;
+                }
             });
-        }, async obtenerRutas() {
+        },
+        async obtenerRutas() {
             await axios.get(`${this.api}/pueblo`, {
                 headers: {
                     Authorization: `Bearer ${this.token}`
@@ -276,44 +351,70 @@ export default {
             }).then((resp) => {
                 this.rutas = resp.data;
             }).catch(error => {
-                console.log(error);
-                return Swal.fire({ icon: 'error', title: 'No se pudo obtener las rutas', showConfirmButton: false, timer: 1500 });
+                switch (error.response.status) {
+                    case 401:
+                        Session.expiredSession();
+                        break;
+                    default:
+                        Swal.fire({
+                            icon: 'info',
+                            text: 'No se pudo obtener las rutas',
+                            showConfirmButton: false,
+                            timer: 1600
+                        });
+                        break;
+                }
             });
         },
         async crearRuta() {
-            this.disableBtn = true;
-            this.dialogR = false;
-            await axios.post(`${this.api}/pueblo/crear`, this.formRuta, {
-                headers: {
-                    Authorization: `Bearer ${this.token}`
-                },
-            }).then(() => {
-                this.formRuta = {
-                    nombre: null,
-                    ciudad: null,
-                    departamento: null,
-                    opcRuta: null,
-                    diario: null,
-                    semanal: null,
-                    quincenal: {
-                        dia: null,
-                        semanas: [null, null]
+            const { valid } = await this.$refs.formRuta.validate();
+            if (valid) {
+                this.disableBtn = true;
+                this.dialogR = false;
+                await axios.post(`${this.api}/pueblo/crear`, this.formRuta, {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`
                     },
-                    mensual: {
-                        dia: null,
-                        semanas: []
+                }).then(() => {
+                    this.formRuta = {
+                        nombre: null,
+                        ciudad: null,
+                        departamento: null,
+                        opcRuta: null,
+                        diario: null,
+                        semanal: null,
+                        quincenal: {
+                            dia: null,
+                            semanas: [null, null]
+                        },
+                        mensual: {
+                            dia: null,
+                            semanas: []
+                        }
                     }
-                }
-                this.quincenaNumber = {
-                    num1: null,
-                    num2: null
-                }
-                return Swal.fire({ icon: 'success', title: 'Se creo la ruta correctamente', showConfirmButton: false, timer: 1500 });
-            }).catch(() => {
-                return Swal.fire({ icon: 'error', title: 'No se pudo crear el pueblo', showConfirmButton: false, timer: 1500 });
-            })
-            await this.obtenerRutas();
-            this.disableBtn = false;
+                    this.quincenaNumber = {
+                        num1: null,
+                        num2: null
+                    }
+                    return Swal.fire({ icon: 'success', title: 'Se creo la ruta correctamente', showConfirmButton: false, timer: 1500 });
+                }).catch(error => {
+                    switch (error.response.status) {
+                        case 401:
+                            Session.expiredSession();
+                            break;
+                        default:
+                            Swal.fire({
+                                icon: 'info',
+                                text: 'No se pudo crear la ruta',
+                                showConfirmButton: false,
+                                timer: 1600
+                            });
+                            break;
+                    }
+                });
+                await this.obtenerRutas();
+                this.disableBtn = false;
+            }
         },
         async eliminarRuta(id) {
             Swal.fire({
@@ -334,8 +435,20 @@ export default {
                         Swal.fire({ icon: 'success', title: 'Se elimino correctamente', timer: 1500, showConfirmButton: false });
                     })
                 }
-            }).catch(() => {
-                return Swal.fire({ icon: 'error', title: 'No se pudo eliminar la ruta', showConfirmButton: false, timer: 1500 });
+            }).catch(error => {
+                switch (error.response.status) {
+                    case 401:
+                        Session.expiredSession();
+                        break;
+                    default:
+                        Swal.fire({
+                            icon: 'info',
+                            text: 'No se pudo eliminar la ruta',
+                            showConfirmButton: false,
+                            timer: 1600
+                        });
+                        break;
+                }
             });
         },
         preEditarRuta(item) {
@@ -346,40 +459,59 @@ export default {
             this.dialogReditar = true;
         },
         async editarRuta() {
+            const { valid } = await this.$refs.formRutaEditar.validate();
+            if (valid) {
 
-            this.disableBtn = true;
-            this.dialogReditar = false;
-            await axios.put(`${this.api}/pueblo/actualizar`, this.formRutaEditar, {
-                headers: {
-                    Authorization: `Bearer ${this.token}`
-                }
-            }).then(() => {
-                this.formRutaEditar = {
-                    nombre: null,
-                    ciudad: null,
-                    departamento: null,
-                    opcRuta: null,
-                    diario: null,
-                    semanal: null,
-                    quincenal: {
-                        dia: null,
-                        semanas: [null, null]
-                    },
-                    mensual: {
-                        dia: null,
-                        semanas: []
+                this.disableBtn = true;
+                this.dialogReditar = false;
+                await axios.put(`${this.api}/pueblo/actualizar`, this.formRutaEditar, {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`
                     }
-                }
-                this.quincenaNumberEditar = {
-                    num1: null,
-                    num2: null
-                }
-                return Swal.fire({ icon: 'success', title: 'Se edito la ruta correctamente', showConfirmButton: false, timer: 1500 });
-            }).catch(() => {
-                return Swal.fire({ icon: 'error', title: 'No se pudo editar el pueblo', showConfirmButton: false, timer: 1500 });
-            })
-            await this.obtenerRutas();
-            this.disableBtn = false;
+                }).then(() => {
+                    this.formRutaEditar = {
+                        nombre: null,
+                        ciudad: null,
+                        departamento: null,
+                        opcRuta: null,
+                        diario: null,
+                        semanal: null,
+                        quincenal: {
+                            dia: null,
+                            semanas: [null, null]
+                        },
+                        mensual: {
+                            dia: null,
+                            semanas: []
+                        }
+                    }
+                    this.quincenaNumberEditar = {
+                        num1: null,
+                        num2: null
+                    }
+                    return Swal.fire({ icon: 'success', title: 'Se edito la ruta correctamente', showConfirmButton: false, timer: 1500 });
+                }).catch(error => {
+                    switch (error.response.status) {
+                        case 401:
+                            Session.expiredSession();
+                            break;
+                        default:
+                            Swal.fire({
+                                icon: 'info',
+                                text: 'No se pudo edita el pueblo',
+                                showConfirmButton: false,
+                                timer: 1600
+                            });
+                            break;
+                    }
+                });
+                await this.obtenerRutas();
+                this.disableBtn = false;
+            }
+        },
+        verRutaFunction(item) {
+            this.dialogVerRuta = true;
+            this.verRuta = item;
         }
     },
     async created() {

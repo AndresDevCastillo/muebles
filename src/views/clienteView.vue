@@ -9,97 +9,440 @@
                     </v-row>
                 </v-col>
                 <v-col cols="auto">
-                    <v-btn prepend-icon="mdi-plus" color="blue" @click="dialogCliente = true;">Agregar cliente</v-btn>
+                    <v-btn prepend-icon="mdi-plus" color="green" @click="dialogCliente = true;">Agregar cliente</v-btn>
                 </v-col>
             </v-row>
         </v-card-title>
+        <v-card-title>
+            <v-col md="6" sm="12"><v-text-field v-model="searchCliente" append-inner-icon="mdi-magnify" label="Buscar"
+                    variant="outlined" hide-details></v-text-field></v-col>
+        </v-card-title>
         <v-card-text>
-            <v-table fixed-header style="margin-bottom: 100px;">
-                <thead style="z-index: 1000" class="bg-table-header">
-                    <tr>
-                        <th class="text-left">Cédula</th>
-                        <th class="text-left">Nombres</th>
-                        <th class="text-left">Correo</th>
-                        <th class="text-left">Teléfono</th>
-                        <th class="text-center"> Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-if="clientes.length == 0">
-                        <td colspan="4" class="text-center">Sin clientes</td>
-                    </tr>
-                    <tr v-for="(cliente, index) in clientes" :key="index">
-                        <td class="text-left">{{ cliente.cedula }}</td>
-                        <td class="text-left">{{ cliente.nombre }}</td>
-                        <td class="text-left">{{ cliente.correo }}</td>
-                        <td class="text-left">{{ cliente.telefono }}</td>
-                        <td style="text-align: center;"><v-btn density="comfortable"
-                                @click="eliminarCliente(cliente.cedula)" color="red">eliminar</v-btn>
-                        </td>
-                    </tr>
-                </tbody>
-            </v-table>
+            <v-data-table :headers="headers" :items="clientes" :sort-by="[{ key: 'nombres', order: 'asc' }]"
+                class="elevation-1" :search="searchCliente">
+                <!-- eslint-disable-next-line vue/valid-v-slot -->
+                <template v-slot:item.actions="{ item }">
+                    <v-icon size="small" class="me-2" @click="verClienteFunction(Object.assign({}, item))">
+                        mdi-information-outline
+                    </v-icon>
+                    <v-icon size="small" class="me-2" @click="preEditarCliente(Object.assign({}, item))">
+                        mdi-pencil
+                    </v-icon>
+                    <v-icon size="small" @click="eliminarCliente(item._id)">
+                        mdi-delete
+                    </v-icon>
+
+                </template>
+            </v-data-table>
         </v-card-text>
-        <v-dialog v-model="dialogCliente" persistent width="700">
-            <clienteComponent @save="$emit('loadingSweet')" @endSave="$emit('closeSweet')"
-                @cerrarDialog="dialogCliente = false;" @cerrarYLlenar="nuevoCliente" />
-        </v-dialog>
     </v-card>
+    <v-dialog v-model="dialogCliente" persistent width="700">
+        <v-card>
+            <v-card-title>Nuevo Cliente</v-card-title>
+            <v-card-text>
+                <v-container>
+                    <v-form ref="formCliente">
+                        <v-row>
+                            <v-col cols="12">
+                                <v-text-field label="Documento" type="number" min="1" required
+                                    hint="Sin comas o puntos (, .)" persistent-hint variant="outlined"
+                                    v-model="formCliente.documento" :rules="numberRules"></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-text-field label="Nombres" type="text" required variant="outlined"
+                                    v-model="formCliente.nombres" :rules="nombreRules"></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-text-field label="Apellidos" type="text" required variant="outlined"
+                                    v-model="formCliente.apellidos" :rules="nombreRules"></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-text-field label="Telefono" type="text" required variant="outlined"
+                                    v-model="formCliente.telefono" :rules="nombreRules"></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-text-field label="Correo" type="text" required variant="outlined"
+                                    v-model="formCliente.correo" :rules="nombreRules"></v-text-field>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-autocomplete :items="rutas" variant="outlined" label="Ruta" required
+                                    v-model="formCliente.direccion" item-title="nombre" item-value="_id"
+                                    :rules="[v => !!v || 'Seleccione una ruta']"
+                                    no-data-text="No hay rutas"></v-autocomplete>
+                            </v-col>
+                        </v-row>
+                    </v-form>
+                </v-container>
+            </v-card-text>
+            <v-card-actions class="justify-end">
+                <v-btn color="red-darken-1" variant="tonal" @click="dialogCliente = false">
+                    Cerrar
+                </v-btn>
+                <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtn" @click="crearCliente()">
+                    Crear
+                </v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+    <v-dialog v-model="dialogClienteEditar" persistent width="700">
+        <v-card>
+            <v-card-title>Editar Cliente</v-card-title>
+            <v-card-text>
+                <v-container>
+                    <v-form ref="formClienteEditar">
+                        <v-row>
+                            <v-col cols="12">
+                                <v-text-field label="Documento" type="number" min="1" required
+                                    hint="Sin comas o puntos (, .)" persistent-hint variant="outlined"
+                                    v-model="formClienteEditar.documento" :rules="numberRules"></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-text-field label="Nombres" type="text" required variant="outlined"
+                                    v-model="formClienteEditar.nombres" :rules="nombreRules"></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-text-field label="Apellidos" type="text" required variant="outlined"
+                                    v-model="formClienteEditar.apellidos" :rules="nombreRules"></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-text-field label="Telefono" type="text" required variant="outlined"
+                                    v-model="formClienteEditar.telefono" :rules="nombreRules"></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-text-field label="Correo" type="text" required variant="outlined"
+                                    v-model="formClienteEditar.correo" :rules="nombreRules"></v-text-field>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-autocomplete :items="rutas" variant="outlined" label="Ruta" required
+                                    v-model="formClienteEditar.direccion" item-title="nombre" item-value="_id"
+                                    :rules="[v => !!v || 'Seleccione una ruta']"
+                                    no-data-text="No hay rutas"></v-autocomplete>
+                            </v-col>
+                        </v-row>
+                    </v-form>
+                </v-container>
+            </v-card-text>
+            <v-card-actions class="justify-end">
+                <v-btn color="red-darken-1" variant="tonal" @click="dialogClienteEditar = false">
+                    Cerrar
+                </v-btn>
+                <v-btn color="blue-darken-1" variant="tonal" :disabled="disableBtn" @click="editarCliente()">
+                    Editar
+                </v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+    <v-dialog v-model="dialogClienteVer" persistent width="700">
+        <v-card>
+            <v-card-text>
+                <v-container>
+                    <v-form>
+                        <v-row>
+                            <v-col cols="12">
+                                <v-text-field label="Documento" type="number" min="1" required
+                                    hint="Sin comas o puntos (, .)" persistent-hint variant="outlined"
+                                    v-model="verCliente.documento" disabled></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-text-field label="Nombres" type="text" required variant="outlined"
+                                    v-model="verCliente.nombres" disabled></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-text-field label="Apellidos" type="text" required variant="outlined"
+                                    v-model="verCliente.apellidos" disabled></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-text-field label="Telefono" type="text" required variant="outlined"
+                                    v-model="verCliente.telefono" disabled></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-text-field label="Correo" type="text" required variant="outlined"
+                                    v-model="verCliente.correo" disabled></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-text-field variant="outlined" label="Ruta" required v-model="verCliente.direccion.nombre"
+                                    disabled></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-text-field variant="outlined" label="Departamento" required
+                                    v-model="verCliente.direccion.departamento" disabled></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-text-field variant="outlined" label="Ciudad" required
+                                    v-model="verCliente.direccion.ciudad" disabled></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-text-field variant="outlined" label="Frecuencia de pago" required
+                                    v-model="verCliente.direccion.opcRuta" disabled></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Semanal'">
+                                <v-text-field variant="outlined" label="Día" required disabled
+                                    v-model="verCliente.direccion.semanal"></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Quincenal'">
+                                <v-text-field variant="outlined" label="Día" required disabled
+                                    v-model="verCliente.direccion.quincenal.dia"></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Quincenal'">
+                                <v-text-field variant="outlined" label="Semana 1" required disabled
+                                    v-model="verCliente.direccion.quincenal.semanas[0]"></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Quincenal'">
+                                <v-text-field variant="outlined" label="Semana 2" required disabled
+                                    v-model="verCliente.direccion.quincenal.semanas[1]"></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Mensual'">
+                                <v-text-field variant="outlined" label="Día" required disabled
+                                    v-model="verCliente.direccion.mensual.dia"></v-text-field>
+                            </v-col>
+                            <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Mensual'">
+                                <v-text-field variant="outlined" label="Semana" required disabled
+                                    v-model="verCliente.direccion.mensual.semanas"></v-text-field>
+                            </v-col>
+                        </v-row>
+                    </v-form>
+                </v-container>
+            </v-card-text>
+            <v-card-actions class="justify-end">
+                <v-btn color="red-darken-1" variant="tonal" @click="dialogClienteVer = false">
+                    Cerrar
+                </v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 <script>
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import clienteComponent from '../components/cliente.vue';
+import Session from '@/validation/session';
+
 export default {
+    name: 'clienteVista',
     components: {
-        clienteComponent
     },
     data: () => ({
         dialogCliente: false,
+        dialogClienteEditar: null,
+        dialogClienteVer: null,
         clientes: [],
+        rutas: [],
         api: process.env.VUE_APP_API_URL,
+        token: null,
+        searchCliente: null,
+        headers: [
+            { title: 'Documento', key: 'documento', sortable: false },
+            { title: 'Nombre', key: 'nombres' },
+            { title: 'Apellido', key: 'apellidos' },
+            { title: 'Telefono', key: 'telefono' },
+            { title: 'Ruta', key: 'direccion.nombre' },
+            { title: 'Frecuencia', key: 'direccion.opcRuta' },
+
+            { title: 'Accion', key: 'actions', sortable: false },
+        ],
+        formCliente: {
+            documento: null,
+            nombres: null,
+            apellidos: null,
+            telefono: null,
+            correo: null,
+            direccion: null
+        },
+        formClienteEditar: {
+            id: null,
+            documento: null,
+            nombres: null,
+            apellidos: null,
+            telefono: null,
+            correo: null,
+            direccion: null
+        },
+        verCliente: null,
+        nombreRules: [
+            v => !!v || 'El nombre es requerido',
+            v => (v && v.length <= 65) || 'EL nombre no puede superar los 65 caracteres',
+        ],
+        numberRules: [v => !!v || 'El precio es requerido', v => (v && /^[0-9]+$/.test(v)) || 'El numero no debe contener caracteres'],
+
     }),
     methods: {
         async obtenerClientes() {
-            this.$emit('loadingSweet');
-            await axios.get(`${this.api}/cliente`).then(response => {
-                this.clientes = response.data;
-            });
-            this.$emit('closeSweet');
-        },
-        async eliminarCliente(cedula) {
-            Swal.fire({
-                icon: "info",
-                title: "Seguro quiere eliminar el cliente?",
-                showDenyButton: true,
-                denyButtonText: "No",
-                confirmButtonText: "Eliminar",
-            })
-                .then(async (result) => {
-                    /* Read more about isConfirmed, isDenied below */
-                    if (result.isConfirmed) {
-                        await axios.delete(`${this.api}/cliente/${cedula}`).then(async () => {
-                            Swal.fire({
-                                icon: "success",
-                                title: "Se elimino correctamente",
-                                timer: 1000,
-                                showConfirmButton: false,
-                            });
-                            await this.obtenerClientes();
+            await axios.get(`${this.api}/cliente`, {
+                headers: {
+                    Authorization: `Bearer ${this.token}`
+                }
+            }).then((resp) => {
+                this.clientes = resp.data;
+            }).catch(error => {
+                switch (error.response.status) {
+                    case 401:
+                        Session.expiredSession();
+                        break;
+                    default:
+                        Swal.fire({
+                            icon: 'info',
+                            text: 'No se pudo obtener los departamentos',
+                            showConfirmButton: false,
+                            timer: 1600
                         });
+                        break;
+                }
+            });
+        },
+        async obtenerRutas() {
+            await axios.get(`${this.api}/pueblo`, {
+                headers: {
+                    Authorization: `Bearer ${this.token}`
+                }
+            }).then((resp) => {
+                this.rutas = resp.data;
+            }).catch(error => {
+                switch (error.response.status) {
+                    case 401:
+                        Session.expiredSession();
+                        break;
+                    default:
+                        Swal.fire({
+                            icon: 'info',
+                            text: 'No se pudo obtener las rutas',
+                            showConfirmButton: false,
+                            timer: 1600
+                        });
+                        break;
+                }
+            });
+        },
+        async crearCliente() {
+            const { valid } = await this.$refs.formCliente.validate();
+            if (valid) {
+                this.disableBtn = true;
+                this.dialogCliente = false;
+                this.formCliente.documento = parseInt(this.formCliente.documento);
+                await axios.post(`${this.api}/cliente/crear`, this.formCliente, {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`
+                    },
+                }).then(() => {
+                    this.formCliente = {
+                        documento: null,
+                        nombres: null,
+                        apellidos: null,
+                        telefono: null,
+                        correo: null,
+                        direccion: null
                     }
-                })
-                .catch(() => {
-                    return Swal.fire({
-                        icon: "error",
-                        title: "No se pudo eliminar al cliente",
-                        timer: 1000,
-                    });
+                    return Swal.fire({ icon: 'success', title: 'Se creo el cliente correctamente', showConfirmButton: false, timer: 1500 });
+                }).catch(error => {
+                    switch (error.response.status) {
+                        case 401:
+                            Session.expiredSession();
+                            break;
+                        default:
+                            Swal.fire({
+                                icon: 'info',
+                                text: 'No se pudo crear el cliente',
+                                showConfirmButton: false,
+                                timer: 1600
+                            });
+                            break;
+                    }
                 });
+                await this.obtenerClientes();
+                this.disableBtn = false;
+            }
+
+        },
+        async eliminarCliente(id) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Seguro quiere eliminar el cliente?',
+                showDenyButton: true,
+                denyButtonText: 'No',
+                confirmButtonText: 'Eliminar',
+            }).then(async (result) => {
+                /* Read more about isConfirmed, isDenied below */
+                if (result.isConfirmed) {
+                    await axios.delete(`${this.api}/cliente/${id}`, {
+                        headers: {
+                            Authorization: `Bearer ${this.token}`
+                        }
+                    }).then(() => {
+                        this.obtenerClientes();
+                        Swal.fire({ icon: 'success', title: 'Se elimino correctamente', timer: 1500, showConfirmButton: false });
+                    })
+                }
+            }).catch(error => {
+                switch (error.response.status) {
+                    case 401:
+                        Session.expiredSession();
+                        break;
+                    default:
+                        Swal.fire({
+                            icon: 'info',
+                            text: 'No se pudo eliminar el cliente',
+                            showConfirmButton: false,
+                            timer: 1600
+                        });
+                        break;
+                }
+            });
+        },
+        preEditarCliente(item) {
+            this.formClienteEditar = item;
+            this.formClienteEditar.id = item._id;
+            delete this.formClienteEditar._id;
+            this.formClienteEditar.direccion = item.direccion._id;
+            this.dialogClienteEditar = true;
+        },
+        async editarCliente() {
+            const { valid } = await this.$refs.formClienteEditar.validate();
+            if (valid) {
+                this.disableBtn = true;
+                this.dialogClienteEditar = false;
+                this.formClienteEditar.documento = parseInt(this.formClienteEditar.documento);
+                await axios.put(`${this.api}/cliente/actualizar`, this.formClienteEditar, {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`
+                    }
+                }).then(() => {
+                    this.formClienteEditar = {
+                        documento: null,
+                        nombres: null,
+                        apellidos: null,
+                        telefono: null,
+                        correo: null,
+                        direccion: null
+                    }
+                    return Swal.fire({ icon: 'success', title: 'Se edito el cliente correctamente', showConfirmButton: false, timer: 1500 });
+                }).catch(error => {
+                    switch (error.response.status) {
+                        case 401:
+                            Session.expiredSession();
+                            break;
+                        default:
+                            Swal.fire({
+                                icon: 'info',
+                                text: 'No se pudo editar el cliente',
+                                showConfirmButton: false,
+                                timer: 1600
+                            });
+                            break;
+                    }
+                });
+                await this.obtenerClientes();
+                this.disableBtn = false;
+            }
+        },
+        verClienteFunction(item) {
+            this.verCliente = item;
+            this.dialogClienteVer = true;
         }
     },
-    created() {
-        this.obtenerClientes();
+    async created() {
+        this.token = this.$store.getters.usuario.usuario.access_token;
+        this.$emit('loadingSweet');
+        await this.obtenerClientes();
+        await this.obtenerRutas();
+        this.$emit('closeSweet');
     }
 }
 </script>
