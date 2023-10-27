@@ -14,42 +14,26 @@
             </v-row>
             <v-row class="flex-column">
                 <v-card class="ma-3 w-100">
-                    <v-table fixed-header fixed-footer class="w-100" v-if="empleados.length > 0">
-                        <thead style="z-index: 1000;" class="bg-table-header">
-                            <tr>
-                                <th class="text-left">
-                                    Cedula
-                                </th>
-                                <th class="text-left">
-                                    Nombre
-                                </th>
-                                <th class="text-left">
-                                    Teléfono
-                                </th>
-                                <th class="text-left">
-                                    Dirección
-                                </th>
-                                <th class="text-left">
-                                    Cargo
-                                </th>
-                                <th colspan="2" class="text-center">Acción</th>
+                    <v-card-title>
+                        <v-col cols="4">
+                            <v-text-field v-model="searchEmpleado" append-inner-icon="mdi-magnify" label="Buscar"
+                                variant="outlined" hide-details>
+                            </v-text-field>
+                        </v-col>
+                    </v-card-title>
+                    <v-data-table :headers="headers" :items="empleados" :sort-by="[{ key: 'nombre', order: 'asc' }]"
+                        class="elevation-1" :search="searchEmpleado" no-data-text="Sin empleados">
+                        <!-- eslint-disable-next-line vue/valid-v-slot -->
+                        <template v-slot:item.actions="{ item }">
+                            <v-icon size="small" class="me-2" @click="editarEmpleado(item)">
+                                mdi-pencil
+                            </v-icon>
+                            <v-icon size="small" @click="eliminarEmpleado(item._id)">
+                                mdi-delete
+                            </v-icon>
+                        </template>
+                    </v-data-table>
 
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(persona) in empleados" :key="persona.cedula">
-                                <td class="text-left">{{ persona.cedula }}</td>
-                                <td class="text-left">{{ persona.nombre }}</td>
-                                <td class="text-left">{{ persona.telefono }}</td>
-                                <td class="text-left">{{ persona.direccion }}</td>
-                                <td class="text-left">{{ persona.tipoCargo }}</td>
-                                <td><v-btn color="blue" density="comfortable"
-                                        @click="editarEmpleado(Object.assign({}, persona))">Editar</v-btn></td>
-                                <td><v-btn color="red" density="comfortable"
-                                        @click="eliminarEmpleado(persona.cedula)">Eliminar</v-btn></td>
-                            </tr>
-                        </tbody>
-                    </v-table>
                 </v-card>
             </v-row>
             <v-dialog v-model="dialogE" persistent width="700">
@@ -140,26 +124,21 @@
                 </v-card>
             </v-dialog>
         </v-card>
-        <editarEmpleadoComponent v-model="ShowEditarEmpleado" :editarEmpleado="paqueteEditar"
-            @cerrar="ShowEditarEmpleado = false" @noactualizo="noEditoEmpleado()" @actualizo="editarEmpleadoCorrecto()">
-        </editarEmpleadoComponent>
     </div>
 </template>
 
 <script>
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import editarEmpleadoComponent from '../components/editarEmpleado.vue';
+import Session from '@/validation/session';
 export default {
     name: "empleadosVista",
-    components: {
-        editarEmpleadoComponent
-    },
     data: () => ({
+        token: null,
+        searchEmpleado: null,
         disableBtn: false,
         visibleContra: true,
         empleados: [],
-        tipoCargo: [],
         dialogC: false,
         dialogE: false,
         dialogU: false,
@@ -188,16 +167,36 @@ export default {
             v => !!v || 'El usuario es requerido',
             v => (v && v.length > 3) || 'EL nombre debe tener mínimo 4 caracteres',
         ],
-        cedulaRules: [v => !!v || 'La cédula es requerida', v => (v && /^[0-9]+$/.test(v)) || 'El número no debe contener caracteres'],
         api: process.env.VUE_APP_API_URL,
+        headers: [
+            { title: 'Nombre', key: 'nombre' },
+            { title: 'Usuario', key: 'usuario' },
+            { title: 'Rol', key: 'rol' },
+            { title: 'Accion', key: 'actions', sortable: false },
+        ],
     }),
     methods: {
         async listarEmpleados() {
-            await axios.get(`${process.env.VUE_APP_API_URL}/empleado`).then(resp => {
-                if (resp.data.length > 0) {
-                    resp.data.sort((a, b) => a.nombre.localeCompare(b.nombre));
+            await axios.get(`${this.api}/usuario`, {
+                headers: {
+                    Authorization: `Bearer ${this.token}`
                 }
+            }).then(resp => {
                 this.empleados = resp.data;
+            }).catch(error => {
+                switch (error.response.status) {
+                    case 401:
+                        Session.expiredSession();
+                        break;
+                    default:
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'No se pudo recuperar la información, intente nuevamente',
+                            showConfirmButton: false,
+                            timer: 1600
+                        });
+                        break;
+                }
             });
         },
         async eliminarEmpleado(cedula) {
@@ -223,39 +222,7 @@ export default {
         async listarCargos() {
             await axios.get(`${process.env.VUE_APP_API_URL}/empleado/cargos`).then((resp) => {
                 this.tipoCargo = resp.data;
-
             })
-        },
-        async crearCargo() {
-            await axios.post(`${process.env.VUE_APP_API_URL}/tipo-cargo/crear`, this.formCargo).then(() => {
-                this.dialogC = false;
-                this.listarCargos();
-                this.formCargo = {
-                    cargo: null
-                }
-                Swal.fire({ icon: 'success', text: 'Se creo el cargo correctamente', timer: 1500, showConfirmButton: false });
-            })
-        },
-        async eliminarCargo(id) {
-            this.dialogC = false;
-            Swal.fire({
-                icon: 'info',
-                title: 'Seguro quiere eliminar el cargo?',
-                showDenyButton: true,
-                denyButtonText: 'No',
-                confirmButtonText: 'Eliminar',
-            }).then(async (result) => {
-                /* Read more about isConfirmed, isDenied below */
-                if (result.isConfirmed) {
-                    await axios.delete(`${process.env.VUE_APP_API_URL}/tipo-cargo/${id}`).then(() => {
-                        Swal.fire({ icon: 'success', text: 'Se elimino el cargo correctamente', timer: 1500, showConfirmButton: false });
-                        this.listarCargos();
-                    })
-                }
-            }).catch(() => {
-                return Swal.fire({ icon: 'error', title: 'No se pudo eliminar el cargo', timer: 1000 });
-            });
-
         },
         async crearEmpleado() {
             const { valid } = await this.$refs.formEmpleado.validate();
@@ -330,10 +297,10 @@ export default {
         }
     },
     async created() {
+        this.token = this.$store.getters.usuario.usuario.access_token;
         this.$emit('loadingSweet');
-        //await this.listarEmpleados();
+        await this.listarEmpleados();
         this.$emit('closeSweet');
-        //this.listarCargos();
     }
 }
 </script>

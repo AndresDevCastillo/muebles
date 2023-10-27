@@ -21,30 +21,38 @@
                                     Nombre
                                 </th>
                                 <th class="text-left">
-                                    Precio
-                                </th>
-                                <th class="text-left">
                                     Cantidad
                                 </th>
                                 <th class="text-left">
                                     Existencia
                                 </th>
+                                <th class="text-left">
+                                    Valor compra
+                                </th>
+                                <th class="text-left">
+                                    Valor contado
+                                </th>
+                                <th class="text-left">
+                                    Valor crédito
+                                </th>
                                 <th colspan="2" class="text-center">Acción</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
+                            <tr v-if="inventario.length == 0">
                                 <td colspan="6" class="text-center">Sin productos</td>
                             </tr>
                             <tr v-for="(item) in inventario" :key="item.id">
                                 <td class="text-left">{{ item.producto.nombre }}</td>
-                                <td class="text-left">{{ item.producto.precio }}</td>
                                 <td class="text-left">{{ item.cantidad }}</td>
-                                <td class="text-left">{{ item.existencia }}</td>
+                                <td class="text-left">{{ item.existencias }}</td>
+                                <td class="text-left">{{ item.producto.valor_compra.toLocaleString() }}</td>
+                                <td class="text-left">{{ item.producto.valor_contado.toLocaleString() }}</td>
+                                <td class="text-left">{{ item.producto.valor_credito.toLocaleString() }}</td>
                                 <td class="text-right"><v-btn density="comfortable"
                                         @click="editarStockVista(Object.assign({}, item))" color="blue">Actualizar</v-btn>
                                 </td>
-                                <td class="text-left"><v-btn density="comfortable" @click="eliminarProducto(item.id)"
+                                <td class="text-left"><v-btn density="comfortable" @click="eliminarProducto(item._id)"
                                         color="red">eliminar</v-btn>
                                 </td>
                             </tr>
@@ -52,7 +60,6 @@
                     </v-table>
                 </v-card>
             </v-row>
-
         </v-card>
         <v-dialog v-model="dialogoI" width="700">
             <v-card>
@@ -62,11 +69,11 @@
                             <v-row>
                                 <v-col cols="12">
                                     <v-text-field label="Existencia" type="number" min="1" required
-                                        variant="outlined" v-model="formInventario.existencia" :rules="existenciaRule"
+                                        variant="outlined" v-model="formInventario.cantidad" :rules="existenciaRule"
                                         :counter="65"></v-text-field>
                                 </v-col>
                                 <v-col cols="12">
-                                    <v-select :items="productos" no-data-text="Sin productos" item-title="nombre" item-value="id" variant="outlined"
+                                    <v-select :items="productos" no-data-text="Sin productos" item-title="nombre" item-value="_id" variant="outlined"
                                         label="Productos" required v-model="formInventario.producto"
                                         :rules="[v => !!v || 'Seleccione un Producto']"></v-select>
                                 </v-col>
@@ -104,7 +111,7 @@
                     <v-btn color="red-darken-1" variant="tonal" @click="dialogoE = false">
                         Cerrar
                     </v-btn>
-                    <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtn" @click="actualizarInventario()">
+                    <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtn" @click="actualizarInventario">
                         Actualizar
                     </v-btn>
                 </v-card-actions>
@@ -116,6 +123,7 @@
 <script>
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import Session from '@/validation/session';
 export default {
     name: 'inventarioVista',
     data: () => ({
@@ -128,16 +136,12 @@ export default {
         disableBtn: false,
         formInventario: {
             producto: null,
-            cantidad: 0,
-            existencia: 1,
-            estado: true
+            cantidad: 1,
         },
         formInventarioEditar: {
             id: null,
-            producto: null,
             cantidad: 0,
             existencia: 1,
-            estado: true
         },
         existenciaRule: [
             (v) => (!!v) || "Añada al menos un producto",
@@ -153,11 +157,20 @@ export default {
                     Authorization: `Bearer ${this.token}`
                 }
             }).then((resp) => {
-                console.log(resp.data)
                 this.inventario = resp.data;
-            }).catch(error => {
+            }).catch(async error => {
                 console.log(error)
-                return Swal.fire({ icon: 'error', title: 'No se pudo obtener los productos en stock', showConfirmButton: false, timer: 1500 });
+                switch (error.response.status) {
+                    case 401:
+                        await Swal.fire({ icon: 'warning', title: 'Tu sesión expiro, vuelve a iniciar sesión', showConfirmButton: false, timer: 1500 });
+                        this.$store.commit('setusuario', { usuario: null, hora_login: null });
+                        this.$router.push('/');
+                        break;
+
+                    default:
+                        Swal.fire({ icon: 'error', title: 'No se pudo obtener los productos en stock', showConfirmButton: false, timer: 1500 });
+                        break;
+                }
             });
         },
         async listarProductos() {
@@ -167,13 +180,23 @@ export default {
                 }
             }).then(resp => {
                 this.productos = resp.data;
-            }).catch(error => {
-                console.log(error)
-                return Swal.fire({ icon: 'error', title: 'No se pudo obtener los productos del inventario', showConfirmButton: false, timer: 1500 });
-            })
+            }).catch(async error => {
+                console.log(error);
+                switch (error.response.status) {
+                    case 401:
+                        await Swal.fire({ icon: 'warning', title: 'Tu sesión expiro, vuelve a iniciar sesión', showConfirmButton: false, timer: 1500 });
+                        this.$store.commit('setusuario', { usuario: null, hora_login: null });
+                        this.$router.push('/');
+                        break;
+
+                    default:
+                        Swal.fire({ icon: 'error', title: 'No se pudo obtener los productos del inventario', showConfirmButton: false, timer: 1500 });
+                        break;
+                }
+            });
         },
         async eliminarProducto(id) {
-            Swal.fire({
+            await Swal.fire({
                 icon: 'info',
                 title: 'Seguro quiere eliminar el producto del inventario?',
                 showDenyButton: true,
@@ -200,8 +223,7 @@ export default {
             const { valid } = await this.$refs.formInventario.validate();
             if (valid) {
                 this.disableBtn = true;
-                this.formInventario.existencia = parseInt(this.formInventario.existencia);
-                this.formInventario.cantidad = this.formInventario.existencia;
+                this.formInventario.cantidad = parseInt(this.formInventario.cantidad);
                 this.dialogoI = false;
                 await axios.post(`${this.api}/inventario/crear`, this.formInventario, {
                     headers: {
@@ -215,30 +237,35 @@ export default {
                             text: 'Stock creado correctamente!',
                             showConfirmButton: false,
                             timer: 1500
-                        })
+                        });
                     }
-                }).catch(error => {
+                }).catch(async error => {
                     console.log(error);
-                    return Swal.fire({ icon: 'error', title: 'No se pudo crear el stock', showConfirmButton: false, timer: 1500 });
+                    switch (error.response.status) {
+                        case 401:
+                            await Swal.fire({ icon: 'warning', title: 'Tu sesión expiro, vuelve a iniciar sesión', showConfirmButton: false, timer: 1500 });
+                            this.$store.commit('setusuario', { usuario: null, hora_login: null });
+                            this.$router.push('/');
+                            break;
 
-                })
+                        default:
+                            Swal.fire({ icon: 'error', title: 'No se pudo crear el stock', showConfirmButton: false, timer: 1500 });
+                            break;
+                    }
+                });
             }
             this.disableBtn = false;
             this.formInventario = {
                 producto: null,
-                cantidad: 0,
-                existencia: 1,
-                estado: true
-            },
-                await this.listarInventario();
+                cantidad: 1,
+            };
+            await this.listarInventario();
             await this.listarProductos();
         },
         editarStockVista(item) {
-            this.formInventarioEditar.cantidad = item.cantidad;
-            this.formInventarioEditar.estado = true;
-            this.formInventarioEditar.id = item.id;
-            this.formInventarioEditar.existencia = item.existencia;
-            this.formInventarioEditar.producto = item.producto.id;
+            this.formInventarioEditar.id = item._id;
+            this.formInventarioEditar.cantidad = parseInt(item.cantidad);
+            this.formInventarioEditar.existencia = parseInt(item.existencias);
             this.dialogoE = true;
 
         },
@@ -249,7 +276,11 @@ export default {
                 this.dialogoE = false;
                 this.formInventarioEditar.existencia = parseInt(this.formInventarioEditar.existencia);
                 this.formInventarioEditar.cantidad = this.formInventarioEditar.existencia;
-                axios.put(`${this.api}/inventario/actualizar`, this.formInventarioEditar).then(async () => {
+                axios.put(`${this.api}/inventario/actualizar`, this.formInventarioEditar, {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`
+                    }
+                }).then(async () => {
                     await this.listarInventario();
                     await this.listarProductos();
                     return Swal.fire({
@@ -258,13 +289,28 @@ export default {
                         text: 'Inventario actualizado correctamente!',
                         showConfirmButton: false,
                         timer: 1500
-                    })
-                }).catch(error => {
+                    });
+                }).catch(async error => {
                     console.log(error);
-                    return Swal.fire({ icon: 'error', title: 'No se pudo crear el stock', showConfirmButton: false, timer: 1500 });
+                    switch (error.response.status) {
+                        case 401:
+                            await Swal.fire({ icon: 'warning', title: 'Tu sesión expiro, vuelve a iniciar sesión', showConfirmButton: false, timer: 1500 });
+                            this.$store.commit('setusuario', { usuario: null, hora_login: null });
+                            this.$router.push('/');
+                            break;
+
+                        default:
+                            Swal.fire({ icon: 'error', title: 'No se pudo crear el stock', showConfirmButton: false, timer: 1500 });
+                            break;
+                    }
                 });
             }
             this.disableBtn = false;
+            await this.listarInventario();
+            await this.listarProductos();
+        },
+        debugSession() {
+            Session.expiredSession();
         }
     },
     async created() {
@@ -272,8 +318,8 @@ export default {
         this.$emit('loadingSweet');
         await this.listarInventario();
         await this.listarProductos();
+        this.debugSession();
         this.$emit('closeSweet');
-
     }
 
 }
