@@ -20,8 +20,8 @@ export default {
 <style>
 body,
 html {
-    overflow: auto;
-    overflow-y: auto;
+    overflow: auto !important;
+    overflow-y: auto !important;
 }
 
 :root {

@@ -1,13 +1,17 @@
 <template>
     <div class="pueblo">
         <v-card class="ma-3">
-            <v-row class="px-6 my-4" justify="space-between">
-                <v-col lg="9" md="9" sm="12">
-                    <div class="d-flex align-center "><v-icon size="x-large" icon="mdi mdi-map-search"></v-icon>
+            <v-row class="px-6 my-4" justify-sm="start" justify="space-between">
+                <v-col lg="2" md="2" sm="12" cols="auto">
+                    <div class="d-flex align-center"><v-icon size="x-large" icon="mdi mdi-map-search"></v-icon>
                         <h1 class="px-3">Rutas</h1>
                     </div>
                 </v-col>
-                <v-col lg="3" md="3" sm="12" class="align-self-end text-end">
+                <v-col lg="8" md="7" sm="12" cols="auto" class="align-self-end text-sm-start text-md-end text-lg-end">
+                    <v-btn prepend-icon="mdi mdi-plus" color="blue" @click="dialogCobrador = true">
+                        Cobrador a ruta</v-btn>
+                </v-col>
+                <v-col lg="2" md="3" sm="12" cols="auto" class="align-self-end text-sm-start">
                     <v-btn prepend-icon="mdi mdi-plus" color="green" @click="dialogR = true" style="min-width: 170px;">Crear
                         Ruta</v-btn>
                 </v-col>
@@ -31,16 +35,14 @@
                             <v-icon size="small" @click="eliminarRuta(item._id)">
                                 mdi-delete
                             </v-icon>
-
                         </template>
                     </v-data-table>
-
                 </v-card>
             </v-row>
         </v-card>
         <v-dialog v-model="dialogR" persistent width="700">
             <v-card>
-                <v-card-title>Nuevo Ruta</v-card-title>
+                <v-card-title>Nueva ruta</v-card-title>
                 <v-card-text>
                     <v-container>
                         <v-form ref="formRuta">
@@ -240,8 +242,37 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
-
-
+        <v-dialog v-model="dialogCobrador" persistent width="700">
+            <v-card>
+                <v-card-title>Agregar ruta a un cobrador</v-card-title>
+                <v-card-text>
+                    <v-container>
+                        <v-form ref="formCobradorRuta">
+                            <v-row>
+                                <v-col cols="12">
+                                    <v-autocomplete :items="cobradores" item-value="_id" item-title="nombre" variant="outlined" label="Cobrador" required
+                                        v-model="formCobrador.cobrador"
+                                        :rules="campoRules"
+                                        no-data-text="Sin cobradores" @update:modelValue="buscarRutasSinCobrador"></v-autocomplete>
+                                </v-col>
+                                <v-col cols="12">
+                                    <v-autocomplete label="Ruta" :items="rutasCobrador" item-value="_id" item-title="nombre" no-data-text="Sin rutas" placeholder="Escoja ruta" required variant="outlined"
+                                        v-model="formCobrador.rutas" :rules="campoRules" multiple chips></v-autocomplete>
+                                </v-col>
+                            </v-row>
+                        </v-form>
+                    </v-container>
+                </v-card-text>
+                <v-card-actions class="justify-end">
+                    <v-btn color="red-darken-1" variant="tonal" @click="dialogCobrador = false">
+                        Cerrar
+                    </v-btn>
+                    <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtn" @click="agregarRutaCobrador">
+                        Agregar
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 
@@ -258,6 +289,7 @@ export default {
         dialogR: null,
         dialogReditar: null,
         dialogVerRuta: null,
+        dialogCobrador: false,
         searchRuta: null,
         opcCrearRuta: ['Diario', 'Semanal', 'Quincenal', 'Mensual'],
         diasSemana: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
@@ -293,6 +325,10 @@ export default {
                 semanas: []
             }
         },
+        formCobrador: {
+            cobrador: null,
+            rutas: [],
+        },
         verRuta: null,
         quincenaNumber: {
             num1: null,
@@ -304,6 +340,7 @@ export default {
         },
         departamento: [],
         ciudades: [],
+        campoRules: [v => !!v || 'Campo requerido',],
         nombreRules: [
             v => !!v || 'El nombre es requerido',
             v => (v && v.length <= 65) || 'EL nombre no puede superar los 65 caracteres',
@@ -317,7 +354,8 @@ export default {
             { title: 'Frecuencia Pago', key: 'opcRuta' },
             { title: 'Accion', key: 'actions', sortable: false },
         ],
-        rutas: []
+        rutas: [],
+        rutasCobrador: []
     }),
     methods: {
         async obtenerUbicacion() {
@@ -359,6 +397,29 @@ export default {
                         Swal.fire({
                             icon: 'info',
                             text: 'No se pudo obtener las rutas',
+                            showConfirmButton: false,
+                            timer: 1600
+                        });
+                        break;
+                }
+            });
+        },
+        async obtenerCobradores() {
+            await axios.get(`${this.api}/usuario/cobrador`, {
+                headers: {
+                    Authorization: `Bearer ${this.token}`
+                }
+            }).then((resp) => {
+                this.cobradores = resp.data;
+            }).catch(error => {
+                switch (error.response.status) {
+                    case 401:
+                        Session.expiredSession();
+                        break;
+                    default:
+                        Swal.fire({
+                            icon: 'info',
+                            text: 'No se pudo obtener los cobradores',
                             showConfirmButton: false,
                             timer: 1600
                         });
@@ -413,6 +474,35 @@ export default {
                     }
                 });
                 await this.obtenerRutas();
+                this.disableBtn = false;
+            }
+        },
+        async agregarRutaCobrador() {
+            const { valid } = await this.$refs.formCobradorRuta.validate();
+            if (valid) {
+                this.disableBtn = true;
+                await axios.post(`${this.api}/usuario/agregarRuta`, this.formCobrador, {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`
+                    },
+                }).then(() => {
+                    this.$refs.formCobradorRuta.reset();
+                    Swal.fire({ icon: 'success', text: 'Se agrego la ruta correctamente', showConfirmButton: false, timer: 1600 });
+                }).catch(error => {
+                    switch (error.response.status) {
+                        case 401:
+                            Session.expiredSession();
+                            break;
+                        default:
+                            Swal.fire({
+                                icon: 'info',
+                                text: 'No se pudo agregar la ruta al cobrador',
+                                showConfirmButton: false,
+                                timer: 1600
+                            });
+                            break;
+                    }
+                });
                 this.disableBtn = false;
             }
         },
@@ -512,13 +602,34 @@ export default {
         verRutaFunction(item) {
             this.dialogVerRuta = true;
             this.verRuta = item;
-        }
+        },
+        async buscarRutasSinCobrador(idCobrador) {
+            if (idCobrador) {
+                this.$emit('loadingSweet', 'Buscando rutas, por favor, espere...');
+                await axios.get(`${this.api}/pueblo/sinCobrador/${idCobrador}`, {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`
+                    }
+                }).then((resp) => {
+                    this.rutasCobrador = resp.data;
+                }).catch(error => {
+                    switch (error.response.status) {
+                        case 401:
+                            Session.expiredSession();
+                            break;
+                    }
+                });
+                this.$emit('closeSweet');
+            }
+        },
     },
     async created() {
+        Session.expiredSession();
         this.token = this.$store.getters.usuario.usuario.access_token;
         this.$emit('loadingSweet');
         await this.obtenerUbicacion();
         await this.obtenerRutas();
+        await this.obtenerCobradores();
         this.$emit('closeSweet');
     },
     watch: {
