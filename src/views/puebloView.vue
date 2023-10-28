@@ -78,8 +78,8 @@
                                         no-data-text="Escoja un dia"></v-select>
                                 </v-col>
                                 <v-col cols="12" sm="6" v-if="formRuta.opcRuta == 'Quincenal'">
-                                    <v-select variant="outlined" label="Semana 1" required v-model="quincenaNumber.num1"
-                                        :rules="[v => !!v || 'Seleccione la primera semana']"
+                                    <v-select variant="outlined" :items="[1, 2, 3, 4]" label="Semana 1" required
+                                        v-model="quincenaNumber.num1" :rules="[v => !!v || 'Seleccione la primera semana']"
                                         no-data-text="Escoja un semana"></v-select>
                                 </v-col>
                                 <v-col cols="12" sm="6" v-if="formRuta.opcRuta == 'Quincenal'">
@@ -250,13 +250,13 @@
                         <v-form ref="formCobradorRuta">
                             <v-row>
                                 <v-col cols="12">
-                                    <v-autocomplete :items="cobradores" item-value="_id" item-title="nombre" variant="outlined" label="Cobrador" required
-                                        v-model="formCobrador.cobrador"
-                                        :rules="campoRules"
-                                        no-data-text="Sin cobradores" @update:modelValue="buscarRutasSinCobrador"></v-autocomplete>
+                                    <v-autocomplete :items="cobradores" item-value="_id" item-title="nombre"
+                                        variant="outlined" label="Cobrador" required v-model="formCobrador.cobrador"
+                                        :rules="campoRules" no-data-text="Sin cobradores"></v-autocomplete>
                                 </v-col>
                                 <v-col cols="12">
-                                    <v-autocomplete label="Ruta" :items="rutasCobrador" item-value="_id" item-title="nombre" no-data-text="Sin rutas" placeholder="Escoja ruta" required variant="outlined"
+                                    <v-autocomplete label="Ruta" :items="rutas" item-value="_id" item-title="nombre"
+                                        no-data-text="Sin rutas" placeholder="Escoja ruta" required variant="outlined"
                                         v-model="formCobrador.rutas" :rules="campoRules" multiple chips></v-autocomplete>
                                 </v-col>
                             </v-row>
@@ -267,8 +267,8 @@
                     <v-btn color="red-darken-1" variant="tonal" @click="dialogCobrador = false">
                         Cerrar
                     </v-btn>
-                    <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtn" @click="agregarRutaCobrador">
-                        Agregar
+                    <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtn" @click="agregarRutaCobrador()">
+                        Actualizar
                     </v-btn>
                 </v-card-actions>
             </v-card>
@@ -355,7 +355,7 @@ export default {
             { title: 'Accion', key: 'actions', sortable: false },
         ],
         rutas: [],
-        rutasCobrador: []
+        cobradores: []
     }),
     methods: {
         async obtenerUbicacion() {
@@ -603,25 +603,6 @@ export default {
             this.dialogVerRuta = true;
             this.verRuta = item;
         },
-        async buscarRutasSinCobrador(idCobrador) {
-            if (idCobrador) {
-                this.$emit('loadingSweet', 'Buscando rutas, por favor, espere...');
-                await axios.get(`${this.api}/pueblo/sinCobrador/${idCobrador}`, {
-                    headers: {
-                        Authorization: `Bearer ${this.token}`
-                    }
-                }).then((resp) => {
-                    this.rutasCobrador = resp.data;
-                }).catch(error => {
-                    switch (error.response.status) {
-                        case 401:
-                            Session.expiredSession();
-                            break;
-                    }
-                });
-                this.$emit('closeSweet');
-            }
-        },
     },
     async created() {
         Session.expiredSession();
@@ -704,6 +685,15 @@ export default {
         "quincenaNumberEditar.num2": {
             handler(newValue) {
                 this.formRutaEditar.quincenal.semanas[1] = newValue;
+            }
+        },
+        "formCobrador.cobrador": {
+            handler(newId) {
+                this.cobradores.map(cobrador => {
+                    if (cobrador._id == newId) {
+                        this.formCobrador.rutas = cobrador.rutas;
+                    }
+                })
             }
         }
 
