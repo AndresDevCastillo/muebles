@@ -503,6 +503,7 @@ export default {
                             break;
                     }
                 });
+                await this.obtenerCobradores();
                 this.disableBtn = false;
             }
         },
