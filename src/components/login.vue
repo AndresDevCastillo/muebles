@@ -1,31 +1,34 @@
 <template>
-    <v-row justify="center" no-gutters class="pa-5">
-        <v-card width="450" class="mt-5 my-4" elevation="5">
-            <v-card-title primary-title>
-                <h3 class="headline text-center text-wrap">Iniciar sesión</h3>
-            </v-card-title>
-            <v-card-text class="px-4">
-                <form ref="form">
-                    <v-row class="flex-column">
-                        <v-col cols="12" class="pa-3">
-                            <v-text-field v-model="paquete.usuario" variant="outlined" label="Usuario" :rules="usuarioRule"
-                                placeholder="Ingrese su usuario" prepend-inner-icon="mdi-account-lock"></v-text-field>
-                        </v-col>
-                        <v-col cols="12" class="pa-3">
-                            <v-text-field v-model="paquete.contrasena" :type="visible ? 'text' : 'password'"
-                                variant="outlined" label="Contraseña" placeholder="Ingrese su contraseña"
-                                :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
-                                prepend-inner-icon="mdi-lock-outline"
-                                @click:append-inner="visible = !visible"></v-text-field>
-                        </v-col>
-                    </v-row>
-                </form>
-            </v-card-text>
-            <v-card-actions justify="center" class="px-4 align-content-end">
-                <v-btn color="success" variant="elevated" @click="ingresar" class="ml-auto">INGRESAR</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-row>
+    <div class="login">
+        <v-row justify="center" no-gutters class="pa-7">
+            <v-card width="450" class="m-6" elevation="5">
+                <v-card-title primary-title>
+                    <h3 class="headline text-center text-wrap">Iniciar sesión</h3>
+                </v-card-title>
+                <v-card-text class="px-4">
+                    <form ref="form">
+                        <v-row class="flex-column">
+                            <v-col cols="12" class="pa-3">
+                                <v-text-field v-model="paquete.usuario" variant="outlined" label="Usuario"
+                                    :rules="usuarioRule" placeholder="Ingrese su usuario"
+                                    prepend-inner-icon="mdi-account-lock"></v-text-field>
+                            </v-col>
+                            <v-col cols="12" class="pa-3">
+                                <v-text-field v-model="paquete.contrasena" :type="visible ? 'text' : 'password'"
+                                    variant="outlined" label="Contraseña" placeholder="Ingrese su contraseña"
+                                    :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
+                                    prepend-inner-icon="mdi-lock-outline"
+                                    @click:append-inner="visible = !visible"></v-text-field>
+                            </v-col>
+                        </v-row>
+                    </form>
+                </v-card-text>
+                <v-card-actions justify="center" class="px-4 align-content-end">
+                    <v-btn color="success" variant="elevated" @click="ingresar" class="ml-auto">INGRESAR</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-row>
+    </div>
 </template>
 <script>
 import Swal from 'sweetalert2';
@@ -109,9 +112,9 @@ html {
     height: 100%;
     min-width: 100%;
     min-height: 100%;
-    /* background: url('../assets/login/fondo.jpg');
+    background: url('../assets/login/fondom.png');
     background-size: cover;
     background-attachment: fixed;
-    background-position: 50% 50%;*/
+    background-position: 50% 50%;
 }
 </style>

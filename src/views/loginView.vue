@@ -1,12 +1,12 @@
 <template>
-    <login/>
+    <login />
 </template>
-<script> 
+<script>
 import login from '../components/login.vue'
- export default{
-     name:'loginVista',
-    components:{
+export default {
+    name: 'loginVista',
+    components: {
         login
     }
 }
- </script>
+</script>

@@ -22,6 +22,7 @@ body,
 html {
     overflow: auto !important;
     overflow-y: auto !important;
+    height: 100%;
 }
 
 :root {
