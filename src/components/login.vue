@@ -59,6 +59,9 @@ export default {
                                 case 'Admin':
                                     this.$router.push('/inicio/empleados');
                                     break;
+                                case 'Cobrador':
+                                    this.$router.push('/inicio/prestamo');
+                                    break;
                             }
                             break;
                     }

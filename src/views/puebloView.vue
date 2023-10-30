@@ -27,7 +27,7 @@
                         <!-- eslint-disable-next-line vue/valid-v-slot -->
                         <template v-slot:item.actions="{ item }">
                             <v-icon size="small" class="me-2" @click="verRutaFunction(Object.assign({}, item))">
-                                mdi-information-outline
+                                mdi-eye
                             </v-icon>
                             <v-icon size="small" class="me-2" @click="preEditarRuta(Object.assign({}, item))">
                                 mdi-pencil

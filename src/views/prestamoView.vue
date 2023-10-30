@@ -13,14 +13,22 @@
         </v-col>
       </v-row>
     </v-card-title>
-    <v-data-table :headers="headers" :items="prestamos" :sort-by="[{ key: 'nombre', order: 'asc' }]"
-      class="elevation-1" :search="searchPrestamo" no-data-text="Sin préstamos">
+    <v-col md="6" sm="12"><v-text-field v-model="searchPrestamo" append-inner-icon="mdi-magnify" label="Buscar"
+        variant="outlined" hide-details></v-text-field></v-col>
+    <v-data-table :headers="headers" :items="prestamos" :sort-by="[{ key: 'nombre', order: 'asc' }]" class="elevation-1"
+      :search="searchPrestamo" no-data-text="Sin préstamos">
+      <!-- eslint-disable-next-line vue/valid-v-slot -->
+      <template v-slot:item.mora="{ value }">
+        <v-chip :color="value ? 'red' : 'green'">
+          {{ value ? 'Atrasado' : 'No' }}
+        </v-chip>
+      </template>
       <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template v-slot:item.actions="{ item }">
-        <v-icon size="small" class="me-2" :id="item">
-          mdi-pencil
+        <v-icon size="small" class="me-2" @click="verPrestamoFunction(Object.assign({}, item))">
+          mdi-eye
         </v-icon>
-        <v-icon size="small">
+        <v-icon size="small" @click="eliminarPrestamo(item._id)">
           mdi-delete
         </v-icon>
       </template>
@@ -29,31 +37,33 @@
       <v-card>
         <v-card-title>
           Nuevo préstamo
+
         </v-card-title>
         <v-card-text>
           <v-form v-model="valid" ref="formPrestamo">
             <v-row>
               <v-col cols="12">
                 <v-autocomplete label="Nombre del cliente" no-data-text="Sin clientes registrados" return-object
-                  :items="clientes" :item-title="(item => { return `${item.nombres} ${item.apellidos}` })" variant="outlined" v-model="form.cliente"
-                  :rules="campoRules"></v-autocomplete>
+                  :items="clientes" :item-title="(item => { return `${item.nombres} ${item.apellidos}` })"
+                  variant="outlined" v-model="form.cliente" :rules="campoRules"></v-autocomplete>
               </v-col>
               <v-col md="6" cols="12">
-                <v-autocomplete label="Producto" return-object no-data-text="Sin productos registrados" item-value="producto._id"
-                  :items="productos" item-title="producto.nombre" variant="outlined" v-model="form.producto"
-                  :rules="campoRules"></v-autocomplete>
+                <v-autocomplete label="Producto" return-object no-data-text="Sin productos registrados"
+                  item-value="producto._id" :items="productos" item-title="producto.nombre" variant="outlined"
+                  v-model="form.producto" :rules="campoRules"></v-autocomplete>
               </v-col>
               <v-col md="6" cols="12">
-                <v-text-field type="number" label="Cantidad" placeholder="Ingrese cantidad del producto" min="1" variant="outlined" v-model="form.cantidad"
-                  :rules="cantidadRules"></v-text-field>
+                <v-text-field type="number" label="Cantidad" placeholder="Ingrese cantidad del producto" min="1"
+                  variant="outlined" v-model="form.cantidad" :rules="cantidadRules"></v-text-field>
               </v-col>
               <v-col :cols="cols2[0]">
-                <v-select label="Forma de pago" :items="formasPago" item-value="index" item-title="forma" placeholder="Escoja forma de pago" variant="outlined" v-model="formaPago"
+                <v-select label="Forma de pago" :items="formasPago" item-value="index" item-title="forma"
+                  placeholder="Escoja forma de pago" variant="outlined" v-model="formaPago"
                   :rules="campoRules"></v-select>
               </v-col>
               <v-col :cols="cols2[1]" v-if="formaPago == 2">
-                <v-text-field type="number" label="Cuotas" placeholder="Ingrese cantidad de cuotas" min="1" variant="outlined" v-model="form.cuotas"
-                  :rules="cantidadRules"></v-text-field>
+                <v-text-field type="number" label="Cuotas" placeholder="Ingrese cantidad de cuotas" min="1"
+                  variant="outlined" v-model="form.cuotas" :rules="cantidadRules"></v-text-field>
               </v-col>
             </v-row>
           </v-form>
@@ -64,6 +74,59 @@
           </v-btn>
           <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtn" @click="guardar">
             Crear
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="dialogVePrestamo" persistent width="700">
+      <v-card>
+        <v-card-text>
+          <v-container>
+            <v-form>
+              <v-row>
+                <v-col cols="12">
+                  <v-text-field label="Nombre" type="text" required variant="outlined"
+                    v-model="verPrestamo.cliente.documento" disabled></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field variant="outlined" label="Nombre" disabled required
+                    v-model="verPrestamo.cliente.nombres"></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field variant="outlined" label="Apellido" disabled required
+                    v-model="verPrestamo.cliente.apellidos"></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field variant="outlined" label="Ruta" disabled required
+                    v-model="verPrestamo.ruta"></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field variant="outlined" label="Producto" disabled required
+                    v-model="verPrestamo.producto"></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field variant="outlined" label="Fecha de Inicio" disabled required
+                    v-model="verPrestamo.fecha_inicio"></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field variant="outlined" label="N° Cuotas" disabled required
+                    v-model="verPrestamo.cuotas"></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field variant="outlined" label="Cuotas atrasadas" disabled required
+                    v-model="verPrestamo.cuotas_atrasadas"></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field variant="outlined" label="Total" disabled required
+                    v-model="verPrestamo.total"></v-text-field>
+                </v-col>
+              </v-row>
+            </v-form>
+          </v-container>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn color="red-darken-1" variant="tonal" @click="dialogVePrestamo = false">
+            Cerrar
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -83,6 +146,7 @@ export default {
     valid: true,
     disableBtn: false,
     dialogPrestamo: false,
+    dialogVePrestamo: null,
     formaPago: null,
     form: {
       cliente: null,
@@ -94,15 +158,48 @@ export default {
       pago_fechas: [],
       total: 0
     },
+    verPrestamo: {
+      abono: null,
+      mora: null,
+      _id: null,
+      cliente: {
+        _id: null,
+        documento: null,
+        nombres: null,
+        apellidos: null,
+        telefono: null,
+        correo: null,
+        direccion: null,
+        mora: null,
+        __v: null
+      },
+      ruta: null,
+      producto: null,
+      fecha_inicio: null,
+      cuotas: null,
+      pago_fechas: [
+        {
+          fecha: null,
+          monto: null
+        }
+      ],
+      cuotas_atrasadas: null,
+      completado: null,
+      total: null,
+    },
     campoRules: [v => !!v || 'Campo requerido',],
     cantidadRules: [
       v => !!v || 'Campo requerido',
       v => parseInt(v) > 0 || 'Ingrese una cantidad mayor a 0'
     ],
     headers: [
-      { title: 'Nombre', key: 'nombre' },
-      { title: 'Usuario', key: 'usuario' },
-      { title: 'Rol', key: 'rol' },
+      { title: 'Documento', key: 'cliente.documento' },
+      { title: 'Nombre', key: 'cliente.nombres' },
+      { title: 'Apellido', key: 'cliente.apellidos' },
+      { title: 'Ruta', key: 'ruta' },
+      { title: 'Producto', key: 'producto' },
+      { title: 'Cuotas', key: 'cuotas' },
+      { title: 'Atrasado', key: 'mora' },
       { title: 'Accion', key: 'actions', sortable: false },
     ],
     clientes: [],
@@ -114,7 +211,7 @@ export default {
   }),
   methods: {
     async getClientes() {
-      await axios.get(`${this.api}/cliente`, {
+      await axios.get(`${this.api}/prestamo/clientes`, {
         headers: {
           Authorization: `Bearer ${this.token}`
         }
@@ -152,6 +249,29 @@ export default {
             Swal.fire({
               icon: 'info',
               text: 'No se pudo obtener los productos',
+              showConfirmButton: false,
+              timer: 1600
+            });
+            break;
+        }
+      });
+    },
+    async getPrestamos() {
+      await axios.get(`${this.api}/prestamo`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        }
+      }).then(resp => {
+        this.prestamos = resp.data;
+      }).catch(error => {
+        switch (error.response.status) {
+          case 401:
+            Session.expiredSession();
+            break;
+          default:
+            Swal.fire({
+              icon: 'info',
+              text: 'No se pudo obtener los prestamos',
               showConfirmButton: false,
               timer: 1600
             });
@@ -256,6 +376,7 @@ export default {
     async guardar() {
       const { valid } = await this.$refs.formPrestamo.validate();
       if (valid) {
+        this.disableBtn = true;
         this.form.cantidad = parseInt(this.form.cantidad);
         this.form.cuotas = parseInt(this.form.cuotas);
         let total, pagos = [];
@@ -276,7 +397,7 @@ export default {
           const paquete = {
             cliente: this.form.cliente._id, //`${this.form.cliente.nombres} ${this.form.cliente.apellidos}`,
             ruta: this.form.cliente.direccion.nombre,
-            producto: this.form.producto._id, //ObjectId del inventario
+            producto: this.form.producto.producto.nombre, //ObjectId del inventario
             fecha_inicio: new Date(),
             cantidad: this.form.cantidad,
             cuotas: this.form.cuotas,
@@ -287,8 +408,14 @@ export default {
             headers: {
               Authorization: `Bearer ${this.token}`
             }
-          }).then(resp => {
-            console.log(resp);
+          }).then(() => {
+            this.dialogPrestamo = false;
+            Swal.fire({
+              icon: 'success',
+              text: 'Prestamo registrado correctamente',
+              showConfirmButton: false,
+              timer: 1600
+            });
           }).catch(error => {
             switch (error.response.status) {
               case 401:
@@ -308,6 +435,9 @@ export default {
           return Swal.fire({ icon: 'warning', text: `La cantidad sobrepasa las existencias, sólo hay ${this.form.producto.existencias} ${this.form.producto.producto.nombre}`, showConfirmButton: false, timer: 1600 })
         }
       }
+      this.disableBtn = false;
+      await this.getPrestamos();
+
       // Ejemplo de uso para octubre de 2023
 
 
@@ -315,6 +445,46 @@ export default {
 
       //console.log(`Número de semanas en ${mes}/${año}: ${numeroDeSemanas}`);
       //console.log();
+    },
+    async eliminarPrestamo(id) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Seguro quiere eliminar el prestamo?',
+        showDenyButton: true,
+        denyButtonText: 'No',
+        confirmButtonText: 'Eliminar',
+      }).then(async (result) => {
+        /* Read more about isConfirmed, isDenied below */
+        if (result.isConfirmed) {
+          await axios.delete(`${this.api}/prestamo/${id}`, {
+            headers: {
+              Authorization: `Bearer ${this.token}`
+            }
+          }).then(async () => {
+            await this.getClientes();
+            await this.getPrestamos();
+            Swal.fire({ icon: 'success', title: 'Se elimino correctamente', timer: 1500, showConfirmButton: false });
+          })
+        }
+      }).catch(error => {
+        switch (error.response.status) {
+          case 401:
+            Session.expiredSession();
+            break;
+          default:
+            Swal.fire({
+              icon: 'info',
+              text: 'No se pudo eliminar el prestamo',
+              showConfirmButton: false,
+              timer: 1600
+            });
+            break;
+        }
+      });
+    },
+    verPrestamoFunction(item) {
+      this.verPrestamo = item;
+      this.dialogVePrestamo = true;
     }
   },
   computed: {
@@ -334,6 +504,7 @@ export default {
     this.$emit('loadingSweet');
     await this.getClientes();
     await this.getProductosInventario();
+    await this.getPrestamos();
     this.$emit('closeSweet');
   },
 };
