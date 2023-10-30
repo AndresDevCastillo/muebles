@@ -14,42 +14,22 @@
             </v-row>
             <v-row>
                 <v-card class="ma-3 w-100">
-                    <v-table fixed-header fixed-footer class="w-100">
-                        <thead style="z-index: 1000;" class="bg-table-header">
-                            <tr>
-                                <th class="text-left">
-                                    Nombre
-                                </th>
-                                <th class="text-left">
-                                    Valor compra
-                                </th>
-                                <th class="text-left">
-                                    Valor contado
-                                </th>
-                                <th class="text-left">
-                                    Valor crédito
-                                </th>
-                                <th colspan="2" class="text-center">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-if="productos.length == 0">
-                                <td colspan="6" class="text-center">Sin productos</td>
-                            </tr>
-                            <tr v-for="(item) in productos" :key="item._id">
-                                <td class="text-left">{{ item.nombre }}</td>
-                                <td class="text-left">{{ item.valor_compra.toLocaleString() }}</td>
-                                <td class="text-left">{{ item.valor_contado.toLocaleString() }}</td>
-                                <td class="text-left">{{ item.valor_credito.toLocaleString() }}</td>
-                                <td style="text-align: center;">
-                                    <v-btn density="comfortable"
-                                        @click="eliminarProducto(item._id)" color="red" class="mr-2">Eliminar</v-btn>
-                                    <v-btn density="comfortable"
-                                        @click="editarProductoFunction(item)" color="primary">Editar</v-btn>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </v-table>
+                    <v-card-title>
+                        <v-col md="6" sm="12"><v-text-field v-model="searchProducto" append-inner-icon="mdi-magnify"
+                                label="Buscar" variant="outlined" hide-details></v-text-field></v-col>
+                    </v-card-title>
+                    <v-data-table :headers="headers" :items="productos" :sort-by="[{ key: 'nombre', order: 'asc' }]"
+                        class="elevation-1" :search="searchProducto">
+                        <!-- eslint-disable-next-line vue/valid-v-slot -->
+                        <template v-slot:item.actions="{ item }">
+                            <v-icon size="small" class="me-2" @click="editarProductoFunction(Object.assign({}, item))">
+                                mdi-pencil
+                            </v-icon>
+                            <v-icon size="small" @click="eliminarProducto(item._id)">
+                                mdi-delete
+                            </v-icon>
+                        </template>
+                    </v-data-table>
                 </v-card>
             </v-row>
         </v-card>
@@ -61,15 +41,13 @@
                         <v-form ref="formProducto">
                             <v-row>
                                 <v-col cols="12">
-                                    <v-text-field label="Nombre producto" type="text" required
-                                        variant="outlined" v-model="formProducto.nombre" :rules="nombreRules"
-                                        :counter="65"></v-text-field>
+                                    <v-text-field label="Nombre producto" type="text" required variant="outlined"
+                                        v-model="formProducto.nombre" :rules="nombreRules" :counter="65"></v-text-field>
                                 </v-col>
                                 <v-col cols="12">
                                     <v-text-field label="Valor de compra" type="number" min="1" required
-                                        hint="Sin comas o puntos (, .)" persistent-hint
-                                        variant="outlined" v-model="formProducto.valor_compra"
-                                        :rules="precioRules"></v-text-field>
+                                        hint="Sin comas o puntos (, .)" persistent-hint variant="outlined"
+                                        v-model="formProducto.valor_compra" :rules="precioRules"></v-text-field>
                                 </v-col>
                                 <v-col cols="12" sm="6">
                                     <v-text-field label="Valor de contado" type="number" min="1" variant="outlined"
@@ -117,6 +95,14 @@ export default {
         disableBtn: false,
         dialogP: false,
         productos: [],
+        searchProducto: null,
+        headers: [
+            { title: 'Nombre', key: 'nombre' },
+            { title: 'Valor compra', key: 'valor_compraP' },
+            { title: 'Valor contado', key: 'valor_contadoP' },
+            { title: 'Valor crédito', key: 'valor_creditoP' },
+            { title: 'Accion', key: 'actions', sortable: false },
+        ],
         actualizarProducto: { _id: null, nombre: null, valor_compra: null, valor_contado: null, valor_credito: null },
         dialogEditar: false,
         formProducto: {
@@ -139,7 +125,16 @@ export default {
                     Authorization: `Bearer ${this.token}`
                 }
             }).then((resp) => {
-                this.productos = resp.data;
+                let productoParseado = [];
+                productoParseado = resp.data.map(producto => {
+                    return {
+                        ...producto,
+                        valor_compraP: producto.valor_compra.toLocaleString(),
+                        valor_contadoP: producto.valor_contado.toLocaleString(),
+                        valor_creditoP: producto.valor_credito.toLocaleString()
+                    }
+                });
+                this.productos = productoParseado;
             }).catch(error => {
                 switch (error.response.status) {
                     case 401:

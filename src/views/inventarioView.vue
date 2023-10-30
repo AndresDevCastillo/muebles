@@ -14,50 +14,22 @@
             </v-row>
             <v-row>
                 <v-card class="ma-3 w-100">
-                    <v-table fixed-header fixed-footer class="w-100">
-                        <thead style="z-index: 1000;" class="bg-table-header">
-                            <tr>
-                                <th class="text-left">
-                                    Nombre
-                                </th>
-                                <th class="text-left">
-                                    Cantidad
-                                </th>
-                                <th class="text-left">
-                                    Existencia
-                                </th>
-                                <th class="text-left">
-                                    Valor compra
-                                </th>
-                                <th class="text-left">
-                                    Valor contado
-                                </th>
-                                <th class="text-left">
-                                    Valor crédito
-                                </th>
-                                <th colspan="2" class="text-center">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-if="inventario.length == 0">
-                                <td colspan="6" class="text-center">Sin productos</td>
-                            </tr>
-                            <tr v-for="(item) in inventario" :key="item.id">
-                                <td class="text-left">{{ item.producto.nombre }}</td>
-                                <td class="text-left">{{ item.cantidad }}</td>
-                                <td class="text-left">{{ item.existencias }}</td>
-                                <td class="text-left">{{ item.producto.valor_compra.toLocaleString() }}</td>
-                                <td class="text-left">{{ item.producto.valor_contado.toLocaleString() }}</td>
-                                <td class="text-left">{{ item.producto.valor_credito.toLocaleString() }}</td>
-                                <td class="text-right"><v-btn density="comfortable"
-                                        @click="editarStockVista(Object.assign({}, item))" color="blue">Actualizar</v-btn>
-                                </td>
-                                <td class="text-left"><v-btn density="comfortable" @click="eliminarProducto(item._id)"
-                                        color="red">eliminar</v-btn>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </v-table>
+                    <v-card-title>
+                        <v-col md="6" sm="12"><v-text-field v-model="searchInventario" append-inner-icon="mdi-magnify"
+                                label="Buscar" variant="outlined" hide-details></v-text-field></v-col>
+                    </v-card-title>
+                    <v-data-table :headers="headers" :items="inventario" :sort-by="[{ key: 'nombre', order: 'asc' }]"
+                        class="elevation-1" :search="searchInventario">
+                        <!-- eslint-disable-next-line vue/valid-v-slot -->
+                        <template v-slot:item.actions="{ item }">
+                            <v-icon size="small" class="me-2" @click="editarStockVista(Object.assign({}, item))">
+                                mdi-pencil
+                            </v-icon>
+                            <v-icon size="small" @click="eliminarProducto(item._id)">
+                                mdi-delete
+                            </v-icon>
+                        </template>
+                    </v-data-table>
                 </v-card>
             </v-row>
         </v-card>
@@ -68,13 +40,14 @@
                         <v-form ref="formInventario">
                             <v-row>
                                 <v-col cols="12">
-                                    <v-text-field label="Existencia" type="number" min="1" required
-                                        variant="outlined" v-model="formInventario.cantidad" :rules="existenciaRule"
+                                    <v-text-field label="Existencia" type="number" min="1" required variant="outlined"
+                                        v-model="formInventario.cantidad" :rules="existenciaRule"
                                         :counter="65"></v-text-field>
                                 </v-col>
                                 <v-col cols="12">
-                                    <v-select :items="productos" no-data-text="Sin productos" item-title="nombre" item-value="_id" variant="outlined"
-                                        label="Productos" required v-model="formInventario.producto"
+                                    <v-select :items="productos" no-data-text="Sin productos" item-title="nombre"
+                                        item-value="_id" variant="outlined" label="Productos" required
+                                        v-model="formInventario.producto"
                                         :rules="[v => !!v || 'Seleccione un Producto']"></v-select>
                                 </v-col>
                             </v-row>
@@ -98,8 +71,8 @@
                         <v-form ref="formInventarioEditar">
                             <v-row>
                                 <v-col cols="12">
-                                    <v-text-field label="Existencia" min="1" type="number" required
-                                        variant="outlined" v-model="formInventarioEditar.existencia" :rules="existenciaRule"
+                                    <v-text-field label="Existencia" min="1" type="number" required variant="outlined"
+                                        v-model="formInventarioEditar.existencia" :rules="existenciaRule"
                                         :counter="65"></v-text-field>
                                 </v-col>
                             </v-row>
@@ -131,6 +104,16 @@ export default {
         api: process.env.VUE_APP_API_URL,
         inventario: [],
         productos: [],
+        searchInventario: null,
+        headers: [
+            { title: 'Nombre', key: 'producto.nombre' },
+            { title: 'Cantidad', key: 'cantidad' },
+            { title: 'Existencia', key: 'existencias' },
+            { title: 'Valor compra', key: 'valor_compraP' },
+            { title: 'Valor contado', key: 'valor_contadoP' },
+            { title: 'Valor crédito', key: 'valor_creditoP' },
+            { title: 'Accion', key: 'actions', sortable: false },
+        ],
         dialogoI: false,
         dialogoE: false,
         disableBtn: false,
@@ -157,7 +140,16 @@ export default {
                     Authorization: `Bearer ${this.token}`
                 }
             }).then((resp) => {
-                this.inventario = resp.data;
+                let inventarioParseado = [];
+                inventarioParseado = resp.data.map(inventario => {
+                    return {
+                        ...inventario,
+                        valor_compraP: inventario.producto.valor_compra.toLocaleString(),
+                        valor_contadoP: inventario.producto.valor_contado.toLocaleString(),
+                        valor_creditoP: inventario.producto.valor_credito.toLocaleString()
+                    }
+                });
+                this.inventario = inventarioParseado;
             }).catch(async error => {
                 console.log(error)
                 switch (error.response.status) {

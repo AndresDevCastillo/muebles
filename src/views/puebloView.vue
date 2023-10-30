@@ -257,7 +257,8 @@
                                 <v-col cols="12">
                                     <v-autocomplete label="Ruta" :items="rutas" item-value="_id" item-title="nombre"
                                         no-data-text="Sin rutas" placeholder="Escoja ruta" required variant="outlined"
-                                        v-model="formCobrador.rutas" closable-chips :rules="campoRules" multiple chips></v-autocomplete>
+                                        v-model="formCobrador.rutas" closable-chips :rules="campoRules" multiple
+                                        chips></v-autocomplete>
                                 </v-col>
                             </v-row>
                         </v-form>

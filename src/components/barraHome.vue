@@ -20,8 +20,7 @@
         </v-app-bar>
         <v-navigation-drawer app theme="dark" v-model="drawer" temporary>
             <v-list>
-                <v-list-item prepend-icon="mdi mdi-home-account" :title="title"
-                    :subtitle="subtitle"></v-list-item>
+                <v-list-item prepend-icon="mdi mdi-home-account" :title="title" :subtitle="subtitle"></v-list-item>
             </v-list>
 
             <v-divider></v-divider>
@@ -35,11 +34,13 @@
             </v-list>
             <template v-slot:append>
                 <v-footer class="d-flex flex-column" style="bottom: 0; width: 100%;">
-                    <div class="d-flex w-100 align-center px-2">
-                        <v-btn v-for="icon in icons" :key="icon" class="mx-2" :icon="icon" variant="plain" size="small"></v-btn>
+                    <div class="d-flex w-100 align-center justify-center px-2">
+                        <v-chip v-for="icon in icons" :key="icon" :href="icon.href" class="mx-2" :prepend-icon="icon.icon">
+                            {{ icon.title }}
+                        </v-chip>
                     </div>
                     <div class=" py-2  text-center w-100">
-                        {{ new Date().getFullYear() }} — Engineersoft
+                        2023 - {{ new Date().getFullYear() }}
                     </div>
                 </v-footer>
             </template>
@@ -62,10 +63,16 @@ export default {
         drawer: false,
         link: { icon: null, title: null, href: null },
         icons: [
-            'mdi-facebook',
-            'mdi-twitter',
-            'mdi-linkedin',
-            'mdi-instagram',
+            {
+                title: 'Andrés',
+                icon: 'mdi-linkedin',
+                href: 'https://www.linkedin.com/in/andres-castillo-backend-jr/'
+            },
+            {
+                title: 'Luis',
+                icon: 'mdi-linkedin',
+                href: 'https://www.linkedin.com/in/luis-miguel'
+            }
         ],
     }),
     methods: {

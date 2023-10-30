@@ -10,15 +10,13 @@
                         <v-form ref="formProductoEditar">
                             <v-row>
                                 <v-col cols="12">
-                                    <v-text-field label="Nombre producto" type="text" required
-                                        variant="outlined" v-model="paquete.nombre" :rules="nombreRules"
-                                        :counter="65"></v-text-field>
+                                    <v-text-field label="Nombre producto" type="text" required variant="outlined"
+                                        v-model="paquete.nombre" :rules="nombreRules" :counter="65"></v-text-field>
                                 </v-col>
                                 <v-col cols="12">
                                     <v-text-field label="Valor de compra" type="number" min="1" required
-                                        hint="Sin comas o puntos (, .)" persistent-hint
-                                        variant="outlined" v-model="paquete.valor_compra"
-                                        :rules="precioRules"></v-text-field>
+                                        hint="Sin comas o puntos (, .)" persistent-hint variant="outlined"
+                                        v-model="paquete.valor_compra" :rules="precioRules"></v-text-field>
                                 </v-col>
                                 <v-col cols="12" sm="6">
                                     <v-text-field label="Valor de contado" type="number" min="1" variant="outlined"
@@ -86,6 +84,9 @@ export default {
             const { valid } = await this.$refs.formProductoEditar.validate();
             if (valid) {
                 try {
+                    this.paquete.valor_compra = parseInt(this.paquete.valor_compra);
+                    this.paquete.valor_contado = parseInt(this.paquete.valor_contado);
+                    this.paquete.valor_credito = parseInt(this.paquete.valor_credito);
                     await axios.put(`${this.api}/producto/actualizar`, this.paquete, {
                         headers: {
                             Authorization: `Bearer ${this.token}`
