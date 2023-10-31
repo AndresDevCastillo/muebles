@@ -5,18 +5,18 @@
         <v-col lg="4" md="4" sm="6" cols="auto">
           <v-row class="align-center">
             <v-icon size="x-large" icon="mdi mdi-tag-plus"></v-icon>
-            <h1 class="px-3">Préstamos</h1>
+            <h1 class="px-3">Ventas</h1>
           </v-row>
         </v-col>
         <v-col cols="auto">
-          <v-btn color="blue" prepend-icon="mdi mdi-plus" @click="dialogPrestamo = true">Crear préstamo</v-btn>
+          <v-btn color="blue" prepend-icon="mdi mdi-plus" @click="dialogPrestamo = true">Crear venta</v-btn>
         </v-col>
       </v-row>
     </v-card-title>
     <v-col md="6" sm="12"><v-text-field v-model="searchPrestamo" append-inner-icon="mdi-magnify" label="Buscar"
         variant="outlined" hide-details></v-text-field></v-col>
     <v-data-table :headers="headers" :items="prestamos" :sort-by="[{ key: 'nombre', order: 'asc' }]" class="elevation-1"
-      :search="searchPrestamo" no-data-text="Sin préstamos">
+      :search="searchPrestamo" no-data-text="Sin ventas">
       <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template v-slot:item.mora="{ value }">
         <v-chip :color="value ? 'red' : 'green'">
@@ -36,14 +36,13 @@
     <v-dialog v-model="dialogPrestamo" persistent width="700">
       <v-card>
         <v-card-title>
-          Nuevo préstamo
-
+          Nueva venta
         </v-card-title>
         <v-card-text>
           <v-form v-model="valid" ref="formPrestamo">
             <v-row>
               <v-col cols="12">
-                <v-autocomplete label="Nombre del cliente" no-data-text="Sin clientes registrados" return-object
+                <v-autocomplete label="Nombre del cliente" no-data-text="Sin clientes disponible para venta" return-object
                   :items="clientes" :item-title="(item => { return `${item.nombres} ${item.apellidos}` })"
                   variant="outlined" v-model="form.cliente" :rules="campoRules"></v-autocomplete>
               </v-col>
@@ -279,10 +278,9 @@ export default {
         }
       });
     },
-    llenarMes(anio, mes, dia) {
+    async llenarMes(anio, mes, dia) {
       const infoMes = [];
       let fechaActual = new Date(anio, mes, dia);
-      fechaActual.setTime(fechaActual.getTime() + (24 * 60 * 60 * 1000));
       const mesSig = new Date(anio, mes + 1, 1);
       mesSig.setDate(mesSig.getDate() - 1);
       const ultimoDiaMes = mesSig.getDate();
@@ -296,7 +294,7 @@ export default {
       }
       return infoMes;
     },
-    calcularPagos(frecuenciaCobro = 'diario', cuotas = 1, semana = '', quincena = {}, mensual = {}) {
+    async calcularPagos(frecuenciaCobro = 'diario', cuotas = 1, semana = '', quincena = {}, mensual = {}) {
       const fechaPagos = [];
       const fechaActual = new Date();
       const diaActual = fechaActual.getDay();
@@ -325,35 +323,36 @@ export default {
           break;
         case 'quincenal':
           sinComplex = false;
+          fechaActual.setDate(fechaActual.getDate() + 1);
           while (fechaPagos.length < cuotas) {
-            mesV = this.llenarMes(fechaActual.getFullYear(), fechaActual.getMonth(), fechaActual.getDate());
+            mesV = await this.llenarMes(fechaActual.getFullYear(), fechaActual.getMonth(), fechaActual.getDate());
             mesV.filter(mes => {
-              if (quincena.semanas.includes(mes.semana) && mes.diaTexto.toLowerCase() == quincena.dia.toLowerCase()) {
+              if (quincena.semanas.includes(mes.semana) && mes.diaTexto.toLowerCase() == quincena.dia.toLowerCase() && fechaPagos.length < cuotas) {
                 fechaPagos.push({ fecha: `${fechaActual.getFullYear()}-${((fechaActual.getMonth() + 1) < 10 ? '0' : null) + parseInt(fechaActual.getMonth() + 1)}-${(mes.dia < 10 ? '0' : null) + mes.dia}` });
               }
               return false;
             });
-            fechaActual.setMonth(fechaActual.getMonth() + 1);
             fechaActual.setDate(1);
+            fechaActual.setMonth(fechaActual.getMonth() + 1);
           }
           break;
         case 'mensual':
           sinComplex = false;
+          fechaActual.setDate(fechaActual.getDate() + 1);
           while (fechaPagos.length < cuotas) {
-            mesV = this.llenarMes(fechaActual.getFullYear(), fechaActual.getMonth(), fechaActual.getDate());
+            mesV = await this.llenarMes(fechaActual.getFullYear(), fechaActual.getMonth(), fechaActual.getDate());
             mesV.filter(mes => {
-              if (mensual.semanas == mes.semana && mes.diaTexto.toLowerCase() == mensual.dia.toLowerCase()) {
+              if (mensual.semanas == mes.semana && mes.diaTexto.toLowerCase() == mensual.dia.toLowerCase() && fechaPagos.length < cuotas) {
                 fechaPagos.push({ fecha: `${fechaActual.getFullYear()}-${((fechaActual.getMonth() + 1) < 10 ? '0' : null) + parseInt(fechaActual.getMonth() + 1)}-${(mes.dia < 10 ? '0' : null) + mes.dia}` });
               }
               return false;
             });
-            fechaActual.setMonth(fechaActual.getMonth() + 1);
             fechaActual.setDate(1);
+            fechaActual.setMonth(fechaActual.getMonth() + 1);
           }
           break;
       }
       if (sinComplex) {
-        console.log('aumento diad', aumentoDias);
         while (fechaPagos.length < cuotas) {
           fechaActual.setTime(fechaActual.getTime() + (aumentoDias * milisDia));
           //No es domingo
@@ -387,9 +386,10 @@ export default {
             this.form.cuotas = 0;
           } else {
             total = this.form.cantidad * this.form.producto.producto.valor_credito;
-            const valorCuota = Math.floor(total / this.form.cuotas);
-            const restVal = parseFloat(total - (valorCuota * this.form.cuotas));
-            pagos = this.calcularPagos(this.form.cliente.direccion.opcRuta, this.form.cuotas, this.form.cliente.direccion.semanal, this.form.cliente.direccion.quincenal, this.form.cliente.direccion.mensual);
+            const cuotaBase = Math.ceil(total / this.form.cuotas); //Redondeo hacia arriba
+            const valorCuota = Math.floor(cuotaBase / 100) * 100; //Redondeo hacia abajo, con parte entera de 100
+            const restVal = Math.round((cuotaBase - valorCuota) * this.form.cuotas); //Diferencia, con redondeo al más cercano
+            pagos = await this.calcularPagos(this.form.cliente.direccion.opcRuta, this.form.cuotas, this.form.cliente.direccion.semanal, this.form.cliente.direccion.quincenal, this.form.cliente.direccion.mensual);
             pagos = pagos.map((pago, index) => {
               return index == 0 ? { fecha: pago.fecha, monto: valorCuota + restVal } : { fecha: pago.fecha, monto: valorCuota };
             });
@@ -409,10 +409,11 @@ export default {
               Authorization: `Bearer ${this.token}`
             }
           }).then(() => {
+            this.$refs.formPrestamo.reset();
             this.dialogPrestamo = false;
             Swal.fire({
               icon: 'success',
-              text: 'Prestamo registrado correctamente',
+              text: 'Venta registrada correctamente',
               showConfirmButton: false,
               timer: 1600
             });
@@ -424,7 +425,7 @@ export default {
               default:
                 Swal.fire({
                   icon: 'info',
-                  text: 'No se pudo crear el préstamo',
+                  text: 'No se pudo crear la venta',
                   showConfirmButton: false,
                   timer: 1600
                 });
@@ -432,24 +433,17 @@ export default {
             }
           });
         } else {
+          this.disableBtn = false;
           return Swal.fire({ icon: 'warning', text: `La cantidad sobrepasa las existencias, sólo hay ${this.form.producto.existencias} ${this.form.producto.producto.nombre}`, showConfirmButton: false, timer: 1600 })
         }
       }
       this.disableBtn = false;
       await this.getPrestamos();
-
-      // Ejemplo de uso para octubre de 2023
-
-
-      // const numeroDeSemanas = this.calcularSemanasEnMes(mes, anio);
-
-      //console.log(`Número de semanas en ${mes}/${año}: ${numeroDeSemanas}`);
-      //console.log();
     },
     async eliminarPrestamo(id) {
       Swal.fire({
         icon: 'info',
-        title: 'Seguro quiere eliminar el prestamo?',
+        title: 'Seguro quiere eliminar la venta?',
         showDenyButton: true,
         denyButtonText: 'No',
         confirmButtonText: 'Eliminar',
@@ -474,7 +468,7 @@ export default {
           default:
             Swal.fire({
               icon: 'info',
-              text: 'No se pudo eliminar el prestamo',
+              text: 'No se pudo eliminar la venta',
               showConfirmButton: false,
               timer: 1600
             });
