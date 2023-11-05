@@ -70,6 +70,9 @@
                 <v-text-field type="number" label="Cuotas" placeholder="Ingrese cantidad de cuotas" min="1"
                   variant="outlined" v-model="form.cuotas" :rules="cantidadRules"></v-text-field>
               </v-col>
+              <v-col cols="12" v-if="formaPago == 2">
+                <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false" cancelText="Cancelar" locale="es" selectText="Seleccionar" v-model="form.pago_fechas" multi-dates :min-date="new Date()" placeholder="Selecciona fechas de pago" teleport-center @cleared="form.pago_fechas = []" />
+              </v-col>
             </v-row>
           </v-form>
         </v-card-text>
@@ -143,10 +146,12 @@
 import Session from "@/validation/session";
 import Swal from "sweetalert2";
 import axios from "axios";
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
 import nuevoCliente from "@/components/nuevoCliente.vue";
 export default {
   name: "prestamoVista",
-  components: { nuevoCliente },
+  components: { nuevoCliente, VueDatePicker },
   data: () => ({
     token: null,
     api: process.env.VUE_APP_API_URL,
@@ -384,12 +389,17 @@ export default {
     async guardar() {
       const { valid } = await this.$refs.formPrestamo.validate();
       if (valid) {
-        this.disableBtn = true;
         this.form.cantidad = parseInt(this.form.cantidad);
         this.form.cuotas = parseInt(this.form.cuotas);
         let total, pagos = [];
-
+        if (this.formaPago == 2 && this.form.pago_fechas.length != this.form.cuotas) {
+          return Swal.fire({ icon: 'warning', text: 'Las fechas de pago deben ser iguales a la cantidad de cuotas', showConfirmButton: false, timer: 1690 });
+        }
         if (this.form.cantidad <= this.form.producto.existencias) {
+          this.disableBtn = true;
+          if (this.form.pago_fechas.length > 1) {
+            this.form.pago_fechas = this.ordenarFechas(this.form.pago_fechas);
+          }
           if (parseInt(this.formaPago) == 1) {
             total = this.form.cantidad * this.form.producto.producto.valor_contado;
             this.form.cuotas = 0;
@@ -398,16 +408,15 @@ export default {
             const cuotaBase = Math.ceil(total / this.form.cuotas); //Redondeo hacia arriba
             const valorCuota = Math.floor(cuotaBase / 100) * 100; //Redondeo hacia abajo, con parte entera de 100
             const restVal = Math.round((cuotaBase - valorCuota) * this.form.cuotas); //Diferencia, con redondeo al más cercano
-            pagos = await this.calcularPagos(this.form.cliente.direccion.opcRuta, this.form.cuotas, this.form.cliente.direccion.semanal, this.form.cliente.direccion.quincenal, this.form.cliente.direccion.mensual);
-            pagos = pagos.map((pago, index) => {
-              return index == 0 ? { fecha: pago.fecha, monto: valorCuota + restVal } : { fecha: pago.fecha, monto: valorCuota };
+            pagos = this.form.pago_fechas.map((pago, index) => {
+              return index == 0 ? { fecha: pago, monto: valorCuota + restVal } : { fecha: pago, monto: valorCuota };
             });
           }
           const paquete = {
             cliente: this.form.cliente._id, //`${this.form.cliente.nombres} ${this.form.cliente.apellidos}`,
             ruta: this.form.cliente.direccion.nombre,
             producto: this.form.producto.producto.nombre, //ObjectId del inventario
-            fecha_inicio: new Date(),
+            fecha_inicio: new Date().toISOString(),
             cantidad: this.form.cantidad,
             cuotas: this.form.cuotas,
             pago_fechas: pagos,
@@ -418,14 +427,15 @@ export default {
               Authorization: `Bearer ${this.token}`
             }
           }).then(() => {
+            this.form.pago_fechas = [];
             this.$refs.formPrestamo.reset();
-            this.dialogPrestamo = false;
             Swal.fire({
               icon: 'success',
               text: 'Venta registrada correctamente',
               showConfirmButton: false,
-              timer: 1600
+              timer: 1710
             });
+            this.dialogPrestamo = false;
           }).catch(error => {
             switch (error.response.status) {
               case 401:
@@ -436,14 +446,14 @@ export default {
                   icon: 'info',
                   text: 'No se pudo crear la venta',
                   showConfirmButton: false,
-                  timer: 1600
+                  timer: 1710
                 });
                 break;
             }
           });
         } else {
           this.disableBtn = false;
-          return Swal.fire({ icon: 'warning', text: `La cantidad sobrepasa las existencias, sólo hay ${this.form.producto.existencias} ${this.form.producto.producto.nombre}`, showConfirmButton: false, timer: 1600 })
+          return Swal.fire({ icon: 'warning', text: `No hay suficientes ${this.form.producto.producto.nombre}, sólo hay ${this.form.producto.existencias}`, showConfirmButton: false, timer: 1600 })
         }
       }
       this.disableBtn = false;
@@ -488,6 +498,11 @@ export default {
     verPrestamoFunction(item) {
       this.verPrestamo = item;
       this.dialogVePrestamo = true;
+    },
+    ordenarFechas(fechas = []) {
+      const fechasDate = fechas.map(fecha => new Date(fecha));
+      fechasDate.sort((f1, f2) => f1 - f2);
+      return fechasDate;
     },
     async actualizarTodo() {
       await this.getClientes();

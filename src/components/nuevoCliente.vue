@@ -20,15 +20,15 @@
                                     v-model="formCliente.apellidos" :rules="nombreRules"></v-text-field>
                             </v-col>
                             <v-col cols="12" sm="6">
-                                <v-text-field label="Telefono" type="text" required variant="outlined"
+                                <v-text-field label="Telefono" type="tel" required variant="outlined"
                                     v-model="formCliente.telefono" :rules="nombreRules"></v-text-field>
                             </v-col>
                             <v-col cols="12" sm="6">
-                                <v-text-field label="Correo" type="text" required variant="outlined"
+                                <v-text-field label="Correo" type="email" required variant="outlined"
                                     v-model="formCliente.correo" :rules="nombreRules"></v-text-field>
                             </v-col>
                             <v-col cols="12">
-                                <v-autocomplete :items="rutas" variant="outlined" label="Ruta" required
+                                <v-autocomplete :items="rutas" return-object variant="outlined" label="Ruta" required
                                     v-model="formCliente.direccion" item-title="nombre" item-value="_id"
                                     :rules="[v => !!v || 'Seleccione una ruta']"
                                     no-data-text="No hay rutas"></v-autocomplete>
@@ -92,8 +92,8 @@ export default {
         formasPago: [{ index: 1, forma: 'De contado' }, { index: 2, forma: 'A crédito' }],
         formaPago: null,
         nombreRules: [
-            v => !!v || 'El nombre es requerido',
-            v => (v && v.length <= 65) || 'EL nombre no puede superar los 65 caracteres',
+            v => !!v || 'El campo es requerido',
+            v => (v && v.length <= 65) || 'El campo no puede superar los 65 caracteres',
         ], usuarioRules: [
             v => !!v || 'El usuario es requerido',
             v => (v && v.length > 3) || 'EL nombre debe tener mínimo 4 caracteres',
@@ -196,6 +196,9 @@ export default {
                             return index == 0 ? { fecha: pago, monto: valorCuota + restVal } : { fecha: pago, monto: valorCuota };
                         });
                     }
+                    delete this.formCliente.direccion.__v;
+                    delete this.formCliente.direccion.ciudad;
+                    delete this.formCliente.direccion.departamento;
                     const paquete = {
                         documento: this.formCliente.documento,
                         nombres: this.formCliente.nombres,
@@ -219,11 +222,21 @@ export default {
                         },
                     }).then(() => {
                         this.$refs.formCliente.reset();
+                        this.formCliente.venta.pago_fechas = [];
                         return Swal.fire({ icon: 'success', text: 'Cliente creado correctamente', showConfirmButton: false, timer: 1500 });
                     }).catch(error => {
                         switch (error.response.status) {
                             case 401:
                                 Session.expiredSession();
+                                break;
+                            case 500:
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'No se pudo crear el cliente',
+                                    text: error.response.data.message.message,
+                                    showConfirmButton: false,
+                                    timer: 1600
+                                });
                                 break;
                             default:
                                 Swal.fire({
@@ -235,6 +248,8 @@ export default {
                                 break;
                         }
                     });
+                    await this.getProductosInventario();
+                    await this.obtenerRutas()
                     this.$emit('actualizarTodo');
                     this.disableBtn = false;
                 } else {
