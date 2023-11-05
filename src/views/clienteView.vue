@@ -1,231 +1,191 @@
 <template>
-    <v-card class="ma-3">
-        <v-card-title>
-            <v-row class="my-4" justify="space-between">
-                <v-col cols="auto">
-                    <v-row class="align-center" no-gutters>
-                        <v-icon size="x-large" icon="mdi mdi-account-group-outline"></v-icon>
-                        <h1 class="px-3">Clientes</h1>
-                    </v-row>
+    <div class="cliente">
+        <v-card class="ma-3">
+            <v-card-title>
+                <v-row class="my-4" justify="space-between">
+                    <v-col cols="auto">
+                        <v-row class="align-center" no-gutters>
+                            <v-icon size="x-large" icon="mdi mdi-account-group-outline"></v-icon>
+                            <h1 class="px-3">Clientes</h1>
+                        </v-row>
+                    </v-col>
+                    <v-col cols="auto">
+                        <v-btn prepend-icon="mdi-plus" color="green" @click="dialogCliente = true;">Agregar cliente</v-btn>
+                    </v-col>
+                </v-row>
+            </v-card-title>
+            <v-card-title>
+                <v-col md="6" sm="12">
+                    <v-text-field v-model="searchCliente" append-inner-icon="mdi-magnify" label="Buscar"
+                        variant="outlined" hide-details>
+                    </v-text-field>
                 </v-col>
-                <v-col cols="auto">
-                    <v-btn prepend-icon="mdi-plus" color="green" @click="dialogCliente = true;">Agregar cliente</v-btn>
-                </v-col>
-            </v-row>
-        </v-card-title>
-        <v-card-title>
-            <v-col md="6" sm="12"><v-text-field v-model="searchCliente" append-inner-icon="mdi-magnify" label="Buscar"
-                    variant="outlined" hide-details></v-text-field></v-col>
-        </v-card-title>
-        <v-card-text>
-            <v-data-table :headers="headers" :items="clientes" :sort-by="[{ key: 'nombres', order: 'asc' }]"
-                class="elevation-1" :search="searchCliente">
-                <!-- eslint-disable-next-line vue/valid-v-slot -->
-                <template v-slot:item.actions="{ item }">
-                    <v-icon size="small" class="me-2" @click="verClienteFunction(Object.assign({}, item))">
-                        mdi-information-outline
-                    </v-icon>
-                    <v-icon size="small" class="me-2" @click="preEditarCliente(Object.assign({}, item))">
-                        mdi-pencil
-                    </v-icon>
-                    <v-icon size="small" @click="eliminarCliente(item._id)">
-                        mdi-delete
-                    </v-icon>
+            </v-card-title>
+            <v-card-text>
+                <v-data-table :headers="headers" :items="clientes" :sort-by="[{ key: 'nombres', order: 'asc' }]"
+                    class="elevation-1" :search="searchCliente">
+                    <!-- eslint-disable-next-line vue/valid-v-slot -->
+                    <template v-slot:item.actions="{ item }">
+                        <v-icon size="small" class="me-2" @click="verClienteFunction(Object.assign({}, item))">
+                            mdi-information-outline
+                        </v-icon>
+                        <v-icon size="small" class="me-2" @click="preEditarCliente(Object.assign({}, item))">
+                            mdi-pencil
+                        </v-icon>
+                        <v-icon size="small" @click="eliminarCliente(item._id)">
+                            mdi-delete
+                        </v-icon>
 
-                </template>
-            </v-data-table>
-        </v-card-text>
-    </v-card>
-    <v-dialog v-model="dialogCliente" persistent width="700">
-        <v-card>
-            <v-card-title>Nuevo Cliente</v-card-title>
-            <v-card-text>
-                <v-container>
-                    <v-form ref="formCliente">
-                        <v-row>
-                            <v-col cols="12">
-                                <v-text-field label="Documento" type="number" min="1" required
-                                    hint="Sin comas o puntos (, .)" persistent-hint variant="outlined"
-                                    v-model="formCliente.documento" :rules="numberRules"></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6">
-                                <v-text-field label="Nombres" type="text" required variant="outlined"
-                                    v-model="formCliente.nombres" :rules="nombreRules"></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6">
-                                <v-text-field label="Apellidos" type="text" required variant="outlined"
-                                    v-model="formCliente.apellidos" :rules="nombreRules"></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6">
-                                <v-text-field label="Telefono" type="text" required variant="outlined"
-                                    v-model="formCliente.telefono" :rules="nombreRules"></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6">
-                                <v-text-field label="Correo" type="text" required variant="outlined"
-                                    v-model="formCliente.correo" :rules="nombreRules"></v-text-field>
-                            </v-col>
-                            <v-col cols="12">
-                                <v-autocomplete :items="rutas" variant="outlined" label="Ruta" required
-                                    v-model="formCliente.direccion" item-title="nombre" item-value="_id"
-                                    :rules="[v => !!v || 'Seleccione una ruta']"
-                                    no-data-text="No hay rutas"></v-autocomplete>
-                            </v-col>
-                        </v-row>
-                    </v-form>
-                </v-container>
+                    </template>
+                </v-data-table>
             </v-card-text>
-            <v-card-actions class="justify-end">
-                <v-btn color="red-darken-1" variant="tonal" @click="dialogCliente = false">
-                    Cerrar
-                </v-btn>
-                <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtn" @click="crearCliente()">
-                    Crear
-                </v-btn>
-            </v-card-actions>
         </v-card>
-    </v-dialog>
-    <v-dialog v-model="dialogClienteEditar" persistent width="700">
-        <v-card>
-            <v-card-title>Editar Cliente</v-card-title>
-            <v-card-text>
-                <v-container>
-                    <v-form ref="formClienteEditar">
-                        <v-row>
-                            <v-col cols="12">
-                                <v-text-field label="Documento" type="number" min="1" required
-                                    hint="Sin comas o puntos (, .)" persistent-hint variant="outlined"
-                                    v-model="formClienteEditar.documento" :rules="numberRules"></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6">
-                                <v-text-field label="Nombres" type="text" required variant="outlined"
-                                    v-model="formClienteEditar.nombres" :rules="nombreRules"></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6">
-                                <v-text-field label="Apellidos" type="text" required variant="outlined"
-                                    v-model="formClienteEditar.apellidos" :rules="nombreRules"></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6">
-                                <v-text-field label="Telefono" type="text" required variant="outlined"
-                                    v-model="formClienteEditar.telefono" :rules="nombreRules"></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6">
-                                <v-text-field label="Correo" type="text" required variant="outlined"
-                                    v-model="formClienteEditar.correo" :rules="nombreRules"></v-text-field>
-                            </v-col>
-                            <v-col cols="12">
-                                <v-autocomplete :items="rutas" variant="outlined" label="Ruta" required
-                                    v-model="formClienteEditar.direccion" item-title="nombre" item-value="_id"
-                                    :rules="[v => !!v || 'Seleccione una ruta']"
-                                    no-data-text="No hay rutas"></v-autocomplete>
-                            </v-col>
-                        </v-row>
-                    </v-form>
-                </v-container>
-            </v-card-text>
-            <v-card-actions class="justify-end">
-                <v-btn color="red-darken-1" variant="tonal" @click="dialogClienteEditar = false">
-                    Cerrar
-                </v-btn>
-                <v-btn color="blue-darken-1" variant="tonal" :disabled="disableBtn" @click="editarCliente()">
-                    Editar
-                </v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
-    <v-dialog v-model="dialogClienteVer" persistent width="700">
-        <v-card>
-            <v-card-text>
-                <v-container>
-                    <v-form>
-                        <v-row>
-                            <v-col cols="12">
-                                <v-text-field label="Documento" type="number" min="1" required
-                                    hint="Sin comas o puntos (, .)" persistent-hint variant="outlined"
-                                    v-model="verCliente.documento" disabled></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6">
-                                <v-text-field label="Nombres" type="text" required variant="outlined"
-                                    v-model="verCliente.nombres" disabled></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6">
-                                <v-text-field label="Apellidos" type="text" required variant="outlined"
-                                    v-model="verCliente.apellidos" disabled></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6">
-                                <v-text-field label="Telefono" type="text" required variant="outlined"
-                                    v-model="verCliente.telefono" disabled></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6">
-                                <v-text-field label="Correo" type="text" required variant="outlined"
-                                    v-model="verCliente.correo" disabled></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6">
-                                <v-text-field variant="outlined" label="Ruta" required v-model="verCliente.direccion.nombre"
-                                    disabled></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6">
-                                <v-text-field variant="outlined" label="Departamento" required
-                                    v-model="verCliente.direccion.departamento" disabled></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6">
-                                <v-text-field variant="outlined" label="Ciudad" required
-                                    v-model="verCliente.direccion.ciudad" disabled></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6">
-                                <v-text-field variant="outlined" label="Frecuencia de pago" required
-                                    v-model="verCliente.direccion.opcRuta" disabled></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Semanal'">
-                                <v-text-field variant="outlined" label="Día" required disabled
-                                    v-model="verCliente.direccion.semanal"></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Quincenal'">
-                                <v-text-field variant="outlined" label="Día" required disabled
-                                    v-model="verCliente.direccion.quincenal.dia"></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Quincenal'">
-                                <v-text-field variant="outlined" label="Semana 1" required disabled
-                                    v-model="verCliente.direccion.quincenal.semanas[0]"></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Quincenal'">
-                                <v-text-field variant="outlined" label="Semana 2" required disabled
-                                    v-model="verCliente.direccion.quincenal.semanas[1]"></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Mensual'">
-                                <v-text-field variant="outlined" label="Día" required disabled
-                                    v-model="verCliente.direccion.mensual.dia"></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Mensual'">
-                                <v-text-field variant="outlined" label="Semana" required disabled
-                                    v-model="verCliente.direccion.mensual.semanas"></v-text-field>
-                            </v-col>
-                        </v-row>
-                    </v-form>
-                </v-container>
-            </v-card-text>
-            <v-card-actions class="justify-end">
-                <v-btn color="red-darken-1" variant="tonal" @click="dialogClienteVer = false">
-                    Cerrar
-                </v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+        <nuevoCliente :dialogCliente="dialogCliente" @cerrarDialog="dialogCliente = false" @actualizarTodo="actualizarTodo" />
+        <v-dialog v-model="dialogClienteEditar" persistent width="700">
+            <v-card>
+                <v-card-title>Editar Cliente</v-card-title>
+                <v-card-text>
+                    <v-container>
+                        <v-form ref="formClienteEditar">
+                            <v-row>
+                                <v-col cols="12">
+                                    <v-text-field label="Documento" type="number" min="1" required
+                                        hint="Sin comas o puntos (, .)" persistent-hint variant="outlined"
+                                        v-model="formClienteEditar.documento" :rules="numberRules"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <v-text-field label="Nombres" type="text" required variant="outlined"
+                                        v-model="formClienteEditar.nombres" :rules="nombreRules"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <v-text-field label="Apellidos" type="text" required variant="outlined"
+                                        v-model="formClienteEditar.apellidos" :rules="nombreRules"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <v-text-field label="Telefono" type="text" required variant="outlined"
+                                        v-model="formClienteEditar.telefono" :rules="nombreRules"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <v-text-field label="Correo" type="text" required variant="outlined"
+                                        v-model="formClienteEditar.correo" :rules="nombreRules"></v-text-field>
+                                </v-col>
+                                <v-col cols="12">
+                                    <v-autocomplete :items="rutas" variant="outlined" label="Ruta" required
+                                        v-model="formClienteEditar.direccion" item-title="nombre" item-value="_id"
+                                        :rules="[v => !!v || 'Seleccione una ruta']"
+                                        no-data-text="No hay rutas"></v-autocomplete>
+                                </v-col>
+                            </v-row>
+                        </v-form>
+                    </v-container>
+                </v-card-text>
+                <v-card-actions class="justify-end">
+                    <v-btn color="red-darken-1" variant="tonal" @click="dialogClienteEditar = false">
+                        Cerrar
+                    </v-btn>
+                    <v-btn color="blue-darken-1" variant="tonal" :disabled="disableBtn" @click="editarCliente()">
+                        Editar
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+        <v-dialog v-model="dialogClienteVer" persistent width="700">
+            <v-card>
+                <v-card-text>
+                    <v-container>
+                        <v-form>
+                            <v-row>
+                                <v-col cols="12">
+                                    <v-text-field label="Documento" type="number" min="1" required
+                                        hint="Sin comas o puntos (, .)" persistent-hint variant="outlined"
+                                        v-model="verCliente.documento" disabled></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <v-text-field label="Nombres" type="text" required variant="outlined"
+                                        v-model="verCliente.nombres" disabled></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <v-text-field label="Apellidos" type="text" required variant="outlined"
+                                        v-model="verCliente.apellidos" disabled></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <v-text-field label="Telefono" type="text" required variant="outlined"
+                                        v-model="verCliente.telefono" disabled></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <v-text-field label="Correo" type="text" required variant="outlined"
+                                        v-model="verCliente.correo" disabled></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <v-text-field variant="outlined" label="Ruta" required v-model="verCliente.direccion.nombre"
+                                        disabled></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <v-text-field variant="outlined" label="Departamento" required
+                                        v-model="verCliente.direccion.departamento" disabled></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <v-text-field variant="outlined" label="Ciudad" required
+                                        v-model="verCliente.direccion.ciudad" disabled></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <v-text-field variant="outlined" label="Frecuencia de pago" required
+                                        v-model="verCliente.direccion.opcRuta" disabled></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Semanal'">
+                                    <v-text-field variant="outlined" label="Día" required disabled
+                                        v-model="verCliente.direccion.semanal"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Quincenal'">
+                                    <v-text-field variant="outlined" label="Día" required disabled
+                                        v-model="verCliente.direccion.quincenal.dia"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Quincenal'">
+                                    <v-text-field variant="outlined" label="Semana 1" required disabled
+                                        v-model="verCliente.direccion.quincenal.semanas[0]"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Quincenal'">
+                                    <v-text-field variant="outlined" label="Semana 2" required disabled
+                                        v-model="verCliente.direccion.quincenal.semanas[1]"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Mensual'">
+                                    <v-text-field variant="outlined" label="Día" required disabled
+                                        v-model="verCliente.direccion.mensual.dia"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" v-if="verCliente.direccion.opcRuta == 'Mensual'">
+                                    <v-text-field variant="outlined" label="Semana" required disabled
+                                        v-model="verCliente.direccion.mensual.semanas"></v-text-field>
+                                </v-col>
+                            </v-row>
+                        </v-form>
+                    </v-container>
+                </v-card-text>
+                <v-card-actions class="justify-end">
+                    <v-btn color="red-darken-1" variant="tonal" @click="dialogClienteVer = false">
+                        Cerrar
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+    </div>
 </template>
 <script>
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import Session from '@/validation/session';
-
+import nuevoCliente from '@/components/nuevoCliente.vue';
 export default {
     name: 'clienteVista',
-    components: {
-    },
+    components: { nuevoCliente },
     data: () => ({
         dialogCliente: false,
         dialogClienteEditar: null,
         dialogClienteVer: null,
+        disableBtn: false,
         clientes: [],
         rutas: [],
+        productos: [],
+        formaPago: null,
         api: process.env.VUE_APP_API_URL,
         token: null,
         searchCliente: null,
@@ -239,14 +199,6 @@ export default {
 
             { title: 'Accion', key: 'actions', sortable: false },
         ],
-        formCliente: {
-            documento: null,
-            nombres: null,
-            apellidos: null,
-            telefono: null,
-            correo: null,
-            direccion: null
-        },
         formClienteEditar: {
             id: null,
             documento: null,
@@ -256,15 +208,44 @@ export default {
             correo: null,
             direccion: null
         },
+        formasPago: [{ index: 1, forma: 'De contado' }, { index: 2, forma: 'A crédito' }],
         verCliente: null,
         nombreRules: [
-            v => !!v || 'El nombre es requerido',
-            v => (v && v.length <= 65) || 'EL nombre no puede superar los 65 caracteres',
+            v => !!v || 'El campo es requerido',
+            v => (v && v.length <= 65) || 'El campo no puede superar los 65 caracteres',
+        ],
+        campoRules: [v => !!v || 'Campo requerido',],
+        cantidadRules: [
+            v => !!v || 'Campo requerido',
+            v => parseInt(v) > 0 || 'Ingrese una cantidad mayor a 0'
         ],
         numberRules: [v => !!v || 'El precio es requerido', v => (v && /^[0-9]+$/.test(v)) || 'El numero no debe contener caracteres'],
 
     }),
     methods: {
+        async getProductosInventario() {
+            await axios.get(`${this.api}/inventario`, {
+                headers: {
+                    Authorization: `Bearer ${this.token}`
+                }
+            }).then(resp => {
+                this.productos = resp.data;
+            }).catch(error => {
+                switch (error.response.status) {
+                    case 401:
+                        Session.expiredSession();
+                        break;
+                    default:
+                        Swal.fire({
+                            icon: 'info',
+                            text: 'No se pudo obtener los productos',
+                            showConfirmButton: false,
+                            timer: 1600
+                        });
+                        break;
+                }
+            });
+        },
         async obtenerClientes() {
             await axios.get(`${this.api}/cliente`, {
                 headers: {
@@ -310,46 +291,6 @@ export default {
                         break;
                 }
             });
-        },
-        async crearCliente() {
-            const { valid } = await this.$refs.formCliente.validate();
-            if (valid) {
-                this.disableBtn = true;
-                this.dialogCliente = false;
-                this.formCliente.documento = parseInt(this.formCliente.documento);
-                await axios.post(`${this.api}/cliente/crear`, this.formCliente, {
-                    headers: {
-                        Authorization: `Bearer ${this.token}`
-                    },
-                }).then(() => {
-                    this.formCliente = {
-                        documento: null,
-                        nombres: null,
-                        apellidos: null,
-                        telefono: null,
-                        correo: null,
-                        direccion: null
-                    }
-                    return Swal.fire({ icon: 'success', title: 'Se creo el cliente correctamente', showConfirmButton: false, timer: 1500 });
-                }).catch(error => {
-                    switch (error.response.status) {
-                        case 401:
-                            Session.expiredSession();
-                            break;
-                        default:
-                            Swal.fire({
-                                icon: 'info',
-                                text: 'No se pudo crear el cliente',
-                                showConfirmButton: false,
-                                timer: 1600
-                            });
-                            break;
-                    }
-                });
-                await this.obtenerClientes();
-                this.disableBtn = false;
-            }
-
         },
         async eliminarCliente(id) {
             Swal.fire({
@@ -432,15 +373,22 @@ export default {
                 this.disableBtn = false;
             }
         },
+        async actualizarTodo() {
+            await this.obtenerClientes();
+            await this.getProductosInventario();
+            await this.obtenerRutas();
+        },
         verClienteFunction(item) {
             this.verCliente = item;
             this.dialogClienteVer = true;
-        }
+        },
     },
     async created() {
+        Session.expiredSession();
         this.token = this.$store.getters.usuario.usuario.access_token;
         this.$emit('loadingSweet');
         await this.obtenerClientes();
+        await this.getProductosInventario();
         await this.obtenerRutas();
         this.$emit('closeSweet');
     }

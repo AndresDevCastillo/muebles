@@ -1,20 +1,25 @@
 <template>
   <v-card>
     <v-card-title>
-      <v-row justify="space-between" class="px-6 my-4">
-        <v-col lg="4" md="4" sm="6" cols="auto">
+      <v-row justify-md="space-between" justify-sm="start" class="px-6 my-4">
+        <v-col md="6" sm="12" cols="auto">
           <v-row class="align-center">
             <v-icon size="x-large" icon="mdi mdi-tag-plus"></v-icon>
             <h1 class="px-3">Ventas</h1>
           </v-row>
         </v-col>
-        <v-col cols="auto">
+        <v-col sm="5" md="3" cols="auto" class="text-sm-start text-md-end">
+          <v-btn prepend-icon="mdi-plus" color="green" @click="dialogCliente = true;">Agregar cliente</v-btn>
+        </v-col>
+        <v-col sm="4" md="3" cols="auto">
           <v-btn color="blue" prepend-icon="mdi mdi-plus" @click="dialogPrestamo = true">Crear venta</v-btn>
         </v-col>
       </v-row>
     </v-card-title>
-    <v-col md="6" sm="12"><v-text-field v-model="searchPrestamo" append-inner-icon="mdi-magnify" label="Buscar"
-        variant="outlined" hide-details></v-text-field></v-col>
+    <v-col md="6" sm="12">
+      <v-text-field v-model="searchPrestamo" append-inner-icon="mdi-magnify" label="Buscar"
+        variant="outlined" hide-details></v-text-field>
+    </v-col>
     <v-data-table :headers="headers" :items="prestamos" :sort-by="[{ key: 'nombre', order: 'asc' }]" class="elevation-1"
       :search="searchPrestamo" no-data-text="Sin ventas">
       <!-- eslint-disable-next-line vue/valid-v-slot -->
@@ -33,6 +38,7 @@
         </v-icon>
       </template>
     </v-data-table>
+    <nuevoCliente :dialogCliente="dialogCliente" @cerrarDialog="dialogCliente = false" @actualizarTodo="actualizarTodo" />
     <v-dialog v-model="dialogPrestamo" persistent width="700">
       <v-card>
         <v-card-title>
@@ -137,14 +143,17 @@
 import Session from "@/validation/session";
 import Swal from "sweetalert2";
 import axios from "axios";
+import nuevoCliente from "@/components/nuevoCliente.vue";
 export default {
   name: "prestamoVista",
+  components: { nuevoCliente },
   data: () => ({
     token: null,
     api: process.env.VUE_APP_API_URL,
     valid: true,
     disableBtn: false,
     dialogPrestamo: false,
+    dialogCliente: false,
     dialogVePrestamo: null,
     formaPago: null,
     form: {
@@ -479,6 +488,11 @@ export default {
     verPrestamoFunction(item) {
       this.verPrestamo = item;
       this.dialogVePrestamo = true;
+    },
+    async actualizarTodo() {
+      await this.getClientes();
+      await this.getProductosInventario();
+      await this.getPrestamos();
     }
   },
   computed: {
