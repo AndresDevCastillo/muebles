@@ -1,17 +1,17 @@
 <template>
   <v-card>
     <v-card-title>
-      <v-row justify-md="space-between" justify-sm="start" class="px-6 my-4">
-        <v-col md="6" sm="12" cols="auto">
+      <v-row justify="space-between" justify-sm="start" class="px-6 my-4">
+        <v-col md="3" lg="2" sm="12" cols="auto">
           <v-row class="align-center">
             <v-icon size="x-large" icon="mdi mdi-tag-plus"></v-icon>
             <h1 class="px-3">Ventas</h1>
           </v-row>
         </v-col>
-        <v-col sm="5" md="3" cols="auto" class="text-sm-start text-md-end">
+        <v-col sm="5" md="7" lg="8" cols="auto" class="text-sm-start text-md-end">
           <v-btn prepend-icon="mdi-plus" color="green" @click="dialogCliente = true;">Agregar cliente</v-btn>
         </v-col>
-        <v-col sm="4" md="3" cols="auto">
+        <v-col sm="4" md="2" lg="2" cols="auto">
           <v-btn color="blue" prepend-icon="mdi mdi-plus" @click="dialogPrestamo = true">Crear venta</v-btn>
         </v-col>
       </v-row>
