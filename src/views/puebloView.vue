@@ -159,8 +159,6 @@
                                         v-model="formCobrador.rutas" closable-chips :rules="campoRules" multiple
                                         chips></v-autocomplete>
                                 </v-col>
-                                {{ rutas }}
-                                {{ formCobrador }}
                             </v-row>
                         </v-form>
                     </v-container>
