@@ -130,6 +130,22 @@
                   <v-text-field variant="outlined" label="Total" disabled required
                     v-model="verPrestamo.total"></v-text-field>
                 </v-col>
+                <v-card-text v-if="verPrestamo.cuotas !== 0">
+                  <div class="font-weight-bold ms-1 mb-2">
+                    Abonos
+                  </div>
+                  <v-timeline density="compact" align="start">
+                    <v-timeline-item v-for="monto in verPrestamo.abono" :key="monto" dot-color="green" size="x-small">
+                      <div class="mb-4">
+                        <div class="font-weight-normal">
+                          <strong> Abono: ${{ monto.monto.toLocaleString() }} </strong>
+                        </div>
+                        <div>{{ formatDate(monto.fecha) }}</div>
+                      </div>
+
+                    </v-timeline-item>
+                  </v-timeline>
+                </v-card-text>
               </v-row>
             </v-form>
           </v-container>
@@ -202,7 +218,7 @@ export default {
       completado: null,
       total: null,
     },
-    campoRules: [v => !!v || 'Campo requerido',],
+    campoRules: [v => !!v || 'Campo requerido'],
     cantidadRules: [
       v => !!v || 'Campo requerido',
       v => parseInt(v) > 0 || 'Ingrese una cantidad mayor a 0'
@@ -225,6 +241,17 @@ export default {
     formasPago: [{ index: 1, forma: 'De contado' }, { index: 2, forma: 'A crédito' }]
   }),
   methods: {
+    formatDate(value) {
+      const date = new Date(value);
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const seconds = date.getSeconds().toString().padStart(2, '0');
+
+      return `${year}-${month}-${day} | ${hours}:${minutes}:${seconds}`;
+    },
     async getClientes() {
       await axios.get(`${this.api}/prestamo/clientes`, {
         headers: {
@@ -500,6 +527,7 @@ export default {
     },
     verPrestamoFunction(item) {
       this.verPrestamo = item;
+      this.verPrestamo.fecha_inicio = this.formatDate(this.verPrestamo.fecha_inicio);
       this.dialogVePrestamo = true;
     },
     ordenarFechas(fechas = []) {
