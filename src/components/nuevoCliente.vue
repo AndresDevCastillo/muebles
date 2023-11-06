@@ -39,12 +39,14 @@
                             </v-col>
                             <v-col md="6" cols="12">
                                 <v-autocomplete label="Producto" return-object no-data-text="Sin productos registrados"
-                                    item-value="producto._id" :items="productos" item-title="producto.nombre" variant="outlined"
-                                    v-model="formCliente.venta.producto" :rules="campoRules"></v-autocomplete>
+                                    item-value="producto._id" :items="productos" item-title="producto.nombre"
+                                    variant="outlined" v-model="formCliente.venta.producto"
+                                    :rules="campoRules"></v-autocomplete>
                             </v-col>
                             <v-col md="6" cols="12">
-                                <v-text-field type="number" label="Cantidad" placeholder="Ingrese cantidad del producto" min="1"
-                                    variant="outlined" v-model="formCliente.venta.cantidad" :rules="cantidadRules"></v-text-field>
+                                <v-text-field type="number" label="Cantidad" placeholder="Ingrese cantidad del producto"
+                                    min="1" variant="outlined" v-model="formCliente.venta.cantidad"
+                                    :rules="cantidadRules"></v-text-field>
                             </v-col>
                             <v-col cols="6">
                                 <v-select label="Forma de pago" :items="formasPago" item-value="index" item-title="forma"
@@ -53,10 +55,15 @@
                             </v-col>
                             <v-col cols="6" v-if="formaPago == 2">
                                 <v-text-field type="number" label="Cuotas" placeholder="Ingrese cantidad de cuotas" min="1"
-                                    variant="outlined" v-model="formCliente.venta.cuotas" :rules="cantidadRules"></v-text-field>
+                                    variant="outlined" v-model="formCliente.venta.cuotas"
+                                    :rules="cantidadRules"></v-text-field>
                             </v-col>
                             <v-col cols="12" v-if="formaPago == 2">
-                                <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false" cancelText="Cancelar" locale="es" selectText="Seleccionar" v-model="formCliente.venta.pago_fechas" multi-dates :min-date="new Date()" placeholder="Selecciona fechas de pago" teleport-center @cleared="formCliente.venta.pago_fechas = []" />
+                                <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false"
+                                    cancelText="Cancelar" locale="es" selectText="Seleccionar"
+                                    v-model="formCliente.venta.pago_fechas" multi-dates :min-date="new Date()"
+                                    placeholder="Selecciona fechas de pago" teleport-center
+                                    @cleared="formCliente.venta.pago_fechas = []" />
                             </v-col>
                         </v-row>
                     </v-form>
@@ -124,7 +131,7 @@ export default {
     }),
     methods: {
         async getProductosInventario() {
-            await axios.get(`${this.api}/inventario`, {
+            await axios.get(`${this.api}/inventario/existe`, {
                 headers: {
                     Authorization: `Bearer ${this.token}`
                 }

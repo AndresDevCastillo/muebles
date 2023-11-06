@@ -16,8 +16,8 @@
             </v-card-title>
             <v-card-title>
                 <v-col md="6" sm="12">
-                    <v-text-field v-model="searchCliente" append-inner-icon="mdi-magnify" label="Buscar"
-                        variant="outlined" hide-details>
+                    <v-text-field v-model="searchCliente" append-inner-icon="mdi-magnify" label="Buscar" variant="outlined"
+                        hide-details>
                     </v-text-field>
                 </v-col>
             </v-card-title>
@@ -40,7 +40,8 @@
                 </v-data-table>
             </v-card-text>
         </v-card>
-        <nuevoCliente :dialogCliente="dialogCliente" @cerrarDialog="dialogCliente = false" @actualizarTodo="actualizarTodo" />
+        <nuevoCliente :dialogCliente="dialogCliente" @cerrarDialog="dialogCliente = false"
+            @actualizarTodo="actualizarTodo" />
         <v-dialog v-model="dialogClienteEditar" persistent width="700">
             <v-card>
                 <v-card-title>Editar Cliente</v-card-title>
@@ -117,8 +118,8 @@
                                         v-model="verCliente.correo" disabled></v-text-field>
                                 </v-col>
                                 <v-col cols="12" sm="6">
-                                    <v-text-field variant="outlined" label="Ruta" required v-model="verCliente.direccion.nombre"
-                                        disabled></v-text-field>
+                                    <v-text-field variant="outlined" label="Ruta" required
+                                        v-model="verCliente.direccion.nombre" disabled></v-text-field>
                                 </v-col>
                                 <v-col cols="12" sm="6">
                                     <v-text-field variant="outlined" label="Departamento" required
@@ -195,8 +196,6 @@ export default {
             { title: 'Apellido', key: 'apellidos' },
             { title: 'Telefono', key: 'telefono' },
             { title: 'Ruta', key: 'direccion.nombre' },
-            { title: 'Frecuencia', key: 'direccion.opcRuta' },
-
             { title: 'Accion', key: 'actions', sortable: false },
         ],
         formClienteEditar: {
@@ -224,7 +223,7 @@ export default {
     }),
     methods: {
         async getProductosInventario() {
-            await axios.get(`${this.api}/inventario`, {
+            await axios.get(`${this.api}/inventario/existe`, {
                 headers: {
                     Authorization: `Bearer ${this.token}`
                 }

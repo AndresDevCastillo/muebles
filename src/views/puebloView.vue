@@ -62,41 +62,6 @@
                                         v-model="formRuta.ciudad" :rules="[v => !!v || 'Seleccione una ciudad']"
                                         no-data-text="Escoja un departamento"></v-select>
                                 </v-col>
-                                <v-col cols="12" sm="6">
-                                    <v-select :items="opcCrearRuta" variant="outlined" label="Frecuencia de pago" required
-                                        v-model="formRuta.opcRuta" :rules="[v => !!v || 'Seleccione un frecuencia']"
-                                        no-data-text="Error en el sistema"></v-select>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="formRuta.opcRuta == 'Semanal'">
-                                    <v-select :items="diasSemana" variant="outlined" label="Día" required
-                                        v-model="formRuta.semanal" :rules="[v => !!v || 'Seleccione una dia']"
-                                        no-data-text="Escoja un dia"></v-select>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="formRuta.opcRuta == 'Quincenal'">
-                                    <v-select :items="diasSemana" variant="outlined" label="Día" required
-                                        v-model="formRuta.quincenal.dia" :rules="[v => !!v || 'Seleccione una dia']"
-                                        no-data-text="Escoja un dia"></v-select>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="formRuta.opcRuta == 'Quincenal'">
-                                    <v-select variant="outlined" :items="[1, 2, 3, 4]" label="Semana 1" required
-                                        v-model="quincenaNumber.num1" :rules="[v => !!v || 'Seleccione la primera semana']"
-                                        no-data-text="Escoja un semana"></v-select>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="formRuta.opcRuta == 'Quincenal'">
-                                    <v-select :items="[1, 2, 3, 4]" variant="outlined" label="Semana 2" required
-                                        v-model="quincenaNumber.num2" :rules="[v => !!v || 'Seleccione la segundo semana']"
-                                        no-data-text="Escoja un semana"></v-select>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="formRuta.opcRuta == 'Mensual'">
-                                    <v-select :items="diasSemana" variant="outlined" label="Día" required
-                                        v-model="formRuta.mensual.dia" :rules="[v => !!v || 'Seleccione una dia']"
-                                        no-data-text="Escoja un dia"></v-select>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="formRuta.opcRuta == 'Mensual'">
-                                    <v-select :items="[1, 2, 3, 4]" variant="outlined" label="Semana" required
-                                        v-model="formRuta.mensual.semanas" :rules="[v => !!v || 'Seleccione la  semana']"
-                                        no-data-text="Escoja un semana"></v-select>
-                                </v-col>
                             </v-row>
                         </v-form>
                     </v-container>
@@ -132,44 +97,6 @@
                                         v-model="formRutaEditar.ciudad" :rules="[v => !!v || 'Seleccione una ciudad']"
                                         no-data-text="Escoja un departamento"></v-select>
                                 </v-col>
-                                <v-col cols="12" sm="6">
-                                    <v-select :items="opcCrearRuta" variant="outlined" label="Frecuencia de pago" required
-                                        v-model="formRutaEditar.opcRuta" :rules="[v => !!v || 'Seleccione un frecuencia']"
-                                        no-data-text="Error en el sistema"></v-select>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="formRutaEditar.opcRuta == 'Semanal'">
-                                    <v-select :items="diasSemana" variant="outlined" label="Día" required
-                                        v-model="formRutaEditar.semanal" :rules="[v => !!v || 'Seleccione una dia']"
-                                        no-data-text="Escoja un dia"></v-select>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="formRutaEditar.opcRuta == 'Quincenal'">
-                                    <v-select :items="diasSemana" variant="outlined" label="Día" required
-                                        v-model="formRutaEditar.quincenal.dia" :rules="[v => !!v || 'Seleccione una dia']"
-                                        no-data-text="Escoja un dia"></v-select>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="formRutaEditar.opcRuta == 'Quincenal'">
-                                    <v-select :items="[1, 2, 3, 4]" variant="outlined" label="Semana 1" required
-                                        v-model="quincenaNumberEditar.num1"
-                                        :rules="[v => !!v || 'Seleccione la primera semana']"
-                                        no-data-text="Escoja un semana"></v-select>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="formRutaEditar.opcRuta == 'Quincenal'">
-                                    <v-select :items="[1, 2, 3, 4]" variant="outlined" label="Semana 2" required
-                                        v-model="quincenaNumberEditar.num2"
-                                        :rules="[v => !!v || 'Seleccione la segundo semana']"
-                                        no-data-text="Escoja un semana"></v-select>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="formRutaEditar.opcRuta == 'Mensual'">
-                                    <v-select :items="diasSemana" variant="outlined" label="Día" required
-                                        v-model="formRutaEditar.mensual.dia" :rules="[v => !!v || 'Seleccione una dia']"
-                                        no-data-text="Escoja un dia"></v-select>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="formRutaEditar.opcRuta == 'Mensual'">
-                                    <v-select :items="[1, 2, 3, 4]" variant="outlined" label="Semana" required
-                                        v-model="formRutaEditar.mensual.semanas"
-                                        :rules="[v => !!v || 'Seleccione la  semana']"
-                                        no-data-text="Escoja un semana"></v-select>
-                                </v-col>
                             </v-row>
                         </v-form>
                     </v-container>
@@ -203,34 +130,6 @@
                                     <v-text-field variant="outlined" label="Ciudad" disabled required
                                         v-model="verRuta.ciudad"></v-text-field>
                                 </v-col>
-                                <v-col cols="12" sm="6">
-                                    <v-text-field variant="outlined" label="Frecuencia de pago" disabled required
-                                        v-model="verRuta.opcRuta"></v-text-field>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="verRuta.opcRuta == 'Semanal'">
-                                    <v-text-field variant="outlined" label="Día" required disabled
-                                        v-model="verRuta.semanal"></v-text-field>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="verRuta.opcRuta == 'Quincenal'">
-                                    <v-text-field variant="outlined" label="Día" required disabled
-                                        v-model="verRuta.quincenal.dia"></v-text-field>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="verRuta.opcRuta == 'Quincenal'">
-                                    <v-text-field variant="outlined" label="Semana 1" required disabled
-                                        v-model="verRuta.quincenal.semanas[0]"></v-text-field>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="verRuta.opcRuta == 'Quincenal'">
-                                    <v-text-field variant="outlined" label="Semana 2" required disabled
-                                        v-model="verRuta.quincenal.semanas[1]"></v-text-field>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="verRuta.opcRuta == 'Mensual'">
-                                    <v-text-field variant="outlined" label="Día" required disabled
-                                        v-model="verRuta.mensual.dia"></v-text-field>
-                                </v-col>
-                                <v-col cols="12" sm="6" v-if="verRuta.opcRuta == 'Mensual'">
-                                    <v-text-field variant="outlined" label="Semana" required disabled
-                                        v-model="verRuta.mensual.semanas"></v-text-field>
-                                </v-col>
                             </v-row>
                         </v-form>
                     </v-container>
@@ -260,6 +159,8 @@
                                         v-model="formCobrador.rutas" closable-chips :rules="campoRules" multiple
                                         chips></v-autocomplete>
                                 </v-col>
+                                {{ rutas }}
+                                {{ formCobrador }}
                             </v-row>
                         </v-form>
                     </v-container>
@@ -292,53 +193,21 @@ export default {
         dialogVerRuta: null,
         dialogCobrador: false,
         searchRuta: null,
-        opcCrearRuta: ['Diario', 'Semanal', 'Quincenal', 'Mensual'],
-        diasSemana: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
         formRuta: {
             nombre: null,
             ciudad: null,
-            departamento: null,
-            opcRuta: null,
-            diario: null,
-            semanal: null,
-            quincenal: {
-                dia: null,
-                semanas: [null, null]
-            },
-            mensual: {
-                dia: null,
-                semanas: []
-            }
+            departamento: null
         },
         formRutaEditar: {
             nombre: null,
             ciudad: null,
-            departamento: null,
-            opcRuta: null,
-            diario: null,
-            semanal: null,
-            quincenal: {
-                dia: null,
-                semanas: [null, null]
-            },
-            mensual: {
-                dia: null,
-                semanas: []
-            }
+            departamento: null
         },
         formCobrador: {
             cobrador: null,
             rutas: [],
         },
         verRuta: null,
-        quincenaNumber: {
-            num1: null,
-            num2: null
-        },
-        quincenaNumberEditar: {
-            num1: null,
-            num2: null
-        },
         departamento: [],
         ciudades: [],
         campoRules: [v => !!v || 'Campo requerido',],
@@ -352,7 +221,6 @@ export default {
             { title: 'Ruta', key: 'nombre' },
             { title: 'Ciudad', key: 'ciudad' },
             { title: 'Departamento', key: 'departamento' },
-            { title: 'Frecuencia Pago', key: 'opcRuta' },
             { title: 'Accion', key: 'actions', sortable: false },
         ],
         rutas: [],
@@ -441,22 +309,7 @@ export default {
                     this.formRuta = {
                         nombre: null,
                         ciudad: null,
-                        departamento: null,
-                        opcRuta: null,
-                        diario: null,
-                        semanal: null,
-                        quincenal: {
-                            dia: null,
-                            semanas: [null, null]
-                        },
-                        mensual: {
-                            dia: null,
-                            semanas: []
-                        }
-                    }
-                    this.quincenaNumber = {
-                        num1: null,
-                        num2: null
+                        departamento: null
                     }
                     return Swal.fire({ icon: 'success', title: 'Se creo la ruta correctamente', showConfirmButton: false, timer: 1500 });
                 }).catch(error => {
@@ -564,22 +417,7 @@ export default {
                     this.formRutaEditar = {
                         nombre: null,
                         ciudad: null,
-                        departamento: null,
-                        opcRuta: null,
-                        diario: null,
-                        semanal: null,
-                        quincenal: {
-                            dia: null,
-                            semanas: [null, null]
-                        },
-                        mensual: {
-                            dia: null,
-                            semanas: []
-                        }
-                    }
-                    this.quincenaNumberEditar = {
-                        num1: null,
-                        num2: null
+                        departamento: null
                     }
                     return Swal.fire({ icon: 'success', title: 'Se edito la ruta correctamente', showConfirmButton: false, timer: 1500 });
                 }).catch(error => {
@@ -626,23 +464,6 @@ export default {
                 })
             },
         },
-        "formRuta.opcRuta": {
-            handler(newValue) {
-                this.formRuta.diario = null,
-                    this.formRuta.semanal = null,
-                    this.formRuta.quincenal = {
-                        dia: null,
-                        semanas: []
-                    }
-                this.formRuta.mensual = {
-                    dia: null,
-                    semanas: []
-                }
-                if (newValue == "Diario") {
-                    this.formRuta.diario = true;
-                }
-            }
-        },
         "formRutaEditar.departamento": {
             handler(departamentoNombre) {
                 this.departamento.map(departamento => {
@@ -651,43 +472,6 @@ export default {
                     }
                 })
             },
-        },
-        "formRutaEditar.opcRuta": {
-            handler(newValue) {
-                this.formRutaEditar.diario = null,
-                    this.formRutaEditar.semanal = null,
-                    this.formRutaEditar.quincenal = {
-                        dia: null,
-                        semanas: []
-                    }
-                this.formRutaEditar.mensual = {
-                    dia: null,
-                    semanas: []
-                }
-                if (newValue == "Diario") {
-                    this.formRutaEditar.diario = true;
-                }
-            }
-        },
-        "quincenaNumber.num1": {
-            handler(newValue) {
-                this.formRuta.quincenal.semanas[0] = newValue;
-            }
-        },
-        "quincenaNumber.num2": {
-            handler(newValue) {
-                this.formRuta.quincenal.semanas[1] = newValue;
-            }
-        },
-        "quincenaNumberEditar.num1": {
-            handler(newValue) {
-                this.formRutaEditar.quincenal.semanas[0] = newValue;
-            }
-        },
-        "quincenaNumberEditar.num2": {
-            handler(newValue) {
-                this.formRutaEditar.quincenal.semanas[1] = newValue;
-            }
         },
         "formCobrador.cobrador": {
             handler(newId) {

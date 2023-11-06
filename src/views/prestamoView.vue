@@ -17,8 +17,8 @@
       </v-row>
     </v-card-title>
     <v-col md="6" sm="12">
-      <v-text-field v-model="searchPrestamo" append-inner-icon="mdi-magnify" label="Buscar"
-        variant="outlined" hide-details></v-text-field>
+      <v-text-field v-model="searchPrestamo" append-inner-icon="mdi-magnify" label="Buscar" variant="outlined"
+        hide-details></v-text-field>
     </v-col>
     <v-data-table :headers="headers" :items="prestamos" :sort-by="[{ key: 'nombre', order: 'asc' }]" class="elevation-1"
       :search="searchPrestamo" no-data-text="Sin ventas">
@@ -71,7 +71,9 @@
                   variant="outlined" v-model="form.cuotas" :rules="cantidadRules"></v-text-field>
               </v-col>
               <v-col cols="12" v-if="formaPago == 2">
-                <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false" cancelText="Cancelar" locale="es" selectText="Seleccionar" v-model="form.pago_fechas" multi-dates :min-date="new Date()" placeholder="Selecciona fechas de pago" teleport-center @cleared="form.pago_fechas = []" />
+                <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false" cancelText="Cancelar"
+                  locale="es" selectText="Seleccionar" v-model="form.pago_fechas" multi-dates :min-date="new Date()"
+                  placeholder="Selecciona fechas de pago" teleport-center @cleared="form.pago_fechas = []" />
               </v-col>
             </v-row>
           </v-form>
@@ -247,7 +249,7 @@ export default {
       });
     },
     async getProductosInventario() {
-      await axios.get(`${this.api}/inventario`, {
+      await axios.get(`${this.api}/inventario/existe`, {
         headers: {
           Authorization: `Bearer ${this.token}`
         }
