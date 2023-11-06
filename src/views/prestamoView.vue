@@ -95,7 +95,7 @@
             <v-form>
               <v-row>
                 <v-col cols="12">
-                  <v-text-field label="Nombre" type="text" required variant="outlined"
+                  <v-text-field label="Documento" type="text" required variant="outlined"
                     v-model="verPrestamo.cliente.documento" disabled></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
@@ -418,6 +418,7 @@ export default {
             cliente: this.form.cliente._id, //`${this.form.cliente.nombres} ${this.form.cliente.apellidos}`,
             ruta: this.form.cliente.direccion.nombre,
             producto: this.form.producto.producto.nombre, //ObjectId del inventario
+            inventario: this.form.producto._id,
             fecha_inicio: new Date().toISOString(),
             cantidad: this.form.cantidad,
             cuotas: this.form.cuotas,
@@ -459,7 +460,7 @@ export default {
         }
       }
       this.disableBtn = false;
-      await this.getPrestamos();
+      await this.actualizarTodo();
     },
     async eliminarPrestamo(id) {
       Swal.fire({
