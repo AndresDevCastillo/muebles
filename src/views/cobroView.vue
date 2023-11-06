@@ -39,7 +39,7 @@
                             mdi-cash
                         </v-icon>
                         <v-icon size="large" class="me-2" @click="verPrestamoFunction(Object.assign({}, item))">
-                            mdi-information-outline
+                            mdi-eye
                         </v-icon>
 
                     </template>
@@ -52,6 +52,11 @@
                     <v-container>
                         <v-form>
                             <v-row>
+                                <v-progress-linear v-model="skill" color="green" height="25">
+                                    <template v-slot:default="{ value }">
+                                        <strong>{{ Math.ceil(value) }}%</strong>
+                                    </template>
+                                </v-progress-linear>
                                 <v-col cols="12">
                                     <v-text-field label="Documento" type="text" required variant="outlined"
                                         v-model="verPrestamo.cliente.documento" disabled></v-text-field>
@@ -492,7 +497,7 @@ export default {
             const fechasDate = fechas.map(fecha => new Date(fecha));
             fechasDate.sort((f1, f2) => f1 - f2);
             return fechasDate;
-        },
+        }
     },
     computed: {
         cols2() {
@@ -503,6 +508,16 @@ export default {
                 resp = [6, 6];
             }
             return resp;
+        },
+        skill() {
+            let abonado = 0;
+            this.verPrestamo.abono.forEach(abono => {
+                abonado += abono.monto;
+            })
+            if (this.verPrestamo.cuotas == 0) {
+                return 100;
+            }
+            return ((abonado * 100) / this.verPrestamo.total);
         }
     },
     async created() {
