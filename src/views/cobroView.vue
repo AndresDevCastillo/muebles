@@ -216,7 +216,9 @@ export default {
     components: { nuevoCliente, VueDatePicker },
     data: () => ({
         api: process.env.VUE_APP_API_URL,
+        disableBtn: false,
         cobros: [],
+        valid: false,
         token: null,
         dialogCliente: false,
         dialogAbonar: null,
