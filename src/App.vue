@@ -109,6 +109,6 @@ div:where(.swal2-container).swal2-noanimation {
 
 div:where(.swal2-container) div:where(.swal2-loader) {
     border-top-color: #FFF !important;
-    border-bottom-color: #000 !important;
+    border-bottom-color: #BB844C !important;
 }
 </style>

@@ -82,6 +82,7 @@
 <script>
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import Session from '@/validation/session';
 import editarProductoComponent from '../components/editarProducto.vue';
 
 export default {
@@ -138,11 +139,16 @@ export default {
             }).catch(error => {
                 switch (error.response.status) {
                     case 401:
-                        this.$store.commit('setusuario', { usuario: null, hora_login: null });
-                        this.$router.push('/');
+                        Session.expiredSession();
                         break;
 
                     default:
+                        Swal.fire({
+                            icon: 'info',
+                            text: 'No se pudo obtener los productos',
+                            showConfirmButton: false,
+                            timer: 1600
+                        });
                         break;
                 }
 
@@ -170,8 +176,20 @@ export default {
                     });
 
                 }).catch(error => {
-                    console.log(error);
-                    return Swal.fire({ icon: 'error', title: 'No se pudo crear el producto', showConfirmButton: false, timer: 1500 });
+                    switch (error.response.status) {
+                        case 401:
+                            Session.expiredSession();
+                            break;
+
+                        default:
+                            Swal.fire({
+                                icon: 'info',
+                                text: 'No se pudo crear el producto',
+                                showConfirmButton: false,
+                                timer: 1600
+                            });
+                            break;
+                    }
                 });
                 this.formProducto = {
                     nombre: null,
@@ -222,10 +240,14 @@ export default {
         },
     },
     async created() {
-        this.token = this.$store.getters.usuario.usuario.access_token;
-        this.$emit('loadingSweet');
-        await this.listarProductos();
-        this.$emit('closeSweet');
+        const invalid = await Session.expiredSession();
+        if (!invalid) {
+            this.token = this.$store.getters.usuario.usuario.access_token;
+            this.$emit('loadingSweet');
+            await this.listarProductos();
+            this.$emit('closeSweet');
+        }
+
     },
 
 }

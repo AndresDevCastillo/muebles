@@ -63,7 +63,7 @@ export default {
                                     this.$router.push('/inicio/empleados');
                                     break;
                                 case 'Cobrador':
-                                    this.$router.push('/inicio/prestamo');
+                                    this.$router.push('/inicio/cobro');
                                     break;
                             }
                             break;

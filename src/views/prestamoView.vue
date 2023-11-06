@@ -567,14 +567,16 @@ export default {
       return ((abonado * 100) / this.verPrestamo.total);
     }
   },
-  async mounted() {
-    Session.expiredSession();
-    this.token = this.$store.getters.usuario.usuario.access_token;
-    this.$emit('loadingSweet');
-    await this.getClientes();
-    await this.getProductosInventario();
-    await this.getPrestamos();
-    this.$emit('closeSweet');
+  async created() {
+    const invalid = await Session.expiredSession();
+    if (!invalid) {
+      this.token = this.$store.getters.usuario.usuario.access_token;
+      this.$emit('loadingSweet');
+      await this.getClientes();
+      await this.getProductosInventario();
+      await this.getPrestamos();
+      this.$emit('closeSweet');
+    }
   },
 };
 </script>

@@ -383,13 +383,15 @@ export default {
         },
     },
     async created() {
-        Session.expiredSession();
-        this.token = this.$store.getters.usuario.usuario.access_token;
-        this.$emit('loadingSweet');
-        await this.obtenerClientes();
-        await this.getProductosInventario();
-        await this.obtenerRutas();
-        this.$emit('closeSweet');
+        const invalid = await Session.expiredSession();
+        if (!invalid) {
+            this.token = this.$store.getters.usuario.usuario.access_token;
+            this.$emit('loadingSweet');
+            await this.obtenerClientes();
+            await this.getProductosInventario();
+            await this.obtenerRutas();
+            this.$emit('closeSweet');
+        }
     }
 }
 </script>
