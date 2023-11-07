@@ -313,7 +313,11 @@ export default {
             await this.getClientes();
         },
         async obtenerCobros() {
-            await axios.get(`${this.api}/prestamo/cobrar`).then((resp) => {
+            await axios.get(`${this.api}/prestamo/cobrar`, {
+                headers: {
+                    Authorization: `Bearer ${this.token}`
+                }
+            }).then((resp) => {
                 this.cobros = resp.data;
             }).catch(error => {
                 switch (error.response.status) {
