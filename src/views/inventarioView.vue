@@ -72,7 +72,7 @@
                             <v-row>
                                 <v-col cols="12">
                                     <v-text-field label="Existencia" min="1" type="number" required variant="outlined"
-                                        v-model="formInventarioEditar.existencia" :rules="existenciaRule"
+                                        v-model="formInventarioEditar.existencias" :rules="existenciaRule"
                                         :counter="65"></v-text-field>
                                 </v-col>
                             </v-row>
@@ -124,7 +124,7 @@ export default {
         formInventarioEditar: {
             id: null,
             cantidad: 0,
-            existencia: 1,
+            existencias: 1,
         },
         existenciaRule: [
             (v) => (!!v) || "Añada al menos un producto",
@@ -257,7 +257,7 @@ export default {
         editarStockVista(item) {
             this.formInventarioEditar.id = item._id;
             this.formInventarioEditar.cantidad = parseInt(item.cantidad);
-            this.formInventarioEditar.existencia = parseInt(item.existencias);
+            this.formInventarioEditar.existencias = parseInt(item.existencias);
             this.dialogoE = true;
 
         },
@@ -266,8 +266,8 @@ export default {
             const { valid } = await this.$refs.formInventarioEditar.validate();
             if (valid) {
                 this.dialogoE = false;
-                this.formInventarioEditar.existencia = parseInt(this.formInventarioEditar.existencia);
-                this.formInventarioEditar.cantidad = this.formInventarioEditar.existencia;
+                this.formInventarioEditar.existencias = parseInt(this.formInventarioEditar.existencias);
+                this.formInventarioEditar.cantidad = this.formInventarioEditar.existencias;
                 axios.put(`${this.api}/inventario/actualizar`, this.formInventarioEditar, {
                     headers: {
                         Authorization: `Bearer ${this.token}`
