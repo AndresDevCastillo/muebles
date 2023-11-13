@@ -68,6 +68,23 @@ const routes = [{
         }
     },
     {
+        path: '/inicio/estadisticas',
+        name: 'estadisticas',
+        component: () =>
+            import('@/views/estadisticasView.vue'),
+        beforeEnter: (to, from, next) => {
+            const data = store.getters.usuario;
+            if (data.usuario) {
+                const cargo = data.usuario.rol.toLowerCase();
+                if (cargo == "cobrador" || cargo == undefined) {
+                    return next(from);
+                }
+                return next();
+            }
+            next('/');
+        }
+    },
+    {
         path: '/inicio/rutas',
         name: 'rutas',
         component: () =>

@@ -18,16 +18,13 @@
                                                 </div>
                                                 <div class="ps-3">
                                                     <h6>${{ hoy.total.toLocaleString() }}</h6>
-                                                    <span class="text-success small pt-1 fw-bold">${{
-                                                        hoy.ganancia.toLocaleString() }}</span>
-                                                    <span> - </span>
-                                                    <span class="text-error small pt-2">${{ hoy.gasto.toLocaleString()
-                                                    }}</span>
-
                                                 </div>
 
                                             </div>
-                                            <h4 class="card-title">Ventas: <span> {{ hoy.factura }}</span></h4>
+                                            <h4 class="card-title">
+                                                Abono: <span> {{ hoy.abono }}</span><br>
+                                                Ventas: <span> {{ hoy.ventas }}</span>
+                                            </h4>
                                         </div>
 
                                     </div>
@@ -39,7 +36,7 @@
                                     <div class="card info-card revenue-card"
                                         :class="{ 'info-card-gana': mes.total >= 0, 'info-card-pierde': mes.total < 0 }">
                                         <div class="card-body">
-                                            <h5 class="card-title">Mensual <span>| {{ mes.fecha }}</span></h5>
+                                            <h5 class="card-title">Mensual <span>| {{ mesesDelAnio[mes.fecha] }}</span></h5>
 
                                             <div class="d-flex align-items-center">
                                                 <div
@@ -48,16 +45,12 @@
                                                 </div>
                                                 <div class="ps-3">
                                                     <h6>${{ mes.total.toLocaleString() }}</h6>
-                                                    <span class="text-success small pt-1 fw-bold">${{
-                                                        mes.ganancia.toLocaleString() }}</span>
-                                                    <span> - </span>
-                                                    <span class="text-error small pt-2">${{ mes.gasto.toLocaleString()
-                                                    }}</span>
-
                                                 </div>
                                             </div>
-                                            <h4 class="card-title">Ventas: <span> {{ mes.factura }}</span></h4>
-
+                                            <h4 class="card-title">
+                                                Abono: <span> {{ mes.abono }}</span><br>
+                                                Ventas: <span> {{ mes.ventas }}</span>
+                                            </h4>
                                         </div>
 
                                     </div>
@@ -78,16 +71,12 @@
                                                 </div>
                                                 <div class="ps-3">
                                                     <h6>${{ yearC.total.toLocaleString() }}</h6>
-                                                    <span class="text-success small pt-1 fw-bold">${{
-                                                        yearC.ganancia.toLocaleString()
-                                                    }}</span>
-                                                    <span> - </span>
-                                                    <span class="text-error small pt-2">${{ yearC.gasto.toLocaleString()
-                                                    }}</span>
-
                                                 </div>
                                             </div>
-                                            <h4 class="card-title">Ventas: <span> {{ yearC.factura }}</span></h4>
+                                            <h4 class="card-title">
+                                                Abono: <span> {{ yearC.abono }}</span><br>
+                                                Ventas: <span> {{ yearC.ventas }}</span>
+                                            </h4>
 
                                         </div>
 
@@ -99,10 +88,10 @@
                 </v-card>
             </v-col>
             <v-col lg="6" md="6" sm="12">
-                <canvas class="mb-6" id="graficaDia"></canvas>
+                <canvas class="mb-6" id="graficaAbono"></canvas>
             </v-col>
             <v-col lg="6" md="6" sm="12">
-                <canvas class="mb-6" id="graficaMes"></canvas>
+                <canvas class="mb-6" id="graficaVenta"></canvas>
             </v-col>
             <v-col lg="12" md="12" sm="12">
                 <canvas class="mb-6" id="graficaYear"></canvas>
@@ -113,53 +102,93 @@
 
 <script>
 import Chart from "chart.js/auto";
+import Session from '@/validation/session';
 import Axios from "axios";
+import Swal from 'sweetalert2';
 export default {
-    name: "gananciasVista",
+    name: "estadisticasVista",
     data: () => ({
+        token: null,
         hoy: {
             fecha: 'Lunes',
             total: 0,
-            ganancia: 0,
-            gasto: 0,
-            factura: 0
+            ventas: 0,
+            abono: 0
         },
         mes: {
             fecha: 'Enero',
             total: 0,
-            ganancia: 0,
-            gasto: 0,
-            factura: 0
+            ventas: 0,
+            abono: 0
         },
         yearC: {
             fecha: 2023,
             total: 0,
-            ganancia: 0,
-            gasto: 0,
-            factura: 0
+            ventas: 0,
+            abono: 0
         },
         miImagen: null,
         year: null,
-        dataYearName: null,
+        abono: null,
+        ventas: null,
+        dataYearName: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
         dataYearCantidad: null,
-        dataMesName: null,
-        dataMesCantidad: null,
-        dataDiaName: null,
-        dataDiaCantidad: null,
+        dataYearVenta: [],
+        dataYearAbono: [],
         chart: null,
         datosCharts: null,
+        mesesDelAnio: [
+            "Enero",
+            "Febrero",
+            "Marzo",
+            "Abril",
+            "Mayo",
+            "Junio",
+            "Julio",
+            "Agosto",
+            "Septiembre",
+            "Octubre",
+            "Noviembre",
+            "Diciembre"
+        ],
+        colores: [
+            "#FF5733", // Naranja
+            "#3498db", // Azul
+            "#e74c3c", // Rojo
+            "#2ecc71", // Verde
+            "#f39c12", // Amarillo
+            "#9b59b6", // Morado
+            "#1abc9c", // Turquesa
+            "#c0392b", // Granate
+            "#27ae60", // Esmeralda
+            "#e67e22", // Zanahoria
+            "#2980b9", // Azul claro
+            "#8e44ad"  // Violeta
+        ]
     }),
     methods: {
-        async listarGraficaYear(year) {
-            this.dataYearName = [];
+        async listarGraficaYear() {
             this.dataYearCantidad = [];
             await Axios.get(
-                `${process.env.VUE_APP_API_URL}/factura/estadisticas/year/${year}`
-            ).then((resp) => {
-                resp.data.map((producto) => {
-                    this.dataYearName.push(producto.nombre);
-                    this.dataYearCantidad.push(producto.cantidad);
-                });
+                `${process.env.VUE_APP_API_URL}/cliente/estadisticas/obtener`, {
+                headers: {
+                    Authorization: `Bearer ${this.token}`
+                }
+            }).then((resp) => {
+                this.dataYearCantidad = resp.data;
+            }).catch(async error => {
+                console.log(error);
+                switch (error.response.status) {
+                    case 401:
+                        await Swal.fire({ icon: 'warning', title: 'Tu sesión expiro, vuelve a iniciar sesión', showConfirmButton: false, timer: 1500 });
+                        this.$store.commit('setusuario', { usuario: null, hora_login: null });
+                        this.$router.push('/');
+                        break;
+
+                    default:
+                        Swal.fire({ icon: 'error', title: 'No se pudo obtener los clientes anuales', showConfirmButton: false, timer: 1500 });
+                        break;
+                }
             });
             let ctx = document.getElementById("graficaYear");
             this.year = {
@@ -168,9 +197,10 @@ export default {
                     labels: this.dataYearName,
                     datasets: [
                         {
-                            label: "Ventas totales",
+                            label: "Clientes",
                             data: this.dataYearCantidad,
                             borderWidth: 1,
+                            backgroundColor: this.colores
                         },
                     ],
                 },
@@ -178,7 +208,7 @@ export default {
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Ventas Anuales',
+                            text: 'Clientes Anuales',
                         },
                     },
                     scales: {
@@ -188,29 +218,45 @@ export default {
                     },
                 },
             };
-
             this.chart = new Chart(ctx, this.year);
         },
-        async listarGraficaMes(year, mes) {
-            this.dataMesName = [];
-            this.dataMesCantidad = [];
+        async listarGraficaCobro() {
             await Axios.get(
-                `${process.env.VUE_APP_API_URL}/factura/estadisticas/mes/${year}/${mes}`
-            ).then((resp) => {
-                resp.data.map((producto) => {
-                    this.dataMesName.push(producto.nombre);
-                    this.dataMesCantidad.push(producto.cantidad);
-                });
+                `${process.env.VUE_APP_API_URL}/prestamo/estadisticas/obtener`, {
+                headers: {
+                    Authorization: `Bearer ${this.token}`
+                }
+            }).then((resp) => {
+                this.dataYearAbono = resp.data.abonos;
+                this.dataYearVenta = resp.data.ventas;
+                this.hoy = resp.data.hoy;
+                this.mes = resp.data.mes;
+                this.yearC = resp.data.year;
+            }).catch(async error => {
+                console.log(error);
+                switch (error.response.status) {
+                    case 401:
+                        await Swal.fire({ icon: 'warning', title: 'Tu sesión expiro, vuelve a iniciar sesión', showConfirmButton: false, timer: 1500 });
+                        this.$store.commit('setusuario', { usuario: null, hora_login: null });
+                        this.$router.push('/');
+                        break;
+
+                    default:
+                        Swal.fire({ icon: 'error', title: 'No se pudo obtener los clientes anuales', showConfirmButton: false, timer: 1500 });
+                        break;
+                }
             });
-            let ctx = document.getElementById("graficaMes");
-            this.year = {
-                type: "pie",
+            let ctx = document.getElementById("graficaAbono");
+            let ctx2 = document.getElementById("graficaVenta");
+            this.abono = {
+                type: "bar",
                 data: {
-                    labels: this.dataMesName,
+                    labels: this.dataYearName,
                     datasets: [
                         {
-                            label: "Ventas totales",
-                            data: this.dataMesCantidad,
+                            label: "Abonos",
+                            data: this.dataYearAbono,
+                            backgroundColor: this.colores,
                             borderWidth: 1,
                         },
                     ],
@@ -219,7 +265,7 @@ export default {
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Ventas Mensuales',
+                            text: 'Abonos',
                         },
                     },
                     scales: {
@@ -229,30 +275,16 @@ export default {
                     },
                 },
             };
-
-            this.chart = new Chart(ctx, this.year);
-        },
-        async listarGraficaDia(year, mes, dia) {
-            this.dataDiaName = [];
-            this.dataDiaCantidad = [];
-            await Axios.get(
-                `${process.env.VUE_APP_API_URL}/factura/estadisticas/dia/${year}/${mes}/${dia}`
-            ).then((resp) => {
-                resp.data.map((producto) => {
-                    this.dataDiaName.push(producto.nombre);
-                    this.dataDiaCantidad.push(producto.cantidad);
-                });
-            });
-            let ctx = document.getElementById("graficaDia");
-            this.dia = {
-                type: "polarArea",
+            this.ventas = {
+                type: "bar",
                 data: {
-                    labels: this.dataDiaName,
+                    labels: this.dataYearName,
                     datasets: [
                         {
-                            label: "Ventas totales",
-                            data: this.dataDiaCantidad,
+                            label: "Ventas",
+                            data: this.dataYearVenta,
                             borderWidth: 1,
+                            backgroundColor: this.colores
                         },
                     ],
                 },
@@ -260,7 +292,7 @@ export default {
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Ventas Diarias',
+                            text: 'Ventas',
                         },
                     },
                     scales: {
@@ -270,42 +302,21 @@ export default {
                     },
                 },
             };
-
-            this.chart = new Chart(ctx, this.dia);
+            this.chart = new Chart(ctx, this.abono);
+            this.chart = new Chart(ctx2, this.ventas);
         },
-        async gananciaYear(year) {
-            await Axios.get(`${process.env.VUE_APP_API_URL}/factura/ganancias/year/${year}`).then(resp => {
-                this.yearC = resp.data;
-            });
-        },
-        async gananciaMes(year, mes) {
-            await Axios.get(`${process.env.VUE_APP_API_URL}/factura/ganancias/mes/${year}/${mes}`).then(resp => {
-                this.mes = resp.data;
-            });
-        },
-        async gananciaDia(year, mes, dia) {
-            await Axios.get(`${process.env.VUE_APP_API_URL}/factura/ganancias/dia/${year}/${mes}/${dia}`).then(resp => {
-                this.hoy = resp.data;
-            });
-        }
     },
 
-    async mounted() {
-        this.miImagen = require('../assets/icons/shop-solid.svg');
-        const fechaActual = new Date();
-        const year = fechaActual.getFullYear();
-        const mes = fechaActual.getMonth() + 1;
-        const hoy = fechaActual.getDate();
-        const dia = hoy.toString().padStart(2, '0');
-        this.$emit('loadingSweet');
-        await this.gananciaDia(year, mes, dia);
-        await this.gananciaMes(year, mes);
-        await this.gananciaYear(year);
-        await this.listarGraficaDia(year, mes, dia);
-        await this.listarGraficaMes(year, mes);
-        await this.listarGraficaYear(year);
-        this.$emit('closeSweet');
-
+    async created() {
+        const invalid = await Session.expiredSession();
+        if (!invalid) {
+            this.token = this.$store.getters.usuario.usuario.access_token;
+            this.miImagen = require('../assets/icons/shop-solid.svg');
+            this.$emit('loadingSweet');
+            await this.listarGraficaYear();
+            await this.listarGraficaCobro();
+            this.$emit('closeSweet');
+        }
 
     },
 };
@@ -334,6 +345,7 @@ export default {
     color: #012970;
     font-family: "Poppins", sans-serif;
 }
+
 
 .card-title span {
     color: #899bbd;
