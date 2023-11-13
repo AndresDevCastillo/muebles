@@ -2,14 +2,17 @@
     <div class="cliente">
         <v-card class="ma-3">
             <v-card-title>
-                <v-row class="my-4" justify="space-between">
-                    <v-col cols="auto">
+                <v-row class="my-4" justify-sm="start" justify="space-between">
+                    <v-col lg="3" md="4" sm="12" cols="auto">
                         <v-row class="align-center" no-gutters>
                             <v-icon size="x-large" icon="mdi mdi-account-group-outline"></v-icon>
                             <h1 class="px-3">Clientes</h1>
                         </v-row>
                     </v-col>
-                    <v-col cols="auto">
+                    <v-col lg="6" md="5" sm="12" cols="auto" class="align-self-end text-sm-start text-md-end text-lg-end">
+                        <v-btn prepend-icon="mdi mdi-file-upload" color="yellow" @click="dialogArchivo = true;">Subir archivo</v-btn>
+                    </v-col>
+                    <v-col lg="3" md="3" sm="12" cols="auto" class="align-self-end text-sm-start">
                         <v-btn prepend-icon="mdi-plus" color="green" @click="dialogCliente = true;">Agregar cliente</v-btn>
                     </v-col>
                 </v-row>
@@ -168,6 +171,42 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
+        <v-dialog v-model="dialogArchivo" persistent width="700">
+            <v-card>
+                <v-card-title>
+                    Subir múltiples clientes
+                </v-card-title>
+                <v-card-text>
+                    <v-container>
+                        <v-form ref="formExcel">
+                            <v-row>
+                                <v-col cols="12">
+                                    <v-file-input
+                                        v-model="archivoClientes"
+                                        label="Archivo Excel"
+                                        hint="El archivo debe ser .xls o .xlsx"
+                                        persistent-hint
+                                        append-inner-icon="mdi mdi-microsoft-excel"
+                                        prepend-icon=""
+                                        outlined
+                                        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                                        :rules="campoRules">
+                                    </v-file-input>
+                                </v-col>
+                            </v-row>
+                        </v-form>
+                    </v-container>
+                </v-card-text>
+                <v-card-actions class="justify-end">
+                    <v-btn color="red-darken-1" variant="tonal" @click="dialogArchivo = false">
+                        Cancelar
+                    </v-btn>
+                    <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtnArchivo" @click="subirExcel">
+                        Subir
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 <script>
@@ -179,6 +218,9 @@ export default {
     name: 'clienteVista',
     components: { nuevoCliente },
     data: () => ({
+        dialogArchivo: false,
+        archivoClientes: null,
+        disableBtnArchivo: false,
         dialogCliente: false,
         dialogClienteEditar: null,
         dialogClienteVer: null,
@@ -370,6 +412,34 @@ export default {
                 });
                 await this.obtenerClientes();
                 this.disableBtn = false;
+            }
+        },
+        async subirExcel() {
+            const { valid } = await this.$refs.formExcel.validate();
+            if (valid) {
+                console.log(this.archivoClientes);
+                await axios.post(`${this.api}/cliente/subir`, { excel: this.archivoClientes[0] }, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        Authorization: `Bearer ${this.token}`
+                    }
+                }).then(resp => {
+                    console.log(resp);
+                }).catch(error => {
+                    switch (error.response.status) {
+                        case 401:
+                            Session.expiredSession();
+                            break;
+                        default:
+                            Swal.fire({
+                                icon: 'info',
+                                text: 'No se pudo subir los clientes',
+                                showConfirmButton: false,
+                                timer: 1600
+                            });
+                            break;
+                    }
+                });
             }
         },
         async actualizarTodo() {
