@@ -275,10 +275,12 @@ export default {
         }
     },
     async created() {
-        Session.expiredSession();
-        this.token = this.$store.getters.usuario.usuario.access_token;
-        await this.getProductosInventario();
-        await this.obtenerRutas();
+        const invalid = await Session.expiredSession();
+        if (!invalid) {
+            this.token = this.$store.getters.usuario.usuario.access_token;
+            await this.getProductosInventario();
+            await this.obtenerRutas();
+        }
     }
 }
 </script>

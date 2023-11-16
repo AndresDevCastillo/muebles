@@ -199,7 +199,7 @@
                 </v-card-text>
                 <v-card-actions class="justify-end">
                     <v-btn color="red-darken-1" variant="tonal" @click="dialogArchivo = false">
-                        Cancelar
+                        Cerrar
                     </v-btn>
                     <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtnArchivo" @click="subirExcel">
                         Subir
@@ -417,15 +417,20 @@ export default {
         async subirExcel() {
             const { valid } = await this.$refs.formExcel.validate();
             if (valid) {
-                console.log(this.archivoClientes);
+                this.disableBtnArchivo = true;
+                this.$emit('loadingSweet', 'Estamos procesando el archivo, esto puede tardar unos minutos...');
                 await axios.post(`${this.api}/cliente/subir`, { excel: this.archivoClientes[0] }, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         Authorization: `Bearer ${this.token}`
                     }
-                }).then(resp => {
-                    console.log(resp);
+                }).then(() => {
+                    this.$emit('closeSweet');
+                    Swal.fire({ icon: 'success', text: 'Clientes creados correctamente', showConfirmButton: false, timer: 1600 });
+                    this.$refs.formExcel.reset();
+                    this.actualizarTodo();
                 }).catch(error => {
+                    this.$emit('closeSweet');
                     switch (error.response.status) {
                         case 401:
                             Session.expiredSession();
@@ -440,6 +445,7 @@ export default {
                             break;
                     }
                 });
+                this.disableBtnArchivo = false;
             }
         },
         async actualizarTodo() {
