@@ -424,10 +424,11 @@ export default {
                         'Content-Type': 'multipart/form-data',
                         Authorization: `Bearer ${this.token}`
                     }
-                }).then(() => {
+                }).then(async resp => {
                     this.$emit('closeSweet');
-                    Swal.fire({ icon: 'success', text: 'Clientes creados correctamente', showConfirmButton: false, timer: 1600 });
+                    Swal.fire({ icon: resp.data.status ? 'success' : 'warning', text: resp.data.message, showConfirmButton: false, timer: 1700 });
                     this.$refs.formExcel.reset();
+                    this.dialogArchivo = false;
                     this.actualizarTodo();
                 }).catch(error => {
                     this.$emit('closeSweet');
@@ -445,6 +446,15 @@ export default {
                             break;
                     }
                 });
+                /* await axios.put(`${this.api}/prestamo/actualizarTodo`, {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`
+                    }
+                }).then(r => {
+                    console.log(r);
+                }).catch(e => {
+                    console.log(e);
+                }); */
                 this.disableBtnArchivo = false;
             }
         },
