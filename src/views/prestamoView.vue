@@ -23,6 +23,10 @@
     <v-data-table :headers="headers" :items="prestamos" :sort-by="[{ key: 'nombre', order: 'asc' }]" class="elevation-1"
       :search="searchPrestamo" no-data-text="Sin ventas">
       <!-- eslint-disable-next-line vue/valid-v-slot -->
+      <template v-slot:item.completado="{ value }">
+        {{ value ? 'Completado' : 'Activo' }}
+      </template>
+      <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template v-slot:item.mora="{ value }">
         <v-chip :color="value ? 'red' : 'green'">
           {{ value ? 'Atrasado' : 'No' }}
@@ -236,6 +240,7 @@ export default {
       { title: 'Producto', key: 'producto' },
       { title: 'Cuotas', key: 'cuotas' },
       { title: 'Atrasado', key: 'mora' },
+      { title: 'Completado', key: 'completado' },
       { title: 'Accion', key: 'actions', sortable: false },
     ],
     clientes: [],
