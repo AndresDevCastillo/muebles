@@ -60,7 +60,7 @@ export default {
                             this.$store.commit('setusuario', { usuario: response.data, hora_login: new Date() });
                             switch (response.data.rol) {
                                 case 'Admin':
-                                    this.$router.push('/inicio/empleados');
+                                    this.$router.push('/inicio/estadisticas');
                                     break;
                                 case 'Cobrador':
                                     this.$router.push('/inicio/cobro');
