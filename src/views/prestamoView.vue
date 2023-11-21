@@ -20,7 +20,7 @@
       <v-text-field v-model="searchPrestamo" append-inner-icon="mdi-magnify" label="Buscar" variant="outlined"
         hide-details></v-text-field>
     </v-col>
-    <v-data-table :headers="headers" :items="prestamos" :sort-by="[{ key: 'nombre', order: 'asc' }]" class="elevation-1"
+    <v-data-table :headers="headers" :items="prestamos" :sort-by="[{ key: 'mora', order: 'asc' }]" class="elevation-1"
       :search="searchPrestamo" no-data-text="Sin ventas">
       <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template v-slot:item.completado="{ value }">
@@ -141,7 +141,7 @@
                 </v-col>
                 <v-card-text v-if="verPrestamo.cuotas !== 0">
                   <div class="font-weight-bold ms-1 mb-2">
-                    Abonos
+                    Total : ${{ calcularAbono(verPrestamo.abono) }}
                   </div>
                   <v-timeline density="compact" align="start">
                     <v-timeline-item v-for="monto in verPrestamo.abono" :key="monto" dot-color="green" size="x-small">
@@ -251,6 +251,13 @@ export default {
     formasPago: [{ index: 1, forma: 'De contado' }, { index: 2, forma: 'A crédito' }]
   }),
   methods: {
+    calcularAbono(abono) {
+      let abonoTotal = 0;
+      abono.forEach(abono => {
+        abonoTotal += abono.monto;
+      })
+      return abonoTotal.toLocaleString();
+    },
     formatDate(value) {
       const date = new Date(value);
       const year = date.getFullYear();

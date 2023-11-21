@@ -25,7 +25,7 @@
                 </v-col>
             </v-card-title>
             <v-card-text>
-                <v-data-table :headers="headers" :items="cobros" :sort-by="[{ key: 'Documento', order: 'asc' }]"
+                <v-data-table :headers="headers" :items="cobros" :sort-by="[{ key: 'mora', order: 'asc' }]"
                     class="elevation-1" :search="searchPrestamo">
                     <!-- eslint-disable-next-line vue/valid-v-slot -->
                     <template v-slot:item.mora="{ value }">
@@ -93,9 +93,9 @@
                                     <v-text-field variant="outlined" label="Total" disabled required
                                         v-model="verPrestamo.total"></v-text-field>
                                 </v-col>
-                                <v-card-text>
+                                <v-card-text v-if="verPrestamo.cuotas !== 0">
                                     <div class="font-weight-bold ms-1 mb-2">
-                                        Abonos
+                                        Total : ${{ calcularAbono(verPrestamo.abono) }}
                                     </div>
                                     <v-timeline density="compact" align="start">
                                         <v-timeline-item v-for="monto in verPrestamo.abono" :key="monto" dot-color="green"
@@ -296,6 +296,13 @@ export default {
         ],
     }),
     methods: {
+        calcularAbono(abono) {
+            let abonoTotal = 0;
+            abono.forEach(abono => {
+                abonoTotal += abono.monto;
+            })
+            return abonoTotal.toLocaleString();
+        },
         formatDate(value) {
             const date = new Date(value);
             const year = date.getFullYear();
