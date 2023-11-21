@@ -16,7 +16,7 @@ const routes = [{
             if (to.fullPath == "/") {
                 switch (data.usuario.rol) {
                     case 'Admin':
-                        ruta = '/inicio/empleados';
+                        ruta = '/inicio/estadisticas';
                         break;
                     case 'Cobrador':
                         ruta = '/inicio/prestamo';
