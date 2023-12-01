@@ -8,11 +8,14 @@
             <h1 class="px-3">Ventas</h1>
           </v-row>
         </v-col>
-        <v-col sm="5" md="7" lg="8" cols="auto" class="text-sm-start text-md-end">
+        <v-col sm="4" md="4" lg="6" cols="auto" class="text-sm-start text-md-end">
           <v-btn prepend-icon="mdi-plus" color="green" @click="dialogCliente = true;">Agregar cliente</v-btn>
         </v-col>
-        <v-col sm="4" md="2" lg="2" cols="auto">
+        <v-col sm="3" md="2" lg="2" cols="auto">
           <v-btn color="blue" prepend-icon="mdi mdi-plus" @click="dialogPrestamo = true">Crear venta</v-btn>
+        </v-col>
+        <v-col sm="4" md="3" lg="2" cols="auto">
+          <v-btn color="yellow" prepend-icon="mdi mdi-cash-sync" @click="dialogAbonar = true">Venta antigua</v-btn>
         </v-col>
       </v-row>
     </v-card-title>
@@ -166,6 +169,109 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="dialogAbonar" persistent width="700">
+      <v-card>
+        <v-card-title>Abonar a la venta</v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-form ref="formAbono">
+              <v-row>
+                <v-col md="6" lg="6" sm="12" cols="12">
+                  <v-autocomplete v-model="abonar.ruta" :items="rutas" item-title="nombre" item-value="_id" :rules="campoRules" label="Barrio" variant="outlined"></v-autocomplete>
+                </v-col>
+                <v-col md="6" lg="6" sm="12" cols="12">
+                  <v-text-field v-model="abonar.direccionResidencia" :rules="campoRules" label="Dirección" variant="outlined"></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field v-model="abonar.nombres" :rules="campoRules" label="Nombres cliente" variant="outlined"></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field v-model="abonar.apellidos" :rules="campoRules" label="Apellidos" variant="outlined"></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field v-model="abonar.documento" hint="Sin puntos o comas (. ,)" persistent-hint :rules="cantidadRules" label="Documento" type="number" variant="outlined"></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field v-model="abonar.telefono" hint="Sin puntos o comas (. ,)" persistent-hint :rules="cantidadRules" label="Número celular" type="tel" variant="outlined"></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field v-model="abonar.correo" label="Correo" type="email" variant="outlined"></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field v-model="abonar.producto" :rules="campoRules" label="Producto" variant="outlined"></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-select v-model="formaPago" :items="formasPago" item-title="forma" item-value="index" :rules="campoRules" label="Forma de pago" variant="outlined"></v-select>
+                </v-col>
+                <v-col cols="12">
+                  <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false" cancelText="Cancelar"
+                    locale="es" selectText="Seleccionar" v-model="fVenta"
+                    placeholder="Selecciona fecha de venta" teleport-center @cleared="fVenta = null" />
+                </v-col>
+                <v-row v-if="formaPago != 1" class="pa-3">
+                  <v-col cols="12">
+                    <v-text-field v-model="abonar.cuotas" hint="Sin puntos o comas (. ,)" persistent-hint :rules="cantidadRules" label="Cantidad de cuotas" type="number" variant="outlined"></v-text-field>
+                  </v-col>
+                  <v-col cols="12">
+                    <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false"
+                      cancelText="Cancelar" locale="es" selectText="Seleccionar"
+                      v-model="abonar.pago_fechas" multi-dates :min-date="new Date()"
+                      placeholder="Selecciona fechas de pago" teleport-center
+                      @cleared="abonar.pago_fechas = []" />
+                  </v-col>
+                </v-row>
+                <v-col cols="12">
+                  <v-text-field v-model="abonar.total" hint="Sin puntos o comas (. ,)" persistent-hint :rules="cantidadRules" label="Total venta" type="number" variant="outlined"></v-text-field>
+                </v-col>
+              </v-row>
+              <div v-if="formaPago == 2" class="mt-9">
+                <v-row>
+                  <v-col md="6" lg="6" sm="12" cols="12">
+                    <v-text-field v-model="abonoAdd" hint="Sin puntos o comas (. ,)" persistent-hint density="compact" :rules="cantidadRules" label="Monto" placeholder="Ingrese monto a abonar" type="number" variant="outlined"></v-text-field>
+                  </v-col>
+                  <v-col md="6" lg="6" sm="12" cols="12">
+                    <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false" cancelText="Cancelar"
+                      locale="es" selectText="Seleccionar" v-model="fechaAdd" :min-date="new Date(fVenta)"
+                      placeholder="Selecciona fecha del abono" teleport-center @cleared="fechaAdd = null" />
+                  </v-col>
+                </v-row>
+                <v-row justify="center">
+                  <v-btn color="blue" prepend-icon="mdi mdi-plus" @click="agregarAbono">
+                    Agregar abono
+                  </v-btn>
+                </v-row>
+              </div>
+            </v-form>
+            <v-data-table v-if="formaPago == 2" :headers="headersAbonos" :items="abonosTabla" class="elevation-3 pa-3 mt-5"
+              no-data-text="Sin abonos">
+              <template v-slot:top>
+                <v-row justify="end" class="pa-2">
+                  <v-col cols="4">
+                    <h3><strong>Total: </strong>{{ totalAbonos }}</h3>
+                  </v-col>
+                </v-row>
+              </template>
+              <!-- eslint-disable-next-line vue/valid-v-slot -->
+              <template v-slot:item.actions="{ index }">
+                <v-icon size="small" @click="eliminarAbono(index)">
+                  mdi-delete
+                </v-icon>
+              </template>
+            </v-data-table>
+            <v-row justify="center" class="pa-4 mt-3">
+              <v-btn color="green" :disabled="disableBtnAbonos" @click="guardarAbonos">
+                Guardar venta
+              </v-btn>
+            </v-row>
+          </v-container>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn color="red-darken-1" variant="tonal" @click="dialogAbonar = false">
+            Cancelar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
@@ -184,9 +290,11 @@ export default {
     api: process.env.VUE_APP_API_URL,
     valid: true,
     disableBtn: false,
+    disableBtnAbonos: false,
     dialogPrestamo: false,
     dialogCliente: false,
     dialogVePrestamo: null,
+    dialogAbonar: false,
     formaPago: null,
     form: {
       cliente: null,
@@ -227,6 +335,27 @@ export default {
       completado: null,
       total: null,
     },
+    fVenta: null,
+    abonar: {
+      ruta: null,
+      rutaPlana: null,
+      direccionResidencia: null,
+      nombres: null,
+      apellidos: null,
+      documento: null,
+      telefono: null,
+      correo: '',
+      producto: null,
+      fechaVenta: null,
+      pago_fechas: [],
+      abonos: [],
+      cuotas: 1,
+      total: 0
+    },
+    rutas: [],
+    abonosTabla: [],
+    abonoAdd: 0,
+    fechaAdd: null,
     campoRules: [v => !!v || 'Campo requerido'],
     cantidadRules: [
       v => !!v || 'Campo requerido',
@@ -243,6 +372,11 @@ export default {
       { title: 'Completado', key: 'completado' },
       { title: 'Accion', key: 'actions', sortable: false },
     ],
+    headersAbonos: [
+      { title: 'Monto', key: 'monto' },
+      { title: 'Fecha pago', key: 'fecha' },
+      { title: 'Accion', key: 'actions', sortable: false },
+    ],
     clientes: [],
     productos: [],
     prestamos: [],
@@ -251,6 +385,134 @@ export default {
     formasPago: [{ index: 1, forma: 'De contado' }, { index: 2, forma: 'A crédito' }]
   }),
   methods: {
+    eliminarAbono(index) {
+      this.abonar.abonos.splice(index, 1);
+      this.abonosTabla.splice(index, 1);
+      this.disableBtnAbonos = this.abonar.abonos.length == 0;
+    },
+    agregarAbono() {
+      if (this.$refs.formAbono.validate()) {
+        if (this.abonoAdd > 0 && this.fechaAdd) {
+          this.disableBtnAbonos = false;
+          const nFecha = new Date(`${this.fechaAdd.getFullYear()}-${this.fechaAdd.getMonth() + 1}-${this.fechaAdd.getDate()}`);
+          this.abonosTabla.push({ fecha: nFecha.toISOString().slice(0, 10), monto: this.abonoAdd });
+          this.abonar.abonos.push({ fecha: nFecha.toISOString().toString(), monto: parseFloat(this.abonoAdd) });
+          this.fechaAdd = null;
+          this.abonoAdd = 0;
+        }
+      }
+    },
+    async guardarAbonos() {
+      if (this.$refs.formAbono.validate()) {
+        const c = parseInt(this.abonar.abonos.length + parseInt(this.abonar.cuotas));
+        const i = this.rutas.findIndex(ruta => ruta._id == this.abonar.ruta);
+        this.abonar.rutaPlana = this.rutas[i].nombre;
+        this.abonar.total = parseInt(this.abonar.total);
+        this.abonar.documento = parseInt(this.abonar.documento);
+        const fV = this.fVenta;
+
+        this.disableBtnAbonos = true;
+        if (this.formaPago == 2) {
+          if (this.abonar.pago_fechas.length == this.abonar.cuotas) {
+            if (this.totalAbonos <= this.abonar.total) {
+              const mS = Math.ceil((this.abonar.total - this.totalAbonos) / c)
+              this.abonar.pago_fechas = this.abonar.pago_fechas.map(fecha => {
+                const f = new Date(`${fecha.getFullYear()}-${fecha.getMonth() + 1}-${fecha.getDate()}`);
+                return {
+                  fecha: f.toISOString().toString(),
+                  monto: mS
+                }
+              });
+              this.abonar.cuotas = parseInt(this.abonar.abonos.length + parseInt(this.abonar.cuotas));
+              this.abonar.pago_fechas = [...this.abonar.abonos, ...this.abonar.pago_fechas];
+              this.abonar.fechaVenta = new Date(`${fV.getFullYear()}-${fV.getMonth() + 1}-${fV.getDate()}`).toISOString().toString();
+
+              await axios.post(`${this.api}/prestamo/abonar`, this.abonar, {
+                headers: {
+                  Authorization: `Bearer ${this.token}`
+                }
+              }).then(response => {
+                if (response.data) {
+                  this.abonar = {
+                    ruta: null,
+                    rutaPlana: null,
+                    direccionResidencia: null,
+                    nombres: null,
+                    apellidos: null,
+                    documento: null,
+                    telefono: null,
+                    correo: '',
+                    producto: null,
+                    fechaVenta: null,
+                    pago_fechas: [],
+                    abonos: [],
+                    cuotas: 1,
+                    total: 0
+                  };
+                  this.formaPago = null;
+                  this.fVenta = null;
+                  this.abonosTabla = [];
+                  Swal.fire({ icon: 'success', text: 'Abonos agregados correctamente', showConfirmButton: false, timer: 1600 });
+                } else {
+                  Swal.fire({ icon: 'error', text: 'No se pudieron agregar los abonos', showConfirmButton: false, timer: 1650 });
+                }
+              }).catch(error => {
+                Swal.fire({ icon: 'error', text: 'No se pudieron agregar los abonos', showConfirmButton: false, timer: 1650 });
+                console.log(error);
+              });
+
+            } else {
+              Swal.fire({ icon: 'info', text: "El total debe ser menor o igual al total de la venta", showConfirmButton: false, timer: 1600 });
+            }
+          } else {
+            Swal.fire({ icon: "info", text: "La cantidad de fechas de pago debe ser igual a la cantidad de cuotas", showConfirmButton: false, timer: 1600 });
+          }
+        } else {
+          this.abonar.cuotas = 0;
+          const i = this.rutas.findIndex(ruta => ruta._id == this.abonar.ruta);
+          this.abonar.rutaPlana = this.rutas[i].nombre;
+          this.abonar.total = parseInt(this.abonar.total);
+          this.abonar.documento = parseInt(this.abonar.documento);
+          this.abonar.fechaVenta = new Date(`${fV.getFullYear()}-${fV.getMonth() + 1}-${fV.getDate()}`).toISOString().toString();
+          this.abonar.pago_fechas = [];
+          this.abonar.abonos = [];
+          await axios.post(`${this.api}/prestamo/abonar`, this.abonar, {
+            headers: {
+              Authorization: `Bearer ${this.token}`
+            }
+          }).then(response => {
+            if (response.data) {
+              this.abonar = {
+                ruta: null,
+                rutaPlana: null,
+                direccionResidencia: null,
+                nombres: null,
+                apellidos: null,
+                documento: null,
+                telefono: null,
+                correo: '',
+                producto: null,
+                fechaVenta: null,
+                pago_fechas: [],
+                abonos: [],
+                cuotas: 1,
+                total: 0
+              };
+              this.formaPago = null;
+              this.fVenta = null;
+              this.abonosTabla = [];
+              Swal.fire({ icon: 'success', text: 'Abonos agregados correctamente', showConfirmButton: false, timer: 1600 });
+            } else {
+              Swal.fire({ icon: 'error', text: 'No se pudieron agregar los abonos', showConfirmButton: false, timer: 1650 });
+            }
+          }).catch(error => {
+            Swal.fire({ icon: 'error', text: 'No se pudieron agregar los abonos', showConfirmButton: false, timer: 1650 });
+            console.log(error);
+          });
+        }
+      }
+      this.disableBtnAbonos = false;
+    },
     calcularAbono(abono) {
       let abonoTotal = 0;
       abono.forEach(abono => {
@@ -556,7 +818,30 @@ export default {
       await this.getClientes();
       await this.getProductosInventario();
       await this.getPrestamos();
-    }
+    },
+    async getRutas() {
+      await axios.get(`${this.api}/pueblo`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        }
+      }).then((resp) => {
+        this.rutas = resp.data;
+      }).catch(error => {
+        switch (error.response.status) {
+          case 401:
+            Session.expiredSession();
+            break;
+          default:
+            Swal.fire({
+              icon: 'info',
+              text: 'No se pudo obtener las rutas',
+              showConfirmButton: false,
+              timer: 1600
+            });
+            break;
+        }
+      });
+    },
   },
   computed: {
     cols2() {
@@ -577,6 +862,11 @@ export default {
         return 100;
       }
       return ((abonado * 100) / this.verPrestamo.total);
+    },
+    totalAbonos() {
+      let total = 0;
+      this.abonosTabla.forEach(abono => total += parseInt(abono.monto));
+      return total;
     }
   },
   async created() {
@@ -584,6 +874,7 @@ export default {
     if (!invalid) {
       this.token = this.$store.getters.usuario.usuario.access_token;
       this.$emit('loadingSweet');
+      await this.getRutas();
       await this.getClientes();
       await this.getProductosInventario();
       await this.getPrestamos();
