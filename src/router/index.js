@@ -19,7 +19,7 @@ const routes = [{
                         ruta = '/inicio/estadisticas';
                         break;
                     case 'Cobrador':
-                        ruta = '/inicio/prestamo';
+                        ruta = '/inicio/cobro';
                         break;
                 }
             }

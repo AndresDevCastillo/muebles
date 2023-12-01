@@ -177,62 +177,75 @@
             <v-form ref="formAbono">
               <v-row>
                 <v-col md="6" lg="6" sm="12" cols="12">
-                  <v-autocomplete v-model="abonar.ruta" :items="rutas" item-title="nombre" item-value="_id" :rules="campoRules" label="Barrio" variant="outlined"></v-autocomplete>
+                  <v-autocomplete v-model="abonar.ruta" :items="rutas" item-title="nombre" item-value="_id"
+                    :rules="campoRules" label="Barrio" variant="outlined"></v-autocomplete>
                 </v-col>
                 <v-col md="6" lg="6" sm="12" cols="12">
-                  <v-text-field v-model="abonar.direccionResidencia" :rules="campoRules" label="Dirección" variant="outlined"></v-text-field>
+                  <v-text-field v-model="abonar.direccionResidencia" :rules="campoRules" label="Dirección"
+                    variant="outlined"></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-text-field v-model="abonar.nombres" :rules="campoRules" label="Nombres cliente" variant="outlined"></v-text-field>
+                  <v-text-field v-model="abonar.nombres" :rules="campoRules" label="Nombres cliente"
+                    variant="outlined"></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-text-field v-model="abonar.apellidos" :rules="campoRules" label="Apellidos" variant="outlined"></v-text-field>
+                  <v-text-field v-model="abonar.apellidos" :rules="campoRules" label="Apellidos"
+                    variant="outlined"></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-text-field v-model="abonar.documento" hint="Sin puntos o comas (. ,)" persistent-hint :rules="cantidadRules" label="Documento" type="number" variant="outlined"></v-text-field>
+                  <v-text-field v-model="abonar.documento" hint="Sin puntos o comas (. ,)" persistent-hint
+                    :rules="cantidadRules" label="Documento" type="number" variant="outlined"></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-text-field v-model="abonar.telefono" hint="Sin puntos o comas (. ,)" persistent-hint :rules="cantidadRules" label="Número celular" type="tel" variant="outlined"></v-text-field>
+                  <v-text-field v-model="abonar.telefono" hint="Sin puntos o comas (. ,)" persistent-hint
+                    :rules="cantidadRules" label="Número celular" type="tel" variant="outlined"></v-text-field>
                 </v-col>
                 <v-col cols="12">
                   <v-text-field v-model="abonar.correo" label="Correo" type="email" variant="outlined"></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-text-field v-model="abonar.producto" :rules="campoRules" label="Producto" variant="outlined"></v-text-field>
+                  <v-autocomplete label="Producto" no-data-text="Sin productos registrados" item-value="producto.nombre"
+                    :items="productos" item-title="producto.nombre" variant="outlined" v-model="abonar.producto"
+                    :rules="campoRules"></v-autocomplete>
                 </v-col>
                 <v-col cols="12">
-                  <v-select v-model="formaPago" :items="formasPago" item-title="forma" item-value="index" :rules="campoRules" label="Forma de pago" variant="outlined"></v-select>
+                  <v-select v-model="formaPago" :items="formasPago" item-title="forma" item-value="index"
+                    :rules="campoRules" label="Forma de pago" variant="outlined"></v-select>
                 </v-col>
                 <v-col cols="12">
                   <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false" cancelText="Cancelar"
-                    locale="es" selectText="Seleccionar" v-model="fVenta"
-                    placeholder="Selecciona fecha de venta" teleport-center @cleared="fVenta = null" />
+                    locale="es" selectText="Seleccionar" v-model="fVenta" placeholder="Selecciona fecha de venta"
+                    teleport-center @cleared="fVenta = null" />
                 </v-col>
                 <v-row v-if="formaPago != 1" class="pa-3">
                   <v-col cols="12">
-                    <v-text-field v-model="abonar.cuotas" hint="Sin puntos o comas (. ,)" persistent-hint :rules="cantidadRules" label="Cantidad de cuotas" type="number" variant="outlined"></v-text-field>
+                    <v-text-field v-model="abonar.cuotas" hint="Sin puntos o comas (. ,)" persistent-hint
+                      :rules="cantidadRules" label="Cantidad de cuotas" type="number" variant="outlined"></v-text-field>
                   </v-col>
                   <v-col cols="12">
                     <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false"
-                      cancelText="Cancelar" locale="es" selectText="Seleccionar"
-                      v-model="abonar.pago_fechas" multi-dates :min-date="new Date()"
-                      placeholder="Selecciona fechas de pago" teleport-center
+                      cancelText="Cancelar" locale="es" selectText="Seleccionar" v-model="abonar.pago_fechas" multi-dates
+                      :min-date="new Date()" placeholder="Selecciona fechas de pago" teleport-center
                       @cleared="abonar.pago_fechas = []" />
                   </v-col>
                 </v-row>
                 <v-col cols="12">
-                  <v-text-field v-model="abonar.total" hint="Sin puntos o comas (. ,)" persistent-hint :rules="cantidadRules" label="Total venta" type="number" variant="outlined"></v-text-field>
+                  <v-text-field v-model="abonar.total" hint="Sin puntos o comas (. ,)" persistent-hint
+                    :rules="cantidadRules" label="Total venta" type="number" variant="outlined"></v-text-field>
                 </v-col>
               </v-row>
               <div v-if="formaPago == 2" class="mt-9">
                 <v-row>
                   <v-col md="6" lg="6" sm="12" cols="12">
-                    <v-text-field v-model="abonoAdd" hint="Sin puntos o comas (. ,)" persistent-hint density="compact" :rules="cantidadRules" label="Monto" placeholder="Ingrese monto a abonar" type="number" variant="outlined"></v-text-field>
+                    <v-text-field v-model="abonoAdd" hint="Sin puntos o comas (. ,)" persistent-hint density="compact"
+                      :rules="cantidadRules" label="Monto" placeholder="Ingrese monto a abonar" type="number"
+                      variant="outlined"></v-text-field>
                   </v-col>
                   <v-col md="6" lg="6" sm="12" cols="12">
-                    <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false" cancelText="Cancelar"
-                      locale="es" selectText="Seleccionar" v-model="fechaAdd" :min-date="new Date(fVenta)"
-                      placeholder="Selecciona fecha del abono" teleport-center @cleared="fechaAdd = null" />
+                    <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false"
+                      cancelText="Cancelar" locale="es" selectText="Seleccionar" v-model="fechaAdd"
+                      :min-date="new Date(fVenta)" placeholder="Selecciona fecha del abono" teleport-center
+                      @cleared="fechaAdd = null" />
                   </v-col>
                 </v-row>
                 <v-row justify="center">
@@ -242,8 +255,8 @@
                 </v-row>
               </div>
             </v-form>
-            <v-data-table v-if="formaPago == 2" :headers="headersAbonos" :items="abonosTabla" class="elevation-3 pa-3 mt-5"
-              no-data-text="Sin abonos">
+            <v-data-table v-if="formaPago == 2" :headers="headersAbonos" :items="abonosTabla"
+              class="elevation-3 pa-3 mt-5" no-data-text="Sin abonos">
               <template v-slot:top>
                 <v-row justify="end" class="pa-2">
                   <v-col cols="4">
