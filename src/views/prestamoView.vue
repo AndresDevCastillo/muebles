@@ -144,7 +144,10 @@
                 </v-col>
                 <v-card-text v-if="verPrestamo.cuotas !== 0">
                   <div class="font-weight-bold ms-1 mb-2">
-                    Total : ${{ calcularAbono(verPrestamo.abono) }}
+                    Restante : ${{ calcularRestante(verPrestamo.abono, verPrestamo.total) }}
+                  </div>
+                  <div class="font-weight-bold ms-1 mb-2">
+                    Abonado : ${{ calcularAbono(verPrestamo.abono) }}
                   </div>
                   <v-timeline density="compact" align="start">
                     <v-timeline-item v-for="monto in verPrestamo.abono" :key="monto" dot-color="green" size="x-small">
@@ -465,6 +468,7 @@ export default {
                   this.formaPago = null;
                   this.fVenta = null;
                   this.abonosTabla = [];
+                  this.getPrestamos();
                   Swal.fire({ icon: 'success', text: 'Abonos agregados correctamente', showConfirmButton: false, timer: 1600 });
                 } else {
                   Swal.fire({ icon: 'error', text: 'No se pudieron agregar los abonos', showConfirmButton: false, timer: 1650 });
@@ -532,6 +536,13 @@ export default {
         abonoTotal += abono.monto;
       })
       return abonoTotal.toLocaleString();
+    },
+    calcularRestante(abono, total) {
+      let abonoTotal = 0;
+      abono.forEach(abono => {
+        abonoTotal += abono.monto;
+      });
+      return (total - abonoTotal).toLocaleString();
     },
     formatDate(value) {
       const date = new Date(value);
