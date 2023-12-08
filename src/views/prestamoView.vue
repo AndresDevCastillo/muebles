@@ -36,9 +36,12 @@
         </v-chip>
       </template>
       <!-- eslint-disable-next-line vue/valid-v-slot -->
-      <template v-slot:item.actions="{ item }">
+      <template v-slot:item.actions="{ item, index }">
         <v-icon size="small" class="me-2" @click="verPrestamoFunction(Object.assign({}, item))">
           mdi-eye
+        </v-icon>
+        <v-icon v-if="(!item.completado && item.producto.length == 0) || item.producto.length == 0" size="small" class="me-2" @click="dialogActualizarVenta(index)">
+          mdi mdi-cash-plus
         </v-icon>
         <v-icon size="small" @click="eliminarPrestamo(item._id)">
           mdi-delete
@@ -288,6 +291,53 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="dialogVentaAntigua" persistent width="700">
+      <v-card>
+        <v-card-title>Actualizar venta</v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-form ref="formVentaAntigua">
+              <v-row>
+                <v-col md="12" lg="12" sm="12" cols="12">
+                  <v-autocomplete v-model="actualizarVentaAntigua.ruta" :items="rutas" item-title="nombre" item-value="nombre"
+                    :rules="campoRules" label="Barrio" variant="outlined"></v-autocomplete>
+                </v-col>
+                <v-col cols="12">
+                  <v-autocomplete label="Producto" no-data-text="Sin productos registrados" item-value="producto.nombre"
+                    :items="productos" item-title="producto.nombre" variant="outlined" v-model="actualizarVentaAntigua.producto"
+                    :rules="campoRules"></v-autocomplete>
+                </v-col>
+                <v-row v-if="actualizarVentaAntigua.resta > 0">
+                  <v-col cols="12">
+                    <div class="font-weight-bold ms-1 mb-2">
+                      Resta por pagar: ${{ actualizarVentaAntigua.resta.toLocaleString() }}
+                    </div>
+                    <v-text-field type="number" min="1" label="Cuotas" variant="outlined" v-model="actualizarVentaAntigua.cuotas"
+                      :rules="cantidadRules"></v-text-field>
+                  </v-col>
+                  <v-col cols="12">
+                    <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false" cancelText="Cancelar"
+                      locale="es" selectText="Seleccionar" :min-date="new Date()" multi-dates v-model="actualizarVentaAntigua.fechas_pago" placeholder="Selecciona fechas de pago"
+                      teleport-center @cleared="actualizarVentaAntigua.fechas_pago = []" />
+                  </v-col>
+                </v-row>
+
+              </v-row>
+            </v-form>
+            <v-row justify="center" class="pa-4 mt-3">
+              <v-btn color="yellow" :disabled="disableBtnAbonos" @click="actualizarVenta">
+                Actualizar venta
+              </v-btn>
+            </v-row>
+          </v-container>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn color="red-darken-1" variant="tonal" @click="dialogVentaAntigua = false">
+            Cancelar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
@@ -311,6 +361,7 @@ export default {
     dialogCliente: false,
     dialogVePrestamo: null,
     dialogAbonar: false,
+    dialogVentaAntigua: false,
     formaPago: null,
     form: {
       cliente: null,
@@ -368,6 +419,15 @@ export default {
       cuotas: 1,
       total: 0
     },
+    fVentaAntigua: [],
+    actualizarVentaAntigua: {
+      venta: null,
+      resta: 0,
+      ruta: null,
+      producto: null,
+      cuotas: 1,
+      fechas_pago: []
+    },
     rutas: [],
     abonosTabla: [],
     abonoAdd: 0,
@@ -401,6 +461,77 @@ export default {
     formasPago: [{ index: 1, forma: 'De contado' }, { index: 2, forma: 'A crédito' }]
   }),
   methods: {
+    dialogActualizarVenta(index) {
+      this.actualizarVentaAntigua.venta = this.prestamos[index]._id;
+      this.actualizarVentaAntigua.resta = this.prestamos[index].total - this.prestamos[index].abono.reduce((acumulador, value) => parseInt(acumulador) + parseInt(value.monto), 0);
+      this.actualizarVentaAntigua.ruta = this.prestamos[index].ruta;
+      this.actualizarVentaAntigua.producto = null;
+      this.dialogVentaAntigua = true;
+    },
+    async actualizarVenta() {
+      const { valid } = await this.$refs.formVentaAntigua.validate();
+      if (valid) {
+        this.actualizarVentaAntigua.cuotas = parseInt(this.actualizarVentaAntigua.cuotas);
+        if (!this.actualizarVentaAntigua.ruta || !this.actualizarVentaAntigua.producto) {
+          return Swal.fire({ icon: 'warning', text: 'Debes seleccionar un barrio y un producto', showConfirmButton: false, timer: 1690 });
+        }
+        else if (this.actualizarVentaAntigua.resta != 0 && this.actualizarVentaAntigua.fechas_pago.length != this.actualizarVentaAntigua.cuotas) {
+          return Swal.fire({ icon: 'warning', text: 'Las fechas de pago deben ser iguales a la cantidad de cuotas', showConfirmButton: false, timer: 1690 });
+        }
+        const paquete = {
+          venta: this.actualizarVentaAntigua.venta,
+          ruta: this.actualizarVentaAntigua.ruta,
+          producto: this.actualizarVentaAntigua.producto,
+          cuotas: 0,
+          fechas_pago: []
+        }
+        if (this.actualizarVentaAntigua.resta > 0) {
+          const montoSugerido = Math.ceil(this.actualizarVentaAntigua.resta / this.actualizarVentaAntigua.cuotas);
+          paquete.fechas_pago = this.ordenarFechas(this.actualizarVentaAntigua.fechas_pago);
+          paquete.fechas_pago = paquete.fechas_pago.map(pago => {
+            return {
+              fecha: `${pago.getFullYear()}-${((parseInt(pago.getMonth()) + 1) < 10 ? '0' : '') + (parseInt(pago.getMonth()) + 1)}-${(parseInt(pago.getDate()) < 10 ? '0' : '') + parseInt(pago.getDate())}T00:00:00-05:00`,
+              monto: montoSugerido
+            }
+          });
+          paquete.cuotas = this.actualizarVentaAntigua.cuotas;
+        }
+        await axios.put(`${this.api}/prestamo/actualizarVenta`, paquete, {
+          headers: {
+            Authorization: `Bearer ${this.token}`
+          }
+        }).then(response => {
+          Swal.fire({
+            icon: response.data.status ? 'success' : 'error',
+            text: response.data.message,
+            showConfirmButton: false,
+            timer: 1600
+          });
+          if (response.data.status) {
+            this.$refs.formVentaAntigua.reset();
+            this.actualizarVentaAntigua.fechas_pago = [];
+            this.dialogVentaAntigua = false;
+            this.actualizarTodo();
+          }
+
+        }).catch(error => {
+          switch (error.response.status) {
+            case 401:
+              Session.expiredSession();
+              break;
+            default:
+              Swal.fire({
+                icon: 'info',
+                text: 'No se pudo actualizar la venta',
+                showConfirmButton: false,
+                timer: 1600
+              });
+              break;
+          }
+        });
+      }
+
+    },
     eliminarAbono(index) {
       this.abonar.abonos.splice(index, 1);
       this.abonosTabla.splice(index, 1);

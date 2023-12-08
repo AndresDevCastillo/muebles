@@ -20,7 +20,7 @@
                                     v-model="formCliente.apellidos" :rules="nombreRules"></v-text-field>
                             </v-col>
                             <v-col cols="12" sm="6">
-                                <v-text-field label="Telefono" type="tel" required variant="outlined"
+                                <v-text-field label="Teléfono" type="tel" required variant="outlined"
                                     v-model="formCliente.telefono" :rules="nombreRules"></v-text-field>
                             </v-col>
                             <v-col cols="12" sm="6">
@@ -32,6 +32,10 @@
                                     v-model="formCliente.direccion" item-title="nombre" item-value="_id"
                                     :rules="[v => !!v || 'Seleccione una ruta']"
                                     no-data-text="No hay rutas"></v-autocomplete>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-text-field label="Dirección" type="text" required variant="outlined"
+                                    v-model="formCliente.direccionResidencia" placeholder="Dirección de la vivienda" :rules="campoRules"></v-text-field>
                             </v-col>
                             <v-divider></v-divider>
                             <v-col cols="12">
@@ -118,6 +122,7 @@ export default {
             telefono: null,
             correo: null,
             direccion: null,
+            direccionResidencia: null,
             venta: {
                 producto: null,
                 cantidad: 1,
