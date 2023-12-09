@@ -213,7 +213,7 @@ import axios from 'axios';
 import Swal from "sweetalert2";
 export default {
   name: "cobroVista",
-  components: { nuevoCliente, VueDatePicker },
+  components: { nuevoCliente },
   data: () => ({
     api: import.meta.env.VITE_APP_API_URL,
     disableBtn: false,
