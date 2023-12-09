@@ -88,7 +88,6 @@ export default {
       this.title = this.$store.getters.usuario.usuario.nombre;
       this.subtitle = this.$store.getters.usuario.usuario.rol;
       const cargo = this.$store.getters.usuario.usuario.rol;
-      console.log(menu);
       menu.filter(menu => {
         if (menu.cargo == cargo) {
           this.menu = menu.menu;

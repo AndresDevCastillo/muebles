@@ -5,26 +5,26 @@ import { createVuexPersistedState } from "vue-persistedstate"
 //Vue.use(Vuex);
 
 export default new createStore({
-  state: {
-    usuario: null,
-    hora_login: null
-  },
-  mutations: {
-    setusuario(state, data) {
-      state.usuario = data.usuario;
-      state.hora_login = data.hora_login;
+    state: {
+        usuario: null,
+        hora_login: null
     },
-  },
-
-  getters: {
-    usuario(state) {
-      return { usuario: state.usuario, hora_login: state.hora_login };
+    mutations: {
+        setusuario(state, data) {
+            state.usuario = data.usuario;
+            state.hora_login = data.hora_login;
+        },
     },
-  },
 
-  actions: {
+    getters: {
+        usuario(state) {
+            return { usuario: state.usuario, hora_login: state.hora_login };
+        },
+    },
 
-  },
-  modules: { createVuexPersistedState },
+    actions: {
+
+    },
+    plugins: [createVuexPersistedState()]
 
 });

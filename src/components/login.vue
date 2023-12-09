@@ -94,10 +94,6 @@ export default {
       Swal.close();
     }
   },
-  created() {
-    console.log(process.env)
-  }
-
 }
 </script>
 <style>
