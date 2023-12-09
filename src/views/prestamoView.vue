@@ -40,7 +40,8 @@
         <v-icon size="small" class="me-2" @click="verPrestamoFunction(Object.assign({}, item))">
           mdi-eye
         </v-icon>
-        <v-icon v-if="(!item.completado && item.producto.length == 0) || item.producto.length == 0" size="small" class="me-2" @click="dialogActualizarVenta(index)">
+        <v-icon v-if="(!item.completado && item.producto.length == 0) || item.producto.length == 0" size="small"
+          class="me-2" @click="dialogActualizarVenta(index)">
           mdi mdi-cash-plus
         </v-icon>
         <v-icon size="small" @click="eliminarPrestamo(item._id)">
@@ -299,26 +300,27 @@
             <v-form ref="formVentaAntigua">
               <v-row>
                 <v-col md="12" lg="12" sm="12" cols="12">
-                  <v-autocomplete v-model="actualizarVentaAntigua.ruta" :items="rutas" item-title="nombre" item-value="nombre"
-                    :rules="campoRules" label="Barrio" variant="outlined"></v-autocomplete>
+                  <v-autocomplete v-model="actualizarVentaAntigua.ruta" :items="rutas" item-title="nombre"
+                    item-value="nombre" :rules="campoRules" label="Barrio" variant="outlined"></v-autocomplete>
                 </v-col>
                 <v-col cols="12">
                   <v-autocomplete label="Producto" no-data-text="Sin productos registrados" item-value="producto.nombre"
-                    :items="productos" item-title="producto.nombre" variant="outlined" v-model="actualizarVentaAntigua.producto"
-                    :rules="campoRules"></v-autocomplete>
+                    :items="productos" item-title="producto.nombre" variant="outlined"
+                    v-model="actualizarVentaAntigua.producto" :rules="campoRules"></v-autocomplete>
                 </v-col>
                 <v-row v-if="actualizarVentaAntigua.resta > 0">
                   <v-col cols="12">
                     <div class="font-weight-bold ms-1 mb-2">
                       Resta por pagar: ${{ actualizarVentaAntigua.resta.toLocaleString() }}
                     </div>
-                    <v-text-field type="number" min="1" label="Cuotas" variant="outlined" v-model="actualizarVentaAntigua.cuotas"
-                      :rules="cantidadRules"></v-text-field>
+                    <v-text-field type="number" min="1" label="Cuotas" variant="outlined"
+                      v-model="actualizarVentaAntigua.cuotas" :rules="cantidadRules"></v-text-field>
                   </v-col>
                   <v-col cols="12">
-                    <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false" cancelText="Cancelar"
-                      locale="es" selectText="Seleccionar" :min-date="new Date()" multi-dates v-model="actualizarVentaAntigua.fechas_pago" placeholder="Selecciona fechas de pago"
-                      teleport-center @cleared="actualizarVentaAntigua.fechas_pago = []" />
+                    <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false"
+                      cancelText="Cancelar" locale="es" selectText="Seleccionar" :min-date="new Date()" multi-dates
+                      v-model="actualizarVentaAntigua.fechas_pago" placeholder="Selecciona fechas de pago" teleport-center
+                      @cleared="actualizarVentaAntigua.fechas_pago = []" />
                   </v-col>
                 </v-row>
 
@@ -345,15 +347,13 @@
 import Session from "@/validation/session";
 import Swal from "sweetalert2";
 import axios from "axios";
-import VueDatePicker from '@vuepic/vue-datepicker';
-import '@vuepic/vue-datepicker/dist/main.css';
 import nuevoCliente from "@/components/nuevoCliente.vue";
 export default {
   name: "prestamoVista",
-  components: { nuevoCliente, VueDatePicker },
+  components: { nuevoCliente },
   data: () => ({
     token: null,
-    api: process.env.VUE_APP_API_URL,
+    api: import.meta.env.VITE_APP_API_URL,
     valid: true,
     disableBtn: false,
     disableBtnAbonos: false,

@@ -1,28 +1,22 @@
 <template>
   <div class="ganancias gananciasF">
     <v-row class="ma-6 mb-6">
-      <v-col cols="12"
-        ><v-card class="w-100 d-flex gananciasF">
+      <v-col cols="12"><v-card class="w-100 d-flex gananciasF">
           <v-container>
             <v-row dense>
               <v-col md="4">
                 <div class="col-xxl-4 col-md-6">
-                  <div
-                    class="card revenue-card"
-                    :class="{
-                      'info-card-gana': hoy.total >= 0,
-                      'info-card-pierde': hoy.total < 0,
-                    }"
-                  >
+                  <div class="card revenue-card" :class="{
+                    'info-card-gana': hoy.total >= 0,
+                    'info-card-pierde': hoy.total < 0,
+                  }">
                     <div class="card-body">
                       <h5 class="card-title">
                         Hoy <span>| {{ hoy.fecha }}</span>
                       </h5>
 
                       <div class="d-flex align-items-center">
-                        <div
-                          class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                        >
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                           <i class="bi bi-currency-dollar"></i>
                         </div>
                         <div class="ps-3">
@@ -30,8 +24,7 @@
                         </div>
                       </div>
                       <h4 class="card-title">
-                        Abono: <span> {{ hoy.abono.toLocaleString() }}</span
-                        ><br />
+                        Abono: <span> {{ hoy.abono.toLocaleString() }}</span><br />
                         Ventas: <span> {{ hoy.ventas }}</span>
                       </h4>
                     </div>
@@ -41,22 +34,17 @@
 
               <v-col md="4">
                 <div class="col-xxl-4 col-md-6">
-                  <div
-                    class="card info-card revenue-card"
-                    :class="{
-                      'info-card-gana': mes.total >= 0,
-                      'info-card-pierde': mes.total < 0,
-                    }"
-                  >
+                  <div class="card info-card revenue-card" :class="{
+                    'info-card-gana': mes.total >= 0,
+                    'info-card-pierde': mes.total < 0,
+                  }">
                     <div class="card-body">
                       <h5 class="card-title">
                         Mensual <span>| {{ mesesDelAnio[mes.fecha] }}</span>
                       </h5>
 
                       <div class="d-flex align-items-center">
-                        <div
-                          class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                        >
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                           <i class="bi bi-currency-dollar"></i>
                         </div>
                         <div class="ps-3">
@@ -64,8 +52,7 @@
                         </div>
                       </div>
                       <h4 class="card-title">
-                        Abono: <span> {{ mes.abono.toLocaleString() }}</span
-                        ><br />
+                        Abono: <span> {{ mes.abono.toLocaleString() }}</span><br />
                         Ventas: <span> {{ mes.ventas }}</span>
                       </h4>
                     </div>
@@ -75,22 +62,17 @@
 
               <v-col md="4">
                 <div class="col-xxl-4 col-md-6">
-                  <div
-                    class="card info-card revenue-card"
-                    :class="{
-                      'info-card-gana': yearC.total >= 0,
-                      'info-card-pierde': yearC.total < 0,
-                    }"
-                  >
+                  <div class="card info-card revenue-card" :class="{
+                    'info-card-gana': yearC.total >= 0,
+                    'info-card-pierde': yearC.total < 0,
+                  }">
                     <div class="card-body">
                       <h5 class="card-title">
                         Anual <span>| {{ yearC.fecha }}</span>
                       </h5>
 
                       <div class="d-flex align-items-center">
-                        <div
-                          class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                        >
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                           <i class="bi bi-currency-dollar"></i>
                         </div>
                         <div class="ps-3">
@@ -98,8 +80,7 @@
                         </div>
                       </div>
                       <h4 class="card-title">
-                        Abono: <span> {{ yearC.abono.toLocaleString() }}</span
-                        ><br />
+                        Abono: <span> {{ yearC.abono.toLocaleString() }}</span><br />
                         Ventas: <span> {{ yearC.ventas }}</span>
                       </h4>
                     </div>
@@ -131,6 +112,7 @@ import Swal from "sweetalert2";
 export default {
   name: "estadisticasVista",
   data: () => ({
+    api: import.meta.env.VITE_APP_API_URL,
     token: null,
     hoy: {
       fecha: "Lunes",
@@ -206,7 +188,7 @@ export default {
     async listarGraficaYear() {
       this.dataYearCantidad = [];
       await Axios.get(
-        `${process.env.VUE_APP_API_URL}/cliente/estadisticas/obtener`,
+        `${this.api}/cliente/estadisticas/obtener`,
         {
           headers: {
             Authorization: `Bearer ${this.token}`,
@@ -275,7 +257,7 @@ export default {
     },
     async listarGraficaCobro() {
       await Axios.get(
-        `${process.env.VUE_APP_API_URL}/prestamo/estadisticas/obtener`,
+        `${this.api}/prestamo/estadisticas/obtener`,
         {
           headers: {
             Authorization: `Bearer ${this.token}`,
@@ -381,7 +363,6 @@ export default {
     const invalid = await Session.expiredSession();
     if (!invalid) {
       this.token = this.$store.getters.usuario.usuario.access_token;
-      this.miImagen = require("../assets/icons/shop-solid.svg");
       this.$emit("loadingSweet");
       await this.listarGraficaYear();
       await this.listarGraficaCobro();
