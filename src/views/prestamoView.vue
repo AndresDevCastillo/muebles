@@ -36,12 +36,12 @@
         </v-chip>
       </template>
       <!-- eslint-disable-next-line vue/valid-v-slot -->
-      <template v-slot:item.actions="{ item, index }">
+      <template v-slot:item.actions="{ item }">
         <v-icon size="small" class="me-2" @click="verPrestamoFunction(Object.assign({}, item))">
           mdi-eye
         </v-icon>
         <v-icon v-if="(!item.completado && item.producto.length == 0) || item.producto.length == 0" size="small"
-          class="me-2" @click="dialogActualizarVenta(index)">
+          class="me-2" @click="dialogActualizarVenta(Object.assign({}, item))">
           mdi mdi-cash-plus
         </v-icon>
         <v-icon size="small" @click="eliminarPrestamo(item._id)">
@@ -308,7 +308,7 @@
                     :items="productos" item-title="producto.nombre" variant="outlined"
                     v-model="actualizarVentaAntigua.producto" :rules="campoRules"></v-autocomplete>
                 </v-col>
-                <v-row v-if="actualizarVentaAntigua.resta > 0">
+                <v-row v-if="actualizarVentaAntigua.resta > 0" class="pa-3">
                   <v-col cols="12">
                     <div class="font-weight-bold ms-1 mb-2">
                       Resta por pagar: ${{ actualizarVentaAntigua.resta.toLocaleString() }}
@@ -462,11 +462,11 @@ export default {
     formasPago: [{ index: 1, forma: 'De contado' }, { index: 2, forma: 'A crédito' }]
   }),
   methods: {
-    dialogActualizarVenta(index) {
-      this.actualizarVentaAntigua.cliente = this.prestamos[index].cliente._id;
-      this.actualizarVentaAntigua.venta = this.prestamos[index]._id;
-      this.actualizarVentaAntigua.resta = this.prestamos[index].total - this.prestamos[index].abono.reduce((acumulador, value) => parseInt(acumulador) + parseInt(value.monto), 0);
-      this.actualizarVentaAntigua.ruta = this.prestamos[index].ruta;
+    dialogActualizarVenta(item) {
+      this.actualizarVentaAntigua.cliente = item.cliente._id;
+      this.actualizarVentaAntigua.venta = item._id;
+      this.actualizarVentaAntigua.resta = item.total - item.abono.reduce((acumulador, value) => acumulador + parseInt(value.monto), 0);
+      this.actualizarVentaAntigua.ruta = item.ruta;
       this.actualizarVentaAntigua.producto = null;
       this.dialogVentaAntigua = true;
     },
