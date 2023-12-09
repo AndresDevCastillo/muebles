@@ -422,6 +422,7 @@ export default {
     fVentaAntigua: [],
     actualizarVentaAntigua: {
       venta: null,
+      cliente: null,
       resta: 0,
       ruta: null,
       producto: null,
@@ -462,6 +463,7 @@ export default {
   }),
   methods: {
     dialogActualizarVenta(index) {
+      this.actualizarVentaAntigua.cliente = this.prestamos[index].cliente._id;
       this.actualizarVentaAntigua.venta = this.prestamos[index]._id;
       this.actualizarVentaAntigua.resta = this.prestamos[index].total - this.prestamos[index].abono.reduce((acumulador, value) => parseInt(acumulador) + parseInt(value.monto), 0);
       this.actualizarVentaAntigua.ruta = this.prestamos[index].ruta;
@@ -481,10 +483,17 @@ export default {
         const paquete = {
           venta: this.actualizarVentaAntigua.venta,
           ruta: this.actualizarVentaAntigua.ruta,
+          idRuta: null,
           producto: this.actualizarVentaAntigua.producto,
+          cliente: this.actualizarVentaAntigua.cliente,
           cuotas: 0,
           fechas_pago: []
         }
+        this.rutas.forEach(ruta => {
+          if (ruta.nombre == paquete.ruta) {
+            paquete.idRuta = ruta._id;
+          }
+        });
         if (this.actualizarVentaAntigua.resta > 0) {
           const montoSugerido = Math.ceil(this.actualizarVentaAntigua.resta / this.actualizarVentaAntigua.cuotas);
           paquete.fechas_pago = this.ordenarFechas(this.actualizarVentaAntigua.fechas_pago);
