@@ -8,11 +8,11 @@
           </div>
         </v-col>
         <v-col lg="8" md="7" sm="12" cols="auto" class="align-self-end text-sm-start text-md-end text-lg-end">
-          <v-btn prepend-icon="mdi mdi-plus" color="blue" @click="dialogCobrador = true">
+          <v-btn prepend-icon="mdi mdi-account-tie" color="blue" @click="dialogCobrador = true">
             Cobrador a ruta</v-btn>
         </v-col>
         <v-col lg="2" md="3" sm="12" cols="auto" class="align-self-end text-sm-start">
-          <v-btn prepend-icon="mdi mdi-plus" color="green" @click="dialogR = true" style="min-width: 170px;">Crear
+          <v-btn prepend-icon="mdi mdi-map-marker" color="green" @click="dialogR = true" style="min-width: 170px;">Crear
             Ruta</v-btn>
         </v-col>
       </v-row>

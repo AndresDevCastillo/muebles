@@ -92,10 +92,16 @@
         </v-card>
       </v-col>
       <v-col lg="6" md="6" sm="12">
+        <canvas class="mb-6" id="graficaCobradores"></canvas>
+      </v-col>
+      <v-col lg="6" md="6" sm="12">
         <canvas class="mb-6" id="graficaAbono"></canvas>
       </v-col>
       <v-col lg="6" md="6" sm="12">
         <canvas class="mb-6" id="graficaVenta"></canvas>
+      </v-col>
+      <v-col lg="6" md="6" sm="12">
+        <canvas class="mb-6" id="graficaRutas"></canvas>
       </v-col>
       <v-col lg="12" md="12" sm="12">
         <canvas class="mb-6" id="graficaYear"></canvas>
@@ -136,6 +142,10 @@ export default {
     year: null,
     abono: null,
     ventas: null,
+    cobradores: null,
+    rutas: null,
+    dataRutas: null,
+    dataCobradores: [],
     dataYearName: [
       "Enero",
       "Febrero",
@@ -270,6 +280,9 @@ export default {
           this.hoy = resp.data.hoy;
           this.mes = resp.data.mes;
           this.yearC = resp.data.year;
+          this.dataCobradores = resp.data.cobradores;
+          this.dataRutas = resp.data.rutas;
+
         })
         .catch(async (error) => {
           console.log(error);
@@ -300,6 +313,8 @@ export default {
         });
       let ctx = document.getElementById("graficaAbono");
       let ctx2 = document.getElementById("graficaVenta");
+      let ctx3 = document.getElementById("graficaCobradores");
+      let ctx4 = document.getElementById("graficaRutas");
       this.abono = {
         type: "bar",
         data: {
@@ -354,8 +369,65 @@ export default {
           },
         },
       };
+      this.cobradores = {
+        type: "bar",
+        data: {
+          labels: this.dataCobradores[0],
+          datasets: [
+            {
+              label: "Cobro de Hoy",
+              data: this.dataCobradores[1],
+              borderWidth: 1,
+              backgroundColor: this.colores,
+            },
+          ],
+        },
+        options: {
+          plugins: {
+            title: {
+              display: true,
+              text: "Cobros de hoy",
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+        },
+      };
+      this.rutas = {
+        type: "bar",
+        data: {
+          labels: this.dataRutas[0],
+          datasets: [
+            {
+              label: "Cobro de Hoy",
+              data: this.dataRutas[1],
+              borderWidth: 1,
+              backgroundColor: this.colores,
+            },
+          ],
+        },
+        options: {
+          plugins: {
+            title: {
+              display: true,
+              text: "Cobros de hoy Por Rutas",
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+        },
+      };
       this.chart = new Chart(ctx, this.abono);
       this.chart = new Chart(ctx2, this.ventas);
+      this.chart = new Chart(ctx3, this.cobradores);
+      this.chart = new Chart(ctx4, this.rutas);
+
     },
   },
 
