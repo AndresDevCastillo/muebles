@@ -37,16 +37,19 @@
       </template>
       <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template v-slot:item.actions="{ item }">
-        <v-icon size="small" class="me-2" @click="verPrestamoFunction(Object.assign({}, item))">
-          mdi-eye
-        </v-icon>
-        <v-icon v-if="(!item.completado && item.producto.length == 0) || item.producto.length == 0" size="small"
-          class="me-2" @click="dialogActualizarVenta(Object.assign({}, item))">
-          mdi mdi-cash-plus
-        </v-icon>
-        <v-icon size="small" @click="eliminarPrestamo(item._id)">
-          mdi-delete
-        </v-icon>
+        <v-row justify="space-between" class="g-3">
+          <v-icon size="small" class="me-2 mb-2" @click="verPrestamoFunction(Object.assign({}, item))">
+            mdi-eye
+          </v-icon>
+          <v-icon v-if="!item.completado" class="me-2 mb-2" size="small" @click="dialogAbonarVentaAntigua(item._id)">mdi mdi-cash-refund</v-icon>
+          <v-icon v-if="(!item.completado && item.producto.length == 0) || item.producto.length == 0" size="small"
+            class="me-2 mb-2" @click="dialogActualizarVenta(Object.assign({}, item))">
+            mdi mdi-cash-plus
+          </v-icon>
+          <v-icon size="small" class="me-2 mb-2" @click="eliminarPrestamo(item._id)">
+            mdi-delete
+          </v-icon>
+        </v-row>
       </template>
     </v-data-table>
     <nuevoCliente :dialogCliente="dialogCliente" @cerrarDialog="dialogCliente = false" @actualizarTodo="actualizarTodo" />
@@ -340,6 +343,39 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="dialogAbonarVenta" persistent width="700">
+      <v-card>
+        <v-card-title>Agregar abono a la venta</v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-form ref="formAbonarVentaAntigua">
+              <v-row>
+                <v-col cols="12">
+                  <v-text-field type="number" min="1" label="Monto" variant="outlined"
+                    v-model="abonarVentaAntigua.monto" :rules="cantidadRules"></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false"
+                    cancelText="Cancelar" locale="es" selectText="Seleccionar"
+                    v-model="abonarVentaAntigua.fecha" placeholder="Selecciona fecha de pago" teleport-center
+                    @cleared="abonarVentaAntigua.fecha = null" />
+                </v-col>
+              </v-row>
+            </v-form>
+            <v-row justify="center" class="pa-4 mt-3">
+              <v-btn color="yellow" :disabled="disableBtnAbonos" @click="guardarAbonoVenta">
+                Abonar a la venta
+              </v-btn>
+            </v-row>
+          </v-container>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn color="red-darken-1" variant="tonal" @click="dialogAbonarVenta = false">
+            Cancelar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
@@ -362,6 +398,7 @@ export default {
     dialogVePrestamo: null,
     dialogAbonar: false,
     dialogVentaAntigua: false,
+    dialogAbonarVenta: false,
     formaPago: null,
     form: {
       cliente: null,
@@ -419,6 +456,11 @@ export default {
       cuotas: 1,
       total: 0
     },
+    abonarVentaAntigua: {
+      venta: null,
+      monto: 0,
+      fecha: null,
+    },
     fVentaAntigua: [],
     actualizarVentaAntigua: {
       venta: null,
@@ -462,6 +504,12 @@ export default {
     formasPago: [{ index: 1, forma: 'De contado' }, { index: 2, forma: 'A crédito' }]
   }),
   methods: {
+    dialogAbonarVentaAntigua(id) {
+      if (id) {
+        this.abonarVentaAntigua.venta = id;
+        this.dialogAbonarVenta = true;
+      }
+    },
     dialogActualizarVenta(item) {
       this.actualizarVentaAntigua.cliente = item.cliente._id;
       this.actualizarVentaAntigua.venta = item._id;
@@ -469,6 +517,47 @@ export default {
       this.actualizarVentaAntigua.ruta = item.ruta;
       this.actualizarVentaAntigua.producto = null;
       this.dialogVentaAntigua = true;
+    },
+    async guardarAbonoVenta() {
+      const { valid } = await this.$refs.formAbonarVentaAntigua.validate();
+      if (valid && this.abonarVentaAntigua.venta && this.abonarVentaAntigua.fecha) {
+        const f = `${this.abonarVentaAntigua.fecha.getFullYear()}-${(this.abonarVentaAntigua.fecha.getMonth() + 1 < 10 ? '0' : '') + (this.abonarVentaAntigua.fecha.getMonth() + 1)}-${(this.abonarVentaAntigua.fecha.getDate() < 10 ? '0' : '') + this.abonarVentaAntigua.fecha.getDate()}`;
+        const paquete = {
+          venta: this.abonarVentaAntigua.venta,
+          monto: parseInt(this.abonarVentaAntigua.monto),
+          fecha: `${f}T00:00:00-05:00`
+        }
+        await axios.put(`${this.api}/prestamo/abonar/venta`, paquete, {
+          headers: {
+            Authorization: `Bearer ${this.token}`
+          }
+        }).then(resp => {
+          this.dialogAbonarVenta = false;
+          Swal.fire({
+            icon: resp.data ? 'success' : 'error',
+            text: resp.data ? 'Abono agregado correctamente' : 'No se pudo agregar el abono',
+            showConfirmButton: false,
+            timer: 1500
+          });
+          this.abonarVentaAntigua.fecha = null;
+          this.$refs.formAbonarVentaAntigua.reset();
+          this.actualizarTodo();
+        }).catch(error => {
+          switch (error.response.status) {
+            case 401:
+              Session.expiredSession();
+              break;
+            default:
+              Swal.fire({
+                icon: 'info',
+                text: 'No se pudo agregar el abono',
+                showConfirmButton: false,
+                timer: 1600
+              });
+              break;
+          }
+        });
+      }
     },
     async actualizarVenta() {
       const { valid } = await this.$refs.formVentaAntigua.validate();
