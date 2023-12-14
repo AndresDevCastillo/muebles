@@ -103,8 +103,11 @@
       <v-col lg="6" md="6" sm="12">
         <canvas class="mb-6" id="graficaRutas"></canvas>
       </v-col>
-      <v-col lg="12" md="12" sm="12">
+      <v-col lg="6" md="6" sm="12">
         <canvas class="mb-6" id="graficaYear"></canvas>
+      </v-col>
+      <v-col lg="6" md="6" sm="12">
+        <canvas class="mb-6" id="graficaProductos"></canvas>
       </v-col>
     </v-row>
   </div>
@@ -144,6 +147,7 @@ export default {
     ventas: null,
     cobradores: null,
     rutas: null,
+    productos: null,
     dataRutas: null,
     dataCobradores: [],
     dataYearName: [
@@ -163,6 +167,7 @@ export default {
     dataYearCantidad: null,
     dataYearVenta: [],
     dataYearAbono: [],
+    dataProductos: [],
     chart: null,
     datosCharts: null,
     mesesDelAnio: [
@@ -195,6 +200,14 @@ export default {
     ],
   }),
   methods: {
+    getRandomColor() {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    },
     async listarGraficaYear() {
       this.dataYearCantidad = [];
       await Axios.get(
@@ -255,6 +268,9 @@ export default {
               display: true,
               text: "Clientes Anuales",
             },
+            legend: {
+              display: false,
+            },
           },
           scales: {
             y: {
@@ -282,6 +298,7 @@ export default {
           this.yearC = resp.data.year;
           this.dataCobradores = resp.data.cobradores;
           this.dataRutas = resp.data.rutas;
+          this.dataProductos = resp.data.graficaProductos;
 
         })
         .catch(async (error) => {
@@ -315,6 +332,7 @@ export default {
       let ctx2 = document.getElementById("graficaVenta");
       let ctx3 = document.getElementById("graficaCobradores");
       let ctx4 = document.getElementById("graficaRutas");
+      let ctx5 = document.getElementById("graficaProductos");
       this.abono = {
         type: "bar",
         data: {
@@ -333,6 +351,9 @@ export default {
             title: {
               display: true,
               text: "Abonos",
+            },
+            legend: {
+              display: false,
             },
           },
           scales: {
@@ -361,6 +382,9 @@ export default {
               display: true,
               text: "Ventas",
             },
+            legend: {
+              display: false,
+            },
           },
           scales: {
             y: {
@@ -387,6 +411,9 @@ export default {
             title: {
               display: true,
               text: "Cobros de hoy",
+            },
+            legend: {
+              display: false,
             },
           },
           scales: {
@@ -415,6 +442,9 @@ export default {
               display: true,
               text: "Cobros de hoy Por Rutas",
             },
+            legend: {
+              display: false,
+            },
           },
           scales: {
             y: {
@@ -423,10 +453,47 @@ export default {
           },
         },
       };
+      this.productos = {
+        type: "bar",
+        data: {
+          labels: this.dataProductos.label,
+          datasets: [
+            {
+              label: "Productos",
+              data: this.dataProductos.dataset,
+              borderWidth: 1,
+              backgroundColor: this.colores,
+            },
+          ],
+        },
+        options: {
+          plugins: {
+            title: {
+              display: true,
+              text: "Productos vendidos Anuales",
+            },
+            legend: {
+              display: false,
+            },
+
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+            x: {
+              display: false
+            }
+          },
+        },
+      };
+
       this.chart = new Chart(ctx, this.abono);
       this.chart = new Chart(ctx2, this.ventas);
       this.chart = new Chart(ctx3, this.cobradores);
       this.chart = new Chart(ctx4, this.rutas);
+      this.chart = new Chart(ctx5, this.productos);
+
 
     },
   },
