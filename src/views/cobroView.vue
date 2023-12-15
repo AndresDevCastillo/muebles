@@ -49,6 +49,15 @@
             </v-icon>
           </template>
         </v-data-table>
+        <v-data-table :headers="headersAbonoHoy" :items="abonosHoy" class="elevation-1 mt-12">
+          <template v-slot:top>
+            <h1 class="text-center">Historial de abonos</h1>
+          </template>
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
+          <template v-slot:item.monto="{ value }">
+            {{ '$' + value.toLocaleString() }}
+          </template>
+        </v-data-table>
       </v-card-text>
     </v-card>
     <v-dialog v-model="dialogVerCobro" persistent width="700">
@@ -223,6 +232,7 @@ export default {
     api: import.meta.env.VITE_APP_API_URL,
     disableBtn: false,
     cobros: [],
+    abonosHoy: [],
     valid: false,
     token: null,
     dialogCliente: false,
@@ -295,6 +305,14 @@ export default {
       { title: 'Pago hoy', key: 'abono' },
       { title: 'Accion', key: 'actions', sortable: false },
     ],
+    headersAbonoHoy: [
+      { title: 'Documento', key: 'cliente.documento' },
+      { title: 'Nombre', key: 'cliente.nombres' },
+      { title: 'Apellido', key: 'cliente.apellidos' },
+      { title: 'Ruta', key: 'ruta' },
+      { title: 'Cobrador', key: 'cobrador' },
+      { title: 'Pago', key: 'monto' },
+    ],
   }),
   methods: {
     calcularAbono(abono) {
@@ -333,7 +351,8 @@ export default {
           Authorization: `Bearer ${this.token}`
         }
       }).then((resp) => {
-        this.cobros = resp.data;
+        this.cobros = resp.data[0];
+        this.abonosHoy = resp.data[1];
       }).catch(error => {
         switch (error.response.status) {
           case 401:
@@ -520,9 +539,9 @@ export default {
     pagoHoy(abono) {
       const l = abono.length;
       const f = new Date();
-      const hoy = `${f.getFullYear()}-${(f.getMonth() + 1 < 10 ? '0' : '') + (f.getMonth() + 1)}-${(f.getDate() < 10 ? '0' : '') + f.getDate()}T${(f.getHours() < 10 ? '0' : '') + f.getHours()}:${(f.getMinutes() < 10 ? '0' : '') + f.getMinutes()}`;
+      const hoy = `${f.getFullYear()}-${(f.getMonth() + 1 < 10 ? '0' : '') + (f.getMonth() + 1)}-${(f.getDate() < 10 ? '0' : '') + f.getDate()}`;
       const ultAbono = abono[l - 1];
-      if (ultAbono.fecha.slice(0, 16) <= hoy && ultAbono.fecha.slice(8, 10) === hoy.slice(8, 10)) {
+      if (ultAbono.fecha.slice(0, 10) == hoy) {
         return [true, ultAbono.monto];
       }
       return [false, 'No'];
