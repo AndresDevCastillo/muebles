@@ -34,6 +34,12 @@
             </v-chip>
           </template>
           <!-- eslint-disable-next-line vue/valid-v-slot -->
+          <template v-slot:item.abono="{ value }">
+            <v-chip :color="pagoHoy(value)[0] ? 'green' : 'red'">
+              {{ pagoHoy(value)[0] ? `Sí: $${(pagoHoy(value)[1]).toLocaleString()}` : pagoHoy(value)[1] }}
+            </v-chip>
+          </template>
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template v-slot:item.actions="{ item }">
             <v-icon size="large" class="me-2" @click="abonarFunction(Object.assign({}, item))">
               mdi-cash
@@ -41,7 +47,6 @@
             <v-icon size="large" class="me-2" @click="verPrestamoFunction(Object.assign({}, item))">
               mdi-eye
             </v-icon>
-
           </template>
         </v-data-table>
       </v-card-text>
@@ -287,6 +292,7 @@ export default {
       { title: 'Producto', key: 'producto' },
       { title: 'Cuotas', key: 'cuotas' },
       { title: 'Atrasado', key: 'mora' },
+      { title: 'Pago hoy', key: 'abono' },
       { title: 'Accion', key: 'actions', sortable: false },
     ],
   }),
@@ -510,6 +516,16 @@ export default {
       const fechasDate = fechas.map(fecha => new Date(fecha));
       fechasDate.sort((f1, f2) => f1 - f2);
       return fechasDate;
+    },
+    pagoHoy(abono) {
+      const l = abono.length;
+      const f = new Date();
+      const hoy = `${f.getFullYear()}-${(f.getMonth() + 1 < 10 ? '0' : '') + (f.getMonth() + 1)}-${(f.getDate() < 10 ? '0' : '') + f.getDate()}T${(f.getHours() < 10 ? '0' : '') + f.getHours()}:${(f.getMinutes() < 10 ? '0' : '') + f.getMinutes()}`;
+      const ultAbono = abono[l - 1];
+      if (ultAbono.fecha.slice(0, 16) <= hoy && ultAbono.fecha.slice(8, 10) === hoy.slice(8, 10)) {
+        return [true, ultAbono.monto];
+      }
+      return [false, 'No'];
     }
   },
   computed: {
