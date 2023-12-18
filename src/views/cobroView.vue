@@ -25,7 +25,7 @@
         </v-col>
       </v-card-title>
       <v-card-text>
-        <v-data-table :headers="headers" :items="cobros" :sort-by="[{ key: 'mora', order: 'asc' }]" class="elevation-1"
+        <v-data-table :headers="headers" :items="cobros" :sort-by="[{ key: 'ruta', order: 'asc' }]" class="elevation-1"
           :search="searchPrestamo">
           <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template v-slot:item.mora="{ value }">
