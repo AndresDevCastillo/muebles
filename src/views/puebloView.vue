@@ -367,9 +367,12 @@ export default {
             headers: {
               Authorization: `Bearer ${this.token}`
             }
-          }).then(() => {
-            this.obtenerRutas();
-            Swal.fire({ icon: 'success', title: 'Se elimino correctamente', timer: 1500, showConfirmButton: false });
+          }).then(response => {
+            console.log(response);
+            if (response.data.delete) {
+              this.obtenerRutas();
+            }
+            Swal.fire({ icon: response.data.delete ? 'success' : 'error', title: 'Eliminado', text: response.data.message, timer: 1600, showConfirmButton: false });
           })
         }
       }).catch(error => {
@@ -481,4 +484,3 @@ export default {
   }
 }
 </script>
-

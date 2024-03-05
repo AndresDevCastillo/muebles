@@ -506,6 +506,11 @@ export default {
       await this.listarGraficaYear();
       await this.listarGraficaCobro();
       this.$emit("closeSweet");
+      await Axios.get(`${this.api}/cliente/sinRuta`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      });
     }
   },
 };
