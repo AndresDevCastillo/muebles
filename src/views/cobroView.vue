@@ -34,6 +34,7 @@
             </v-chip>
           </template>
           <!-- eslint-disable-next-line vue/valid-v-slot -->
+
           <template v-slot:item.actions="{ item }">
             <v-icon size="large" class="me-2" @click="abonarFunction(Object.assign({}, item))">
               mdi-cash
@@ -44,10 +45,12 @@
           </template>
         </v-data-table>
         <v-data-table :headers="headersAbonoHoy" :items="abonosHoy" class="elevation-1 mt-12">
+
           <template v-slot:top>
             <h1 class="text-center">Historial de abonos</h1>
           </template>
           <!-- eslint-disable-next-line vue/valid-v-slot -->
+
           <template v-slot:item.monto="{ value }">
             <v-chip color="green">
               {{ '$' + value.toLocaleString() }}
@@ -63,6 +66,7 @@
             <v-form>
               <v-row>
                 <v-progress-linear v-model="skill" color="green" height="25">
+
                   <template v-slot:default="{ value }">
                     <strong>{{ Math.ceil(value) }}%</strong>
                   </template>
@@ -81,7 +85,7 @@
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-text-field variant="outlined" label="Ruta" disabled required
-                    v-model="verPrestamo.ruta"></v-text-field>
+                    v-model="verPrestamo.cliente.direccion.nombre"></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-text-field variant="outlined" label="Producto" disabled required
@@ -172,8 +176,8 @@
           <v-form v-model="valid" ref="formPrestamo">
             <v-row>
               <v-col cols="12">
-                <v-autocomplete label="Nombre del cliente" no-data-text="Sin clientes disponible para venta" return-object
-                  :items="clientes" :item-title="(item => { return `${item.nombres} ${item.apellidos}` })"
+                <v-autocomplete label="Nombre del cliente" no-data-text="Sin clientes disponible para venta"
+                  return-object :items="clientes" :item-title="(item => { return `${item.nombres} ${item.apellidos}` })"
                   variant="outlined" v-model="form.cliente" :rules="campoRules"></v-autocomplete>
               </v-col>
               <v-col md="6" cols="12">
@@ -212,7 +216,8 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <nuevoCliente :dialogCliente="dialogCliente" @cerrarDialog="dialogCliente = false" @actualizarTodo="actualizarTodo" />
+    <nuevoCliente :dialogCliente="dialogCliente" @cerrarDialog="dialogCliente = false"
+      @actualizarTodo="actualizarTodo" />
   </div>
 </template>
 
@@ -294,7 +299,7 @@ export default {
       { title: 'Documento', key: 'cliente.documento' },
       { title: 'Nombre', key: 'cliente.nombres' },
       { title: 'Apellido', key: 'cliente.apellidos' },
-      { title: 'Ruta', key: 'ruta' },
+      { title: 'Ruta', key: 'cliente.direccion.nombre' },
       { title: 'Producto', key: 'producto' },
       { title: 'Cuotas', key: 'cuotas' },
       { title: 'Atrasado', key: 'mora' },
@@ -304,7 +309,7 @@ export default {
       { title: 'Documento', key: 'cliente.documento' },
       { title: 'Nombre', key: 'cliente.nombres' },
       { title: 'Apellido', key: 'cliente.apellidos' },
-      { title: 'Ruta', key: 'ruta' },
+      { title: 'Ruta', key: 'cliente.direccion.nombre' },
       { title: 'Cobrador', key: 'cobrador' },
       { title: 'Pago', key: 'monto' },
     ],
