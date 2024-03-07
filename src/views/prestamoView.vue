@@ -30,18 +30,21 @@
         {{ value ? 'Completado' : 'Activo' }}
       </template>
       <!-- eslint-disable-next-line vue/valid-v-slot -->
+
       <template v-slot:item.mora="{ value }">
         <v-chip :color="value ? 'red' : 'green'">
           {{ value ? 'Atrasado' : 'No' }}
         </v-chip>
       </template>
       <!-- eslint-disable-next-line vue/valid-v-slot -->
+
       <template v-slot:item.actions="{ item }">
         <v-row justify="space-between" class="g-3">
           <v-icon size="small" class="me-2 mb-2" @click="verPrestamoFunction(Object.assign({}, item))">
             mdi-eye
           </v-icon>
-          <v-icon v-if="!item.completado" class="me-2 mb-2" size="small" @click="dialogAbonarVentaAntigua(item._id)">mdi mdi-cash-refund</v-icon>
+          <v-icon v-if="!item.completado" class="me-2 mb-2" size="small" @click="dialogAbonarVentaAntigua(item._id)">mdi
+            mdi-cash-refund</v-icon>
           <v-icon v-if="(!item.completado && item.producto.length == 0) || item.producto.length == 0" size="small"
             class="me-2 mb-2" @click="dialogActualizarVenta(Object.assign({}, item))">
             mdi mdi-cash-plus
@@ -52,7 +55,8 @@
         </v-row>
       </template>
     </v-data-table>
-    <nuevoCliente :dialogCliente="dialogCliente" @cerrarDialog="dialogCliente = false" @actualizarTodo="actualizarTodo" />
+    <nuevoCliente :dialogCliente="dialogCliente" @cerrarDialog="dialogCliente = false"
+      @actualizarTodo="actualizarTodo" />
     <v-dialog v-model="dialogPrestamo" persistent width="700">
       <v-card>
         <v-card-title>
@@ -62,8 +66,8 @@
           <v-form v-model="valid" ref="formPrestamo">
             <v-row>
               <v-col cols="12">
-                <v-autocomplete label="Nombre del cliente" no-data-text="Sin clientes disponible para venta" return-object
-                  :items="clientes" :item-title="(item => { return `${item.nombres} ${item.apellidos}` })"
+                <v-autocomplete label="Nombre del cliente" no-data-text="Sin clientes disponible para venta"
+                  return-object :items="clientes" :item-title="(item => { return `${item.nombres} ${item.apellidos}` })"
                   variant="outlined" v-model="form.cliente" :rules="campoRules"></v-autocomplete>
               </v-col>
               <v-col md="6" cols="12">
@@ -109,6 +113,7 @@
             <v-form>
               <v-row>
                 <v-progress-linear v-model="skill" color="green" height="25">
+
                   <template v-slot:default="{ value }">
                     <strong>{{ Math.ceil(value) }}%</strong>
                   </template>
@@ -127,7 +132,7 @@
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-text-field variant="outlined" label="Ruta" disabled required
-                    v-model="verPrestamo.ruta"></v-text-field>
+                    v-model="verPrestamo.cliente.direccion.nombre"></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-text-field variant="outlined" label="Producto" disabled required
@@ -223,9 +228,9 @@
                     :rules="campoRules" label="Forma de pago" variant="outlined"></v-select>
                 </v-col>
                 <v-col cols="12">
-                  <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false" cancelText="Cancelar"
-                    locale="es" selectText="Seleccionar" v-model="fVenta" placeholder="Selecciona fecha de venta"
-                    teleport-center @cleared="fVenta = null" />
+                  <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false"
+                    cancelText="Cancelar" locale="es" selectText="Seleccionar" v-model="fVenta"
+                    placeholder="Selecciona fecha de venta" teleport-center @cleared="fVenta = null" />
                 </v-col>
                 <v-row v-if="formaPago != 1" class="pa-3">
                   <v-col cols="12">
@@ -234,8 +239,8 @@
                   </v-col>
                   <v-col cols="12">
                     <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false"
-                      cancelText="Cancelar" locale="es" selectText="Seleccionar" v-model="abonar.pago_fechas" multi-dates
-                      :min-date="new Date()" placeholder="Selecciona fechas de pago" teleport-center
+                      cancelText="Cancelar" locale="es" selectText="Seleccionar" v-model="abonar.pago_fechas"
+                      multi-dates :min-date="new Date()" placeholder="Selecciona fechas de pago" teleport-center
                       @cleared="abonar.pago_fechas = []" />
                   </v-col>
                 </v-row>
@@ -267,6 +272,7 @@
             </v-form>
             <v-data-table v-if="formaPago == 2" :headers="headersAbonos" :items="abonosTabla"
               class="elevation-3 pa-3 mt-5" no-data-text="Sin abonos">
+
               <template v-slot:top>
                 <v-row justify="end" class="pa-2">
                   <v-col cols="4">
@@ -275,6 +281,7 @@
                 </v-row>
               </template>
               <!-- eslint-disable-next-line vue/valid-v-slot -->
+
               <template v-slot:item.actions="{ index }">
                 <v-icon size="small" @click="eliminarAbono(index)">
                   mdi-delete
@@ -322,8 +329,8 @@
                   <v-col cols="12">
                     <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false"
                       cancelText="Cancelar" locale="es" selectText="Seleccionar" :min-date="new Date()" multi-dates
-                      v-model="actualizarVentaAntigua.fechas_pago" placeholder="Selecciona fechas de pago" teleport-center
-                      @cleared="actualizarVentaAntigua.fechas_pago = []" />
+                      v-model="actualizarVentaAntigua.fechas_pago" placeholder="Selecciona fechas de pago"
+                      teleport-center @cleared="actualizarVentaAntigua.fechas_pago = []" />
                   </v-col>
                 </v-row>
 
@@ -356,9 +363,8 @@
                 </v-col>
                 <v-col cols="12">
                   <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false"
-                    cancelText="Cancelar" locale="es" selectText="Seleccionar"
-                    v-model="abonarVentaAntigua.fecha" placeholder="Selecciona fecha de pago" teleport-center
-                    @cleared="abonarVentaAntigua.fecha = null" />
+                    cancelText="Cancelar" locale="es" selectText="Seleccionar" v-model="abonarVentaAntigua.fecha"
+                    placeholder="Selecciona fecha de pago" teleport-center @cleared="abonarVentaAntigua.fecha = null" />
                 </v-col>
               </v-row>
             </v-form>
@@ -372,6 +378,32 @@
         <v-card-actions class="justify-end">
           <v-btn color="red-darken-1" variant="tonal" @click="dialogAbonarVenta = false">
             Cancelar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="dialogoChangeRoute" persistent width="700">
+      <v-card>
+        <v-card-title>
+          Cambiar ruta
+        </v-card-title>
+        <v-card-text>
+          <v-form ref="formPrestamo">
+            <v-row>
+              <v-col cols="12">
+                <v-autocomplete label="Nombre del cliente" no-data-text="Sin clientes disponible para venta"
+                  return-object :items="clientes" :item-title="(item => { return `${item.nombres} ${item.apellidos}` })"
+                  variant="outlined" v-model="form.cliente" :rules="campoRules"></v-autocomplete>
+              </v-col>
+            </v-row>
+          </v-form>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn color="red-darken-1" variant="tonal" @click="dialogoChangeRoute = false">
+            Cerrar
+          </v-btn>
+          <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtn" @click="changeRoute">
+            Crear
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -484,7 +516,7 @@ export default {
       { title: 'Documento', key: 'cliente.documento' },
       { title: 'Nombre', key: 'cliente.nombres' },
       { title: 'Apellido', key: 'cliente.apellidos' },
-      { title: 'Ruta', key: 'ruta' },
+      { title: 'Ruta', key: 'cliente.direccion.nombre' },
       { title: 'Producto', key: 'producto' },
       { title: 'Cuotas', key: 'cuotas' },
       { title: 'Atrasado', key: 'mora' },

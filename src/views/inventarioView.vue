@@ -1,3 +1,5 @@
+<!-- eslint-disable vue/valid-v-slot -->
+
 <template>
   <div class="inventario">
     <v-card class="ma-3">
@@ -18,21 +20,24 @@
       <v-row>
         <v-card class="ma-3 w-100">
           <v-card-title>
-            <v-col md="6" sm="12"><v-text-field v-model="searchInventario" append-inner-icon="mdi-magnify" label="Buscar"
-                variant="outlined" hide-details></v-text-field></v-col>
+            <v-col md="6" sm="12"><v-text-field v-model="searchInventario" append-inner-icon="mdi-magnify"
+                label="Buscar" variant="outlined" hide-details></v-text-field></v-col>
           </v-card-title>
           <v-data-table :headers="headers" :items="inventario" :sort-by="[{ key: 'nombre', order: 'asc' }]"
             class="elevation-1" :search="searchInventario">
             <template v-slot:item.producto.valor_compra="{ item }">
               {{ item.producto.valor_compra.toLocaleString() }}
             </template>
+
             <template v-slot:item.producto.valor_contado="{ item }">
               {{ item.producto.valor_contado.toLocaleString() }}
             </template>
+
             <template v-slot:item.producto.valor_credito="{ item }">
               {{ item.producto.valor_credito.toLocaleString() }}
             </template>
             <!-- eslint-disable-next-line vue/valid-v-slot -->
+
             <template v-slot:item.actions="{ item }">
               <v-icon size="small" class="me-2" @click="editarStockVista(Object.assign({}, item))">
                 mdi-pencil
@@ -136,6 +141,7 @@
                 </v-col>
                 <v-data-table :headers="headersBodega" :items="bodegas" :sort-by="[{ key: 'nombre', order: 'asc' }]"
                   class="elevation-1">
+
                   <template v-slot:item.actions="{ item }">
                     <v-icon size="small" @click="eliminarBodega(item._id)">
                       mdi-delete

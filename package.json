@@ -16,6 +16,7 @@
     "core-js": "^3.29.0",
     "roboto-fontface": "*",
     "sweetalert2": "^11.10.1",
+    "tiktok-live-connector": "^1.0.5",
     "vue": "^3.2.0",
     "vue-chartjs": "^5.2.0",
     "vue-persistedstate": "^1.2.5",
