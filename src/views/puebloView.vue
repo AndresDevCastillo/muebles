@@ -22,19 +22,21 @@
             <v-col md="6" sm="12"><v-text-field v-model="searchRuta" append-inner-icon="mdi-magnify" label="Buscar"
                 variant="outlined" hide-details></v-text-field></v-col>
           </v-card-title>
-          <v-data-table :headers="headers" :items="rutas" :sort-by="[{ key: 'nombre', order: 'asc' }]" class="elevation-1"
-            :search="searchRuta">
+          <v-data-table :headers="headers" :items="rutas" :sort-by="[{ key: 'nombre', order: 'asc' }]"
+            class="elevation-1" :search="searchRuta">
             <!-- eslint-disable-next-line vue/valid-v-slot -->
             <template v-slot:item.actions="{ item }">
-              <v-icon size="small" class="me-2" @click="verRutaFunction(Object.assign({}, item))">
-                mdi-eye
-              </v-icon>
-              <v-icon size="small" class="me-2" @click="preEditarRuta(Object.assign({}, item))">
-                mdi-pencil
-              </v-icon>
-              <v-icon size="small" @click="eliminarRuta(item._id)">
-                mdi-delete
-              </v-icon>
+              <div v-if="item.nombre != 'Sin ruta'">
+                <v-icon size="small" class="me-2" @click="verRutaFunction(Object.assign({}, item))">
+                  mdi-eye
+                </v-icon>
+                <v-icon size="small" class="me-2" @click="preEditarRuta(Object.assign({}, item))">
+                  mdi-pencil
+                </v-icon>
+                <v-icon size="small" @click="eliminarRuta(item._id)">
+                  mdi-delete
+                </v-icon>
+              </div>
             </template>
           </v-data-table>
         </v-card>
@@ -114,8 +116,8 @@
             <v-form>
               <v-row>
                 <v-col cols="12">
-                  <v-text-field label="Nombre de la ruta" type="text" required variant="outlined" v-model="verRuta.nombre"
-                    disabled></v-text-field>
+                  <v-text-field label="Nombre de la ruta" type="text" required variant="outlined"
+                    v-model="verRuta.nombre" disabled></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-text-field variant="outlined" label="Departamento" disabled required v-model="verRuta.departamento"
