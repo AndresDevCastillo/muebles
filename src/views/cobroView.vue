@@ -47,10 +47,30 @@
         <v-data-table :headers="headersAbonoHoy" :items="abonosHoy" class="elevation-1 mt-12">
 
           <template v-slot:top>
-            <h1 class="text-center">Historial de abonos</h1>
+            <h1 class="text-center">Abonos de hoy</h1>
           </template>
           <!-- eslint-disable-next-line vue/valid-v-slot -->
 
+          <template v-slot:item.monto="{ value }">
+            <v-chip color="green">
+              {{ '$' + value.toLocaleString() }}
+            </v-chip>
+          </template>
+        </v-data-table>
+        <v-data-table :headers="headersAbonoHoy" :items="abonosFechaEspecifica" class="elevation-1 mt-12">
+
+          <template v-slot:top>
+            <h1 class="text-center">Historial de abonos</h1>
+            <v-row style="padding: 30px;">
+              <v-col md="6" sm="12">
+                <VueDatePicker v-model="fechaAbonoApi"></VueDatePicker>
+              </v-col>
+              <v-col md="6" sm="12">
+                <v-btn color="blue" prepend-icon="mdi mdi-plus" @click="findCobroEspecifico()">Buscar</v-btn>
+              </v-col>
+            </v-row>
+          </template>
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template v-slot:item.monto="{ value }">
             <v-chip color="green">
               {{ '$' + value.toLocaleString() }}
@@ -232,8 +252,10 @@ export default {
   data: () => ({
     api: import.meta.env.VITE_APP_API_URL,
     disableBtn: false,
+    fechaAbonoApi: null,
     cobros: [],
     abonosHoy: [],
+    abonosFechaEspecifica: [],
     valid: false,
     token: null,
     dialogCliente: false,
@@ -536,6 +558,35 @@ export default {
       fechasDate.sort((f1, f2) => f1 - f2);
       return fechasDate;
     },
+    async findCobroEspecifico() {
+      if (this.fechaAbonoApi) {
+        this.$emit('loadingSweet');
+        await axios.post(`${this.api}/prestamo/cobroEspecifico`, {
+          date: this.fechaAbonoApi
+        }, {
+          headers: {
+            Authorization: `Bearer ${this.token}`
+          }
+        }).then(resp => {
+          this.abonosFechaEspecifica = resp.data;
+        }).catch(error => {
+          switch (error.response.status) {
+            case 401:
+              Session.expiredSession();
+              break;
+            default:
+              Swal.fire({
+                icon: 'info',
+                text: 'No se pudo obtener los productos',
+                showConfirmButton: false,
+                timer: 1600
+              });
+              break;
+          }
+        });
+        this.$emit('closeSweet');
+      }
+    }
   },
   computed: {
     cols2() {
