@@ -600,7 +600,7 @@ export default {
       abonos.forEach(abono => {
         montoT += abono.monto;
       });
-      return montoT;
+      return montoT.toLocaleString();
     }
   },
   computed: {
