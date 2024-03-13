@@ -48,6 +48,11 @@
 
           <template v-slot:top>
             <h1 class="text-center">Abonos de hoy</h1>
+            <v-row style="padding: 30px;">
+              <v-chip color="green">
+                <h3> {{ 'Total Recaudado $' + calcularAbonoTotales(abonosHoy) }}</h3>
+              </v-chip>
+            </v-row>
           </template>
           <!-- eslint-disable-next-line vue/valid-v-slot -->
 
@@ -68,6 +73,9 @@
               <v-col md="6" sm="12">
                 <v-btn color="blue" prepend-icon="mdi mdi-plus" @click="findCobroEspecifico()">Buscar</v-btn>
               </v-col>
+              <v-chip color="green">
+                <h3> {{ 'Total Recaudado $' + calcularAbonoTotales(abonosFechaEspecifica) }}</h3>
+              </v-chip>
             </v-row>
           </template>
           <!-- eslint-disable-next-line vue/valid-v-slot -->
@@ -252,7 +260,7 @@ export default {
   data: () => ({
     api: import.meta.env.VITE_APP_API_URL,
     disableBtn: false,
-    fechaAbonoApi: null,
+    fechaAbonoApi: [],
     cobros: [],
     abonosHoy: [],
     abonosFechaEspecifica: [],
@@ -342,7 +350,7 @@ export default {
       abono.forEach(abono => {
         abonoTotal += abono.monto;
       })
-      return abonoTotal.toLocaleString();
+      return abonoTotal.toLcalcularAbonoTotalesocaleString();
     },
     calcularRestante(abono, total) {
       let abonoTotal = 0;
@@ -586,6 +594,13 @@ export default {
         });
         this.$emit('closeSweet');
       }
+    },
+    calcularAbonoTotales(abonos) {
+      let montoT = 0;
+      abonos.forEach(abono => {
+        montoT += abono.monto;
+      });
+      return montoT;
     }
   },
   computed: {
