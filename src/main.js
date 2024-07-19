@@ -11,6 +11,15 @@ import App from './App.vue'
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
 
+//Componente Drag and Drop
+import draggable from 'vuedraggable';
+
+//Componente maps
+import { GoogleMap, Marker, MarkerCluster, InfoWindow, CustomControl } from 'vue3-google-map';
+
+//Componente maps
+import Maps from '@/components/maps.vue';
+
 // Composables
 import { createApp } from 'vue'
 
@@ -21,5 +30,12 @@ const app = createApp(App)
 registerPlugins(app)
 
 app.component('VueDatePicker', VueDatePicker);
+app.component('VueDraggable', draggable);
+app.component('GoogleMap', GoogleMap);
+app.component('GoogleMarker', Marker);
+app.component('GoogleMarkerCluster', MarkerCluster);
+app.component('GoogleInfoWindow', InfoWindow);
+app.component('GoogleCustomControl', CustomControl);
+app.component('MapsComponent', Maps);
 
 app.mount('#app')
