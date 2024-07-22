@@ -415,6 +415,12 @@
                 ></v-text-field>
               </v-col>
               <v-col cols="12" v-if="formaPago == 2">
+                <v-chip color="green">
+                  Fechas seleccionadas:
+                  {{ form.pago_fechas.length }}</v-chip
+                >
+              </v-col>
+              <v-col cols="12" v-if="formaPago == 2">
                 <VueDatePicker
                   format="yyyy-MM-dd"
                   :rules="campoRules"

@@ -198,6 +198,12 @@
                 ></v-text-field>
               </v-col>
               <v-col cols="12" v-if="formaPago == 2">
+                <v-chip color="green">
+                  Fechas seleccionadas:
+                  {{ form.pago_fechas.length }}</v-chip
+                >
+              </v-col>
+              <v-col cols="12" v-if="formaPago == 2">
                 <VueDatePicker
                   format="yyyy-MM-dd"
                   :rules="campoRules"
@@ -492,6 +498,12 @@
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12">
+                    <v-chip color="green">
+                      Fechas seleccionadas:
+                      {{ abonar.pago_fechas.length }}</v-chip
+                    >
+                  </v-col>
+                  <v-col cols="12">
                     <VueDatePicker
                       format="yyyy-MM-dd"
                       :rules="campoRules"
@@ -651,6 +663,12 @@
                       v-model="actualizarVentaAntigua.cuotas"
                       :rules="cantidadRules"
                     ></v-text-field>
+                  </v-col>
+                  <v-col cols="12">
+                    <v-chip color="green">
+                      Fechas seleccionadas:
+                      {{ actualizarVentaAntigua.fechas_pago.length }}</v-chip
+                    >
                   </v-col>
                   <v-col cols="12">
                     <VueDatePicker
