@@ -1,115 +1,275 @@
 <template>
   <div class="ganancias gananciasF">
-    <v-row class="ma-6 mb-6">
-      <v-col cols="12"><v-card class="w-100 d-flex gananciasF">
-          <v-container>
-            <v-row dense>
-              <v-col md="4">
-                <div class="col-xxl-4 col-md-6">
-                  <div class="card revenue-card" :class="{
-                    'info-card-gana': hoy.total >= 0,
-                    'info-card-pierde': hoy.total < 0,
-                  }">
-                    <div class="card-body">
-                      <h5 class="card-title">
-                        Hoy <span>| {{ hoy.fecha }}</span>
-                      </h5>
+    <v-card class="ma-6">
+      <v-tabs v-model="tab" bg-color="primary">
+        <v-tab value="Actual">Actual</v-tab>
+        <v-tab value="total">total</v-tab>
+      </v-tabs>
+      <v-card-text>
+        <v-tabs-window v-model="tab">
+          <v-tabs-window-item value="Actual">
+            <v-row class="ma-6 mb-6">
+              <v-col cols="12"
+                ><v-card class="w-100 d-flex gananciasF">
+                  <v-container>
+                    <v-row dense>
+                      <v-col md="4">
+                        <div class="col-xxl-4 col-md-6">
+                          <div
+                            class="card revenue-card"
+                            :class="{
+                              'info-card-gana': hoy.total >= 0,
+                              'info-card-pierde': hoy.total < 0,
+                            }"
+                          >
+                            <div class="card-body">
+                              <h5 class="card-title">
+                                Hoy <span>| {{ hoy.fecha }}</span>
+                              </h5>
 
-                      <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                          <i class="bi bi-currency-dollar"></i>
+                              <div class="d-flex align-items-center">
+                                <div
+                                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
+                                >
+                                  <i class="bi bi-currency-dollar"></i>
+                                </div>
+                                <div class="ps-3">
+                                  <h6>${{ hoy.total.toLocaleString() }}</h6>
+                                </div>
+                              </div>
+                              <h4 class="card-title">
+                                Abono:
+                                <span> {{ hoy.abono.toLocaleString() }}</span
+                                ><br />
+                                Ventas: <span> {{ hoy.ventas }}</span>
+                              </h4>
+                            </div>
+                          </div>
                         </div>
-                        <div class="ps-3">
-                          <h6>${{ hoy.total.toLocaleString() }}</h6>
+                      </v-col>
+
+                      <v-col md="4">
+                        <div class="col-xxl-4 col-md-6">
+                          <div
+                            class="card info-card revenue-card"
+                            :class="{
+                              'info-card-gana': mes.total >= 0,
+                              'info-card-pierde': mes.total < 0,
+                            }"
+                          >
+                            <div class="card-body">
+                              <h5 class="card-title">
+                                Mensual
+                                <span>| {{ dataYearName[mes.fecha] }}</span>
+                              </h5>
+
+                              <div class="d-flex align-items-center">
+                                <div
+                                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
+                                >
+                                  <i class="bi bi-currency-dollar"></i>
+                                </div>
+                                <div class="ps-3">
+                                  <h6>${{ mes.total.toLocaleString() }}</h6>
+                                </div>
+                              </div>
+                              <h4 class="card-title">
+                                Abono:
+                                <span> {{ mes.abono.toLocaleString() }}</span
+                                ><br />
+                                Ventas: <span> {{ mes.ventas }}</span>
+                              </h4>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <h4 class="card-title">
-                        Abono: <span> {{ hoy.abono.toLocaleString() }}</span><br />
-                        Ventas: <span> {{ hoy.ventas }}</span>
-                      </h4>
-                    </div>
-                  </div>
-                </div>
+                      </v-col>
+
+                      <v-col md="4">
+                        <div class="col-xxl-4 col-md-6">
+                          <div
+                            class="card info-card revenue-card"
+                            :class="{
+                              'info-card-gana': yearC.total >= 0,
+                              'info-card-pierde': yearC.total < 0,
+                            }"
+                          >
+                            <div class="card-body">
+                              <h5 class="card-title">
+                                Anual <span>| {{ yearC.fecha }}</span>
+                              </h5>
+
+                              <div class="d-flex align-items-center">
+                                <div
+                                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
+                                >
+                                  <i class="bi bi-currency-dollar"></i>
+                                </div>
+                                <div class="ps-3">
+                                  <h6>${{ yearC.total.toLocaleString() }}</h6>
+                                </div>
+                              </div>
+                              <h4 class="card-title">
+                                Abono:
+                                <span> {{ yearC.abono.toLocaleString() }}</span
+                                ><br />
+                                Ventas: <span> {{ yearC.ventas }}</span>
+                              </h4>
+                            </div>
+                          </div>
+                        </div>
+                      </v-col>
+                    </v-row>
+                  </v-container>
+                </v-card>
               </v-col>
-
-              <v-col md="4">
-                <div class="col-xxl-4 col-md-6">
-                  <div class="card info-card revenue-card" :class="{
-                    'info-card-gana': mes.total >= 0,
-                    'info-card-pierde': mes.total < 0,
-                  }">
-                    <div class="card-body">
-                      <h5 class="card-title">
-                        Mensual <span>| {{ mesesDelAnio[mes.fecha] }}</span>
-                      </h5>
-
-                      <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                          <i class="bi bi-currency-dollar"></i>
-                        </div>
-                        <div class="ps-3">
-                          <h6>${{ mes.total.toLocaleString() }}</h6>
-                        </div>
-                      </div>
-                      <h4 class="card-title">
-                        Abono: <span> {{ mes.abono.toLocaleString() }}</span><br />
-                        Ventas: <span> {{ mes.ventas }}</span>
-                      </h4>
-                    </div>
-                  </div>
-                </div>
+              <v-col lg="6" md="6" sm="12">
+                <canvas class="mb-6" id="graficaCobradores"></canvas>
               </v-col>
-
-              <v-col md="4">
-                <div class="col-xxl-4 col-md-6">
-                  <div class="card info-card revenue-card" :class="{
-                    'info-card-gana': yearC.total >= 0,
-                    'info-card-pierde': yearC.total < 0,
-                  }">
-                    <div class="card-body">
-                      <h5 class="card-title">
-                        Anual <span>| {{ yearC.fecha }}</span>
-                      </h5>
-
-                      <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                          <i class="bi bi-currency-dollar"></i>
-                        </div>
-                        <div class="ps-3">
-                          <h6>${{ yearC.total.toLocaleString() }}</h6>
-                        </div>
-                      </div>
-                      <h4 class="card-title">
-                        Abono: <span> {{ yearC.abono.toLocaleString() }}</span><br />
-                        Ventas: <span> {{ yearC.ventas }}</span>
-                      </h4>
-                    </div>
-                  </div>
-                </div>
+              <v-col lg="6" md="6" sm="12">
+                <canvas class="mb-6" id="graficaAbono"></canvas>
+              </v-col>
+              <v-col lg="6" md="6" sm="12">
+                <canvas class="mb-6" id="graficaVenta"></canvas>
+              </v-col>
+              <v-col lg="6" md="6" sm="12">
+                <canvas class="mb-6" id="graficaRutas"></canvas>
+              </v-col>
+              <v-col lg="6" md="6" sm="12">
+                <canvas class="mb-6" id="graficaYear"></canvas>
+              </v-col>
+              <v-col lg="6" md="6" sm="12">
+                <canvas class="mb-6" id="graficaProductos"></canvas>
               </v-col>
             </v-row>
-          </v-container>
-        </v-card>
-      </v-col>
-      <v-col lg="6" md="6" sm="12">
-        <canvas class="mb-6" id="graficaCobradores"></canvas>
-      </v-col>
-      <v-col lg="6" md="6" sm="12">
-        <canvas class="mb-6" id="graficaAbono"></canvas>
-      </v-col>
-      <v-col lg="6" md="6" sm="12">
-        <canvas class="mb-6" id="graficaVenta"></canvas>
-      </v-col>
-      <v-col lg="6" md="6" sm="12">
-        <canvas class="mb-6" id="graficaRutas"></canvas>
-      </v-col>
-      <v-col lg="6" md="6" sm="12">
-        <canvas class="mb-6" id="graficaYear"></canvas>
-      </v-col>
-      <v-col lg="6" md="6" sm="12">
-        <canvas class="mb-6" id="graficaProductos"></canvas>
-      </v-col>
-    </v-row>
+          </v-tabs-window-item>
+          <v-tabs-window-item value="total">
+            <v-row class="ma-6 mb-6">
+              <v-col cols="12"
+                ><v-card class="w-100 d-flex gananciasF">
+                  <v-container>
+                    <v-row dense>
+                      <v-col md="4">
+                        <div class="col-xxl-4 col-md-6">
+                          <div class="card revenue-card info-card-gana">
+                            <div class="card-body">
+                              <h5 class="card-title">Abonos</h5>
+                              <div class="d-flex align-items-center">
+                                <div
+                                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
+                                >
+                                  <i class="bi bi-currency-dollar"></i>
+                                </div>
+                                <div class="ps-3">
+                                  <h6>${{ total.abonos.toLocaleString() }}</h6>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </v-col>
+
+                      <v-col md="4">
+                        <div class="col-xxl-4 col-md-6">
+                          <div
+                            class="card info-card revenue-card info-card-gana"
+                          >
+                            <div class="card-body">
+                              <h5 class="card-title">Ventas</h5>
+
+                              <div class="d-flex align-items-center">
+                                <div
+                                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
+                                >
+                                  <i class="bi bi-currency-dollar"></i>
+                                </div>
+                                <div class="ps-3">
+                                  <h6>${{ total.ventas.toLocaleString() }}</h6>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </v-col>
+
+                      <v-col md="4">
+                        <div class="col-xxl-4 col-md-6">
+                          <div
+                            class="card info-card revenue-card info-card-gana"
+                          >
+                            <div class="card-body">
+                              <h5 class="card-title">Total de Ventas</h5>
+
+                              <div class="d-flex align-items-center">
+                                <div
+                                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
+                                >
+                                  <i class="bi bi-currency-dollar"></i>
+                                </div>
+                                <div class="ps-3">
+                                  <h6>
+                                    {{ total.ventasTotales.toLocaleString() }}
+                                  </h6>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </v-col>
+                    </v-row>
+                  </v-container>
+                </v-card>
+              </v-col>
+              <v-col cols="12">
+                <v-card class="ma-6">
+                  <v-tabs v-model="tabsPrestamo" bg-color="primary">
+                    <v-tab value="ventas">Ventas</v-tab>
+                    <v-tab value="abonos">Abonos</v-tab>
+                  </v-tabs>
+                  <v-card-text>
+                    <v-tabs-window v-model="tabsPrestamo">
+                      <v-tabs-window-item value="ventas">
+                        <v-col md="3" lg="2" sm="12" cols="auto">
+                          <div class="d-flex align-center">
+                            <v-icon
+                              size="x-large"
+                              icon="mdi-store-edit"
+                            ></v-icon>
+                            <h1 class="px-3">Ventas</h1>
+                          </div>
+                        </v-col>
+                        <v-col cols="12">
+                          <v-data-table
+                            items-per-page="13"
+                            :items="total.tablaPrestamos"
+                          />
+                        </v-col>
+                      </v-tabs-window-item>
+                      <v-tabs-window-item value="abonos">
+                        <v-col md="3" lg="2" sm="12" cols="auto">
+                          <div class="d-flex align-center">
+                            <v-icon
+                              size="x-large"
+                              icon="mdi-store-edit"
+                            ></v-icon>
+                            <h1 class="px-3">Abonos</h1>
+                          </div>
+                        </v-col>
+                        <v-col cols="12">
+                          <v-data-table
+                            items-per-page="13"
+                            :items="total.tablaAbonos"
+                          />
+                        </v-col>
+                      </v-tabs-window-item>
+                    </v-tabs-window>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-tabs-window-item>
+        </v-tabs-window>
+      </v-card-text>
+    </v-card>
   </div>
 </template>
 
@@ -123,6 +283,8 @@ export default {
   data: () => ({
     api: import.meta.env.VITE_APP_API_URL,
     token: null,
+    tab: null,
+    tabsPrestamo: null,
     hoy: {
       fecha: "Lunes",
       total: 0,
@@ -140,6 +302,13 @@ export default {
       total: 0,
       ventas: 0,
       abono: 0,
+    },
+    total: {
+      abonos: 0,
+      ventas: 0,
+      ventasTotales: 0,
+      tablaPrestamos: [],
+      tablaAbonos: [],
     },
     miImagen: null,
     year: null,
@@ -170,20 +339,6 @@ export default {
     dataProductos: [],
     chart: null,
     datosCharts: null,
-    mesesDelAnio: [
-      "Enero",
-      "Febrero",
-      "Marzo",
-      "Abril",
-      "Mayo",
-      "Junio",
-      "Julio",
-      "Agosto",
-      "Septiembre",
-      "Octubre",
-      "Noviembre",
-      "Diciembre",
-    ],
     colores: [
       "#FF5733", // Naranja
       "#3498db", // Azul
@@ -201,8 +356,8 @@ export default {
   }),
   methods: {
     getRandomColor() {
-      const letters = '0123456789ABCDEF';
-      let color = '#';
+      const letters = "0123456789ABCDEF";
+      let color = "#";
       for (let i = 0; i < 6; i++) {
         color += letters[Math.floor(Math.random() * 16)];
       }
@@ -210,14 +365,11 @@ export default {
     },
     async listarGraficaYear() {
       this.dataYearCantidad = [];
-      await Axios.get(
-        `${this.api}/cliente/estadisticas/obtener`,
-        {
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
-        }
-      )
+      await Axios.get(`${this.api}/cliente/estadisticas/obtener`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      })
         .then((resp) => {
           this.dataYearCantidad = resp.data;
         })
@@ -241,7 +393,7 @@ export default {
             default:
               Swal.fire({
                 icon: "error",
-                title: "No se pudo obtener los clientes anuales",
+                title: "No se pudo obtener las graficas",
                 showConfirmButton: false,
                 timer: 1500,
               });
@@ -282,14 +434,11 @@ export default {
       this.chart = new Chart(ctx, this.year);
     },
     async listarGraficaCobro() {
-      await Axios.get(
-        `${this.api}/prestamo/estadisticas/obtener`,
-        {
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
-        }
-      )
+      await Axios.get(`${this.api}/prestamo/estadisticas/obtener`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      })
         .then((resp) => {
           this.dataYearAbono = resp.data.abonos;
           this.dataYearVenta = resp.data.ventas;
@@ -299,7 +448,6 @@ export default {
           this.dataCobradores = resp.data.cobradores;
           this.dataRutas = resp.data.rutas;
           this.dataProductos = resp.data.graficaProductos;
-
         })
         .catch(async (error) => {
           console.log(error);
@@ -321,7 +469,7 @@ export default {
             default:
               Swal.fire({
                 icon: "error",
-                title: "No se pudo obtener los clientes anuales",
+                title: "No se pudo obtener las graficas",
                 showConfirmButton: false,
                 timer: 1500,
               });
@@ -475,15 +623,14 @@ export default {
             legend: {
               display: false,
             },
-
           },
           scales: {
             y: {
               beginAtZero: true,
             },
             x: {
-              display: false
-            }
+              display: false,
+            },
           },
         },
       };
@@ -493,8 +640,46 @@ export default {
       this.chart = new Chart(ctx3, this.cobradores);
       this.chart = new Chart(ctx4, this.rutas);
       this.chart = new Chart(ctx5, this.productos);
+    },
+    async listarGraficaTotal() {
+      await Axios.get(`${this.api}/prestamo/estadisticas/total`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      })
+        .then((resp) => {
+          this.total = resp.data;
+        })
+        .catch(async (error) => {
+          console.log(error);
+          switch (error.response.status) {
+            case 401:
+              await Swal.fire({
+                icon: "warning",
+                title: "Tu sesión expiro, vuelve a iniciar sesión",
+                showConfirmButton: false,
+                timer: 1500,
+              });
+              this.$store.commit("setusuario", {
+                usuario: null,
+                hora_login: null,
+              });
+              this.$router.push("/");
+              break;
 
-
+            default:
+              Swal.fire({
+                icon: "error",
+                title: "No se pudo obtener las graficas",
+                showConfirmButton: false,
+                timer: 1500,
+              });
+              break;
+          }
+        });
+      /* let ctx = document.getElementById("graficaYear");
+      
+      this.chart = new Chart(ctx, this.year); */
     },
   },
 
@@ -505,6 +690,7 @@ export default {
       this.$emit("loadingSweet");
       await this.listarGraficaYear();
       await this.listarGraficaCobro();
+      await this.listarGraficaTotal();
       this.$emit("closeSweet");
       await Axios.get(`${this.api}/cliente/sinRuta`, {
         headers: {
