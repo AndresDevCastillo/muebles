@@ -70,9 +70,9 @@
               mdi-cash
             </v-icon>
             <v-btn
-              v-if="item.cliente.direccionMaps.lat != null"
+              v-if="item.ubicacionMap.lat != null"
               class="elevation-0 me-2"
-              :href="`https://www.google.com/maps?q=${item.cliente.direccionMaps.lat},${item.cliente.direccionMaps.lng}`"
+              :href="`https://www.google.com/maps?q=${item.ubicacionMap.lat},${item.ubicacionMap.lng}`"
               target="_blank"
               icon
               dark
@@ -436,6 +436,16 @@
                   @cleared="form.pago_fechas = []"
                 />
               </v-col>
+              <v-col cols="12">
+                <h6 class="mb-3 text-h6">Marca la ubicación de cobro</h6>
+                <MapsComponent
+                  @ubicacion="
+                    (ubi) => {
+                      form.ubicacionMap = ubi;
+                    }
+                  "
+                />
+              </v-col>
             </v-row>
           </v-form>
         </v-card-text>
@@ -502,6 +512,10 @@ export default {
       cuotas: 1,
       pago_fechas: [],
       total: 0,
+      ubicacionMap: {
+        lat: null,
+        lng: null,
+      },
     },
     formAbono: {
       id: null,
@@ -728,6 +742,19 @@ export default {
     async guardar() {
       const { valid } = await this.$refs.formPrestamo.validate();
       if (valid) {
+        if (
+          this.form.ubicacionMap.lat == null ||
+          this.form.ubicacionMap.lng == null
+        ) {
+          Swal.fire({
+            icon: "error",
+            title: "Ubicación",
+            text: "Debe seleccionar una ubicación en el mapa",
+            showConfirmButton: false,
+            timer: 1600,
+          });
+          return;
+        }
         this.form.cantidad = parseInt(this.form.cantidad);
         this.form.cuotas = parseInt(this.form.cuotas);
         let total,
@@ -776,6 +803,7 @@ export default {
             cuotas: this.form.cuotas,
             pago_fechas: pagos,
             total: total,
+            ubicacionMap: this.form.ubicacionMap,
           };
           await axios
             .post(`${this.api}/prestamo/crear`, paquete, {

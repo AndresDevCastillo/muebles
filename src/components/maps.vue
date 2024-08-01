@@ -54,6 +54,7 @@ export default {
           this.centerMap = newValue;
         }
       },
+      immediate: true,
     },
     ubicacionAnterior: {
       handler(newValue) {

@@ -88,8 +88,8 @@
           >
           <v-icon
             v-if="
-              (!item.completado && item.producto.length == 0) ||
-              item.producto.length == 0
+              !item.completado &&
+              (item.producto.length == 0 || item.ruta == 'Sin ruta')
             "
             size="small"
             class="me-2 mb-2"
@@ -98,9 +98,9 @@
             mdi mdi-cash-plus
           </v-icon>
           <v-btn
-            v-if="item.cliente.direccionMaps.lat != null"
+            v-if="item.ubicacionMap.lat != null"
             class="elevation-0"
-            :href="`https://www.google.com/maps?q=${item.cliente.direccionMaps.lat},${item.cliente.direccionMaps.lng}`"
+            :href="`https://www.google.com/maps?q=${item.ubicacionMap.lat},${item.ubicacionMap.lng}`"
             target="_blank"
             icon
             dark
@@ -217,6 +217,16 @@
                   placeholder="Selecciona fechas de pago"
                   teleport-center
                   @cleared="form.pago_fechas = []"
+                />
+              </v-col>
+              <v-col cols="12">
+                <h6 class="mb-3 text-h6">Marca la ubicación de cobro</h6>
+                <MapsComponent
+                  @ubicacion="
+                    (ubi) => {
+                      form.ubicacionMap = ubi;
+                    }
+                  "
                 />
               </v-col>
             </v-row>
@@ -637,6 +647,18 @@
                   ></v-autocomplete>
                 </v-col>
                 <v-col cols="12">
+                  <h6 class="mb-3 text-h6">Marca la ubicación de cobro</h6>
+                  <MapsComponent
+                    :ubicacionAnterior="actualizarVentaAntigua.ubicacionMap"
+                    :centroMap="actualizarVentaAntigua.ubicacionMap"
+                    @ubicacion="
+                      (ubi) => {
+                        actualizarVentaAntigua.ubicacionMap = ubi;
+                      }
+                    "
+                  />
+                </v-col>
+                <v-col cols="12">
                   <v-autocomplete
                     label="Producto"
                     no-data-text="Sin productos registrados"
@@ -844,6 +866,10 @@ export default {
       cuotas: 1,
       pago_fechas: [],
       total: 0,
+      ubicacionMap: {
+        lat: null,
+        lng: null,
+      },
     },
     verPrestamo: {
       abono: null,
@@ -905,6 +931,10 @@ export default {
       producto: null,
       cuotas: 1,
       fechas_pago: [],
+      ubicacionMap: {
+        lat: null,
+        lng: null,
+      },
     },
     rutas: [],
     abonosTabla: [],
@@ -958,6 +988,7 @@ export default {
     },
     dialogActualizarVenta(item) {
       this.actualizarVentaAntigua.cliente = item.cliente._id;
+      this.actualizarVentaAntigua.ubicacionMap = item.ubicacionMap;
       this.actualizarVentaAntigua.venta = item._id;
       this.actualizarVentaAntigua.resta =
         item.total -
@@ -966,7 +997,8 @@ export default {
           0
         );
       this.actualizarVentaAntigua.ruta = item.ruta;
-      this.actualizarVentaAntigua.producto = null;
+      this.actualizarVentaAntigua.producto =
+        item.producto != null && item.producto != "" ? item.producto : null;
       this.dialogVentaAntigua = true;
     },
     async guardarAbonoVenta() {
@@ -1028,6 +1060,19 @@ export default {
     async actualizarVenta() {
       const { valid } = await this.$refs.formVentaAntigua.validate();
       if (valid) {
+        if (
+          this.actualizarVentaAntigua.ubicacionMap.lat == null ||
+          this.actualizarVentaAntigua.ubicacionMap.lng == null
+        ) {
+          Swal.fire({
+            icon: "error",
+            title: "Ubicación",
+            text: "Debe seleccionar una ubicación en el mapa",
+            showConfirmButton: false,
+            timer: 1600,
+          });
+          return;
+        }
         this.actualizarVentaAntigua.cuotas = parseInt(
           this.actualizarVentaAntigua.cuotas
         );
@@ -1061,6 +1106,7 @@ export default {
           cliente: this.actualizarVentaAntigua.cliente,
           cuotas: 0,
           fechas_pago: [],
+          ubicacionMap: this.actualizarVentaAntigua.ubicacionMap,
         };
         this.rutas.forEach((ruta) => {
           if (ruta.nombre == paquete.ruta) {
@@ -1581,6 +1627,19 @@ export default {
     async guardar() {
       const { valid } = await this.$refs.formPrestamo.validate();
       if (valid) {
+        if (
+          this.form.ubicacionMap.lat == null ||
+          this.form.ubicacionMap.lng == null
+        ) {
+          Swal.fire({
+            icon: "error",
+            title: "Ubicación",
+            text: "Debe seleccionar una ubicación en el mapa",
+            showConfirmButton: false,
+            timer: 1600,
+          });
+          return;
+        }
         this.form.cantidad = parseInt(this.form.cantidad);
         this.form.cuotas = parseInt(this.form.cuotas);
         let total,
@@ -1629,6 +1688,7 @@ export default {
             cuotas: this.form.cuotas,
             pago_fechas: pagos,
             total: total,
+            ubicacionMap: this.form.ubicacionMap,
           };
           await axios
             .post(`${this.api}/prestamo/crear`, paquete, {

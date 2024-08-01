@@ -85,11 +85,11 @@
                 ></v-text-field>
               </v-col>
               <v-col cols="12">
-                <h6 class="mb-3 text-h6">Marca la ubicación de tu casa</h6>
+                <h6 class="mb-3 text-h6">Marca la ubicación de cobro</h6>
                 <MapsComponent
                   @ubicacion="
                     (ubi) => {
-                      formCliente.direccionMaps = ubi;
+                      formCliente.venta.ubicacionMap = ubi;
                     }
                   "
                 />
@@ -237,10 +237,6 @@ export default {
       correo: null,
       direccion: null,
       direccionResidencia: null,
-      direccionMaps: {
-        lat: null,
-        lng: null,
-      },
       venta: {
         producto: null,
         cantidad: 1,
@@ -248,6 +244,10 @@ export default {
         fecha_inicio: null,
         pago_fechas: [],
         total: 0,
+        ubicacionMap: {
+          lat: null,
+          lng: null,
+        },
       },
     },
   }),
@@ -308,8 +308,8 @@ export default {
       const { valid } = await this.$refs.formCliente.validate();
       if (valid) {
         if (
-          this.formCliente.direccionMaps.lat == null ||
-          this.formCliente.direccionMaps.lng == null
+          this.formCliente.venta.ubicacionMap.lat == null ||
+          this.formCliente.venta.ubicacionMap.lng == null
         ) {
           Swal.fire({
             icon: "error",
@@ -380,7 +380,6 @@ export default {
             correo: this.formCliente.correo,
             direccion: this.formCliente.direccion,
             direccionResidencia: this.formCliente.direccionResidencia,
-            direccionMaps: this.formCliente.direccionMaps,
             venta: {
               inventario: this.formCliente.venta.producto._id,
               producto: this.formCliente.venta.producto.producto.nombre,
@@ -389,6 +388,7 @@ export default {
               fecha_inicio: new Date(),
               pago_fechas: pagos,
               total: total,
+              ubicacionMap: this.formCliente.venta.ubicacionMap,
             },
           };
           await axios
@@ -400,7 +400,7 @@ export default {
             .then(() => {
               this.$refs.formCliente.reset();
               this.formCliente.venta.pago_fechas = [];
-              this.formCliente.direccionMaps = {
+              this.formCliente.direccionMap = {
                 lat: null,
                 lng: null,
               };
