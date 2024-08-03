@@ -78,21 +78,6 @@
             >
               mdi-pencil
             </v-icon>
-            <v-btn
-              v-if="item.direccionMaps.lat != null"
-              class="elevation-0 me-2"
-              :href="`https://www.google.com/maps?q=${item.direccionMaps.lat},${item.direccionMaps.lng}`"
-              target="_blank"
-              icon
-              dark
-              density="compact"
-              text
-            >
-              <v-icon size="small">mdi mdi-home-map-marker</v-icon>
-              <v-tooltip activator="parent" location="top"
-                >Ver ubicación</v-tooltip
-              >
-            </v-btn>
             <v-icon size="small" @click="eliminarCliente(item._id)">
               mdi-delete
             </v-icon>
@@ -177,17 +162,6 @@
                     :rules="[(v) => !!v || 'Seleccione una ruta']"
                     no-data-text="No hay rutas"
                   ></v-autocomplete>
-                </v-col>
-                <v-col cols="12">
-                  <h6 class="mb-3 text-h6">Marca la ubicación de tu casa</h6>
-                  <MapsComponent
-                    :ubicacionAnterior="ubicacionVieja"
-                    @ubicacion="
-                      (ubi) => {
-                        formClienteEditar.direccionMaps = ubi;
-                      }
-                    "
-                  />
                 </v-col>
               </v-row>
             </v-form>
@@ -485,10 +459,6 @@ export default {
       telefono: null,
       correo: null,
       direccion: null,
-      direccionMaps: {
-        lat: null,
-        lng: null,
-      },
     },
     ubicacionVieja: {
       lat: null,
@@ -652,30 +622,11 @@ export default {
       this.formClienteEditar.id = item._id;
       delete this.formClienteEditar._id;
       this.formClienteEditar.direccion = item.direccion._id;
-      this.formClienteEditar.direccionMaps.lat = item.direccionMaps.lat;
-      this.formClienteEditar.direccionMaps.lng = item.direccionMaps.lng;
-      this.ubicacionVieja = {
-        lat: item.direccionMaps.lat,
-        lng: item.direccionMaps.lng,
-      };
       this.dialogClienteEditar = true;
     },
     async editarCliente() {
       const { valid } = await this.$refs.formClienteEditar.validate();
       if (valid) {
-        if (
-          this.formClienteEditar.direccionMaps.lat == null ||
-          this.formClienteEditar.direccionMaps.lng == null
-        ) {
-          Swal.fire({
-            icon: "error",
-            title: "Ubicación",
-            text: "Debe seleccionar una ubicación en el mapa",
-            showConfirmButton: false,
-            timer: 1600,
-          });
-          return;
-        }
         this.disableBtn = true;
         this.dialogClienteEditar = false;
         this.formClienteEditar.documento = parseInt(

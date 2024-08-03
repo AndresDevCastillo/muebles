@@ -1,86 +1,147 @@
 <template>
   <div class="rutas">
-    <v-card class="ma-3">
+    <v-card class="ma-3 text-break">
+      <v-card-title>
+        <v-row justify="space-between" justify-sm="start" class="px-6 my-4">
+          <v-col cols="auto">
+            <v-row class="align-center">
+              <v-icon size="x-large" icon="mdi mdi-cash-marker" />
+              <h1 class="px-3">Ordena y revisa tus cobros</h1>
+            </v-row>
+          </v-col>
+        </v-row>
+      </v-card-title>
       <v-card-text>
-        <v-expansion-panels class="my-4" variant="popout">
-          <v-expansion-panel
-            v-for="i in 3"
-            :key="i"
-            text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-            title="Item"
-          ></v-expansion-panel>
-        </v-expansion-panels>
-        <!-- <VueDraggable
-          class="list-group"
-          handle=".handle"
-          :component-data="{
-            tag: 'li',
-            type: 'transition-group',
-            name: !drag ? 'flip-list' : null,
-          }"
-          v-model="list"
-          v-bind="dragOptions"
-          @start="drag = true"
-          @end="drag = false"
-          item-key="order"
+        <v-row no-gutters justify="center">
+          <v-col cols="12" md="5" sm="8">
+            <v-form ref="formRutas">
+              <v-autocomplete
+                label="Tus rutas"
+                v-model="ruta"
+                :items="rutas"
+                item-title="nombre"
+                item-value="_id"
+                @update:modelValue="buscarPrestamosRuta"
+                clearable
+              />
+            </v-form>
+          </v-col>
+        </v-row>
+        <v-row
+          class="flex-column"
+          align="center"
+          no-gutters
+          v-if="prestamos.length > 0"
         >
-          <template #item="{ element }">
-            <div>
-              <v-list lines="one" class="ruta">
-                <v-list-item
-                  max-height="100%"
-                  elevation="12"
-                  :title="element.name"
-                >
-                  <template v-slot:prepend>
+          <h1 class="my-2 text-center w-100">Ordena tus cobros</h1>
+          <v-btn color="info" @click="marcarPendiente"
+            >Marcar todos como Pendiente</v-btn
+          >
+          <v-col cols="4">
+            <v-btn
+              block
+              class="mt-4"
+              @click="guardarOrdenCobros"
+              :disabled="btnOrden"
+              color="success"
+            >
+              Actualizar orden cobros
+            </v-btn>
+          </v-col>
+          <VueDraggable
+            v-model="prestamos"
+            class="w-100"
+            animation="200"
+            target=".prestamos-target"
+          >
+            <TransitionGroup
+              type="transition"
+              tag="ul"
+              name="slide-fade"
+              class="prestamos-target w-100 v-list v-list--one-line"
+            >
+              <li
+                v-for="(prestamo, index) in prestamos"
+                class="d-flex ga-2 justify-space-between align-center mx-2 my-2 v-list-item v-theme--light v-list-item--density-default elevation-12 rounded-0 v-list-item--variant-text"
+                :key="index"
+              >
+                <div class="contenido d-flex ga-4">
+                  <div class="icon">
                     <v-icon
                       class="cursor-pointer"
                       icon="mdi mdi-drag handle"
                     ></v-icon>
-                  </template>
-                </v-list-item>
-              </v-list>
-            </div>
-          </template>
-        </VueDraggable> -->
-
-        <v-row justify="center">
-          <GoogleMap
-            :api-key="api_key_maps"
-            style="height: 500px; width: 90%"
-            :zoom="10"
-            :center="centerMap"
-            @click="marcarUbicacion"
-          >
-            <GoogleMarkerCluster>
-              <GoogleMarker
-                v-for="(marker, index) in markerLocation"
-                :key="index"
-                :options="{ position: marker }"
-              >
-                <GoogleInfoWindow v-if="marker.label">
-                  <div id="content">
-                    <div id="siteNotice"></div>
-                    <h4 id="firstHeading" class="firstHeading">
-                      {{ marker.label }}
-                    </h4>
-                    <div id="bodyContent">
-                      <p>
-                        {{
-                          marker.label == "Yo"
-                            ? marker.title
-                            : `${marker.title} agregada ${index + 1}`
-                        }}
-                      </p>
-                    </div>
                   </div>
-                </GoogleInfoWindow>
-              </GoogleMarker>
-            </GoogleMarkerCluster>
-            <GoogleCustomControl position="INLINE_END_BLOCK_CENTER">
-              <button class="custom-btn">Limpiar ubicaciones</button>
-            </GoogleCustomControl>
-          </GoogleMap>
+                  <div class="descripcion v-list-item-title">
+                    <p>
+                      {{ index + 1 }} - {{ prestamo.nombres }}
+                      {{ prestamo.apellidos }}
+                      <span class="ml-4"
+                        ><strong>Producto: </strong>
+                        {{ prestamo.producto }}</span
+                      >
+                    </p>
+                  </div>
+                </div>
+                <div class="estados">
+                  <v-radio-group
+                    v-model="prestamo.estado"
+                    inline
+                    :hide-details="true"
+                  >
+                    <v-radio label="Pendiente" value="Pendiente" />
+                    <v-radio label="Aplazado" value="Aplazado" />
+                    <v-radio label="Finalizado" value="Finalizado" />
+                  </v-radio-group>
+                </div>
+              </li>
+            </TransitionGroup>
+          </VueDraggable>
+        </v-row>
+        <v-row no-gutters class="flex-column">
+          <h1 class="my-2 text-center w-100">Tus rutas de cobro</h1>
+          <v-expansion-panels class="my-4 w-100" variant="popout" multiple>
+            <v-expansion-panel
+              v-for="(ruta, index) in rutasCobro"
+              :key="index"
+              class="w-100"
+            >
+              <v-expansion-panel-title>
+                <strong>
+                  {{ ruta.ruta.nombre }} - {{ ruta.ruta.ciudad }} -
+                  {{ ruta.ruta.departamento }}
+                </strong>
+              </v-expansion-panel-title>
+              <v-expansion-panel-text>
+                <v-list density="compact" lines="two">
+                  <v-list-subheader>CLIENTES</v-list-subheader>
+                  <v-list-item
+                    v-for="(cobro, index) in ruta.orden_cobro"
+                    :key="index"
+                    :title="`${index + 1} - ${cobro.prestamo.cliente.nombres} ${
+                      cobro.prestamo.cliente.apellidos
+                    }`"
+                    :subtitle="cobro.prestamo.producto"
+                    color="primary"
+                  >
+                    <template v-slot:append>
+                      <v-chip
+                        variant="flat"
+                        :color="
+                          cobro.estado == 'Pendiente'
+                            ? 'primary'
+                            : cobro.estado == 'Aplazado'
+                            ? 'orange'
+                            : 'green'
+                        "
+                        >{{ cobro.estado }}</v-chip
+                      >
+                    </template>
+                  </v-list-item>
+                </v-list>
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
         </v-row>
       </v-card-text>
     </v-card>
@@ -92,35 +153,24 @@ import axios from "axios";
 import Swal from "sweetalert2";
 export default {
   name: "rutasCobrador",
-  display: "Transitions",
-  order: 7,
   data: () => ({
     api: import.meta.env.VITE_APP_API_URL,
-    api_key_maps: import.meta.env.VITE_APP_API_KEY_MAPS,
-    centerMap: {
-      lat: -34.6037,
-      lng: -58.3816,
-    },
-    markerLocation: [],
-    watchIdLocation: null,
     token: {
       headers: {
         Authorization: null,
       },
     },
-    drag: false,
+    ruta: null,
+    isDragging: false,
     rutas: [],
+    rutasCobro: [],
+    prestamos: [],
+    btnOrden: false,
   }),
   methods: {
-    sort() {
-      this.list = this.list.sort((a, b) => a.order - b.order);
-    },
-    marcarUbicacion(ubicacion) {
-      this.markerLocation.push({
-        lat: ubicacion.latLng.lat(),
-        lng: ubicacion.latLng.lng(),
-        label: "Ubicación agregada",
-        title: "Ubicación",
+    marcarPendiente() {
+      this.prestamos = this.prestamos.map((prestamo) => {
+        return { ...prestamo, estado: "Pendiente" };
       });
     },
     async getRutasAndClientes() {
@@ -148,6 +198,117 @@ export default {
           }
         });
     },
+    async getCobroRutas() {
+      await axios
+        .get(
+          `${this.api}/cobro-ruta/cobrador/${this.$store.getters.usuario.usuario.id}`,
+          this.token
+        )
+        .then((resp) => {
+          this.rutasCobro = resp.data;
+          console.log(resp.data);
+        })
+        .catch((error) => {
+          switch (error.response.status) {
+            case 401:
+              Session.expiredSession();
+              break;
+            default:
+              Swal.fire({
+                icon: "info",
+                text: "No se pudieron obtener las rutas",
+                showConfirmButton: false,
+                timer: 1600,
+              });
+              break;
+          }
+        });
+    },
+    async buscarPrestamosRuta() {
+      if (this.ruta) {
+        this.$emit("loadingSweet", "Buscando, espera un momento...");
+        await axios
+          .get(`${this.api}/cobro-ruta/${this.ruta}`, this.token)
+          .then((resp) => {
+            this.prestamos = resp.data.flatMap((prestamo) => {
+              return {
+                ...prestamo.cliente,
+                producto: prestamo.producto,
+                prestamo_id: prestamo._id,
+                estado: prestamo.estado ? prestamo.estado : null,
+              };
+            });
+          })
+          .catch((error) => {
+            switch (error.response.status) {
+              case 401:
+                Session.expiredSession();
+                break;
+              default:
+                Swal.fire({
+                  icon: "info",
+                  text: "No se pudieron obtener los préstamos",
+                  showConfirmButton: false,
+                  timer: 1600,
+                });
+                break;
+            }
+          });
+        this.$emit("closeSweet");
+      } else {
+        this.prestamos = [];
+      }
+    },
+    async guardarOrdenCobros() {
+      if (this.prestamos.every((prest) => prest.estado != null)) {
+        this.$emit("loadingSweet", "Guardando, espera un momento...");
+        this.btnOrden = true;
+        const paquete = {
+          ruta: this.ruta,
+          orden_cobro: this.prestamos.map((prest) => {
+            return {
+              prestamo: prest.prestamo_id,
+              estado: prest.estado,
+            };
+          }),
+        };
+        await axios
+          .post(`${this.api}/cobro-ruta/guardar`, paquete, this.token)
+          .then(async () => {
+            Swal.fire({
+              icon: "success",
+              text: "Orden de cobros guardada exitosamente",
+              showConfirmButton: false,
+              timer: 1600,
+            });
+            await this.getCobroRutas();
+          })
+          .catch((error) => {
+            switch (error.response.status) {
+              case 401:
+                Session.expiredSession();
+                break;
+              default:
+                Swal.fire({
+                  icon: "error",
+                  text: "No se pudo guardar la orden de cobros",
+                  showConfirmButton: false,
+                  timer: 1600,
+                });
+                break;
+            }
+          });
+        this.$emit("closeSweet");
+        this.btnOrden = false;
+      } else {
+        Swal.fire({
+          icon: "error",
+          text: "Debe seleccionar todos los estados",
+          showConfirmButton: false,
+          timer: 1600,
+        });
+      }
+    },
   },
   async created() {
     const invalid = await Session.expiredSession();
@@ -159,67 +320,8 @@ export default {
       };
       this.$emit("loadingSweet", "Cargando rutas, espere un momento...");
       await this.getRutasAndClientes();
+      await this.getCobroRutas();
       this.$emit("closeSweet");
-      //Obtener ubicación actual
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            this.centerMap = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            };
-            this.markerLocation.push({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-              label: "Yo",
-              title: "Mi ubicación actual",
-            });
-          },
-          (error) => {
-            console.error("Error: ", error);
-          }
-        );
-        this.watchIdLocation = navigator.geolocation.watchPosition(
-          (position) => {
-            this.centerMap = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            };
-            const miUbiActual = this.markerLocation.findIndex(
-              (ubi) => ubi.label == "Yo"
-            );
-            if (miUbiActual > -1) {
-              this.markerLocation[miUbiActual] = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-                label: "Yo",
-                title: "Mi ubicación actual",
-              };
-            } else {
-              this.markerLocation.push({
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-                label: "Yo",
-                title: "Mi ubicación actual",
-              });
-            }
-          },
-          (error) => {
-            Swal.fire({
-              icon: "info",
-              title: "Ubicación",
-              text: `Ocurrió un problema actualizando la ubicación ${error.message}`,
-              showConfirmButton: false,
-              timer: 1600,
-            });
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0,
-          }
-        );
-      }
     }
   },
   computed: {
@@ -231,12 +333,6 @@ export default {
         ghostClass: "ghost",
       };
     },
-  },
-  unmounted() {
-    if (this.watchIdLocation != null) {
-      navigator.geolocation.clearWatch(this.watchIdLocation);
-      this.watchIdLocation = null;
-    }
   },
 };
 </script>

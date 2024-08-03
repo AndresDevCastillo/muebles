@@ -19,10 +19,10 @@
     "tiktok-live-connector": "^1.0.5",
     "vue": "^3.2.0",
     "vue-chartjs": "^5.2.0",
+    "vue-draggable-plus": "^0.5.2",
     "vue-persistedstate": "^1.2.5",
     "vue-router": "^4.0.0",
     "vue3-google-map": "^0.20.0",
-    "vuedraggable": "^4.1.0",
     "vuetify": "^3.0.0",
     "vuex": "^4.1.0"
   },

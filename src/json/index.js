@@ -48,11 +48,11 @@ const menu = [{
                 title: 'Cobro',
                 href: '/inicio/cobro'
             },
-            /* {
-                       icon: '',
-                       title: 'Cobro por Rutas',
-                       href: '/inicio/cobro-rutas'
-                   } */
+            {
+                icon: 'mdi mdi-cash-marker',
+                title: 'Cobro por Rutas',
+                href: '/inicio/cobro-rutas'
+            }
         ]
     },
 ]
