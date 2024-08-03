@@ -70,6 +70,24 @@
               mdi-cash
             </v-icon>
             <v-btn
+              v-if="
+                !item.completado &&
+                (item.producto.length != 0 || item.ruta != 'Sin ruta') &&
+                item.ubicacionMap.lat == null
+              "
+              @click="dialogActualizarUbicacion(item._id)"
+              class="elevation-0 me-2"
+              text
+              icon
+              dark
+              density="compact"
+            >
+              <v-icon size="large">mdi mdi-home-map-marker</v-icon>
+              <v-tooltip activator="parent" location="top"
+                >Actualizar ubicación</v-tooltip
+              >
+            </v-btn>
+            <v-btn
               v-if="item.ubicacionMap.lat != null"
               class="elevation-0 me-2"
               :href="`https://www.google.com/maps?q=${item.ubicacionMap.lat},${item.ubicacionMap.lng}`"
@@ -79,7 +97,7 @@
               density="compact"
               text
             >
-              <v-icon size="small">mdi mdi-home-map-marker</v-icon>
+              <v-icon size="large">mdi mdi-home-map-marker</v-icon>
               <v-tooltip activator="parent" location="top"
                 >Ver ubicación</v-tooltip
               >
@@ -473,6 +491,41 @@
       @cerrarDialog="dialogCliente = false"
       @actualizarTodo="actualizarTodo"
     />
+    <v-dialog v-model="dialogUbicacion" persistent width="700">
+      <v-card>
+        <v-card-title> Cambiar ubicación </v-card-title>
+        <v-card-text>
+          <v-col cols="12">
+            <h6 class="mb-3 text-h6">Marca la ubicación de cobro</h6>
+            <MapsComponent
+              :centroMap="actualizarUbicacion.ubicacionMap"
+              @ubicacion="
+                (ubi) => {
+                  actualizarUbicacion.ubicacionMap = ubi;
+                }
+              "
+            />
+          </v-col>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn
+            color="red-darken-1"
+            variant="tonal"
+            @click="dialogUbicacion = false"
+          >
+            Cerrar
+          </v-btn>
+          <v-btn
+            color="green-darken-1"
+            variant="tonal"
+            :disabled="disableBtn"
+            @click="cambiarUbicacion"
+          >
+            Cambiar ubicación
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -497,6 +550,7 @@ export default {
     dialogAbonar: null,
     dialogVerCobro: null,
     dialogPrestamo: null,
+    dialogUbicacion: false,
     searchPrestamo: null,
     cedulaTemp: null,
     montoSugerido: null,
@@ -520,6 +574,13 @@ export default {
     formAbono: {
       id: null,
       abono: null,
+    },
+    actualizarUbicacion: {
+      venta: null,
+      ubicacionMap: {
+        lat: null,
+        lng: null,
+      },
     },
     verPrestamo: {
       abono: null,
@@ -579,6 +640,12 @@ export default {
     ],
   }),
   methods: {
+    dialogActualizarUbicacion(id) {
+      if (id != null) {
+        this.actualizarUbicacion.venta = id;
+        this.dialogUbicacion = true;
+      }
+    },
     calcularAbono(abono) {
       let abonoTotal = 0;
       abono.forEach((abono) => {
@@ -603,6 +670,54 @@ export default {
       const seconds = date.getSeconds().toString().padStart(2, "0");
 
       return `${year}-${month}-${day} | ${hours}:${minutes}:${seconds}`;
+    },
+
+    async cambiarUbicacion() {
+      if (
+        this.actualizarUbicacion.venta != null &&
+        this.actualizarUbicacion.ubicacionMap.lat != null &&
+        this.actualizarUbicacion.ubicacionMap.lng != null
+      ) {
+        await axios
+          .put(`${this.api}/prestamo/ubicacion`, this.actualizarUbicacion, {
+            headers: {
+              Authorization: `Bearer ${this.token}`,
+            },
+          })
+          .then(() => {
+            Swal.fire({
+              icon: "success",
+              text: "Ubicación actualizada correctamente",
+              showConfirmButton: false,
+              timer: 1500,
+            });
+            this.dialogUbicacion = false;
+            this.actualizarTodo();
+          })
+          .catch((error) => {
+            switch (error.response.status) {
+              case 401:
+                Session.expiredSession();
+                break;
+              default:
+                Swal.fire({
+                  icon: "info",
+                  text: "No se pudo actualizar la ubicación",
+                  showConfirmButton: false,
+                  timer: 1600,
+                });
+                break;
+            }
+          });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Ubicación",
+          text: "Debe seleccionar una ubicación en el mapa",
+          showConfirmButton: false,
+          timer: 1600,
+        });
+      }
     },
     async actualizarTodo() {
       await this.obtenerCobros();

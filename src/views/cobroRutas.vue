@@ -125,6 +125,21 @@
                     color="primary"
                   >
                     <template v-slot:append>
+                      <v-btn
+                        v-if="cobro.prestamo.ubicacionMap.lat != null"
+                        class="elevation-0 me-2"
+                        :href="`https://www.google.com/maps?q=${cobro.prestamo.ubicacionMap.lat},${cobro.prestamo.ubicacionMap.lng}`"
+                        target="_blank"
+                        icon
+                        dark
+                        density="compact"
+                        text
+                      >
+                        <v-icon size="large">mdi mdi-home-map-marker</v-icon>
+                        <v-tooltip activator="parent" location="top"
+                          >Ver ubicación</v-tooltip
+                        >
+                      </v-btn>
                       <v-chip
                         variant="flat"
                         :color="
@@ -206,7 +221,6 @@ export default {
         )
         .then((resp) => {
           this.rutasCobro = resp.data;
-          console.log(resp.data);
         })
         .catch((error) => {
           switch (error.response.status) {
