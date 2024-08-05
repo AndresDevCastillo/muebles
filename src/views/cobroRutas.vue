@@ -190,10 +190,7 @@ export default {
     },
     async getRutasAndClientes() {
       await axios
-        .get(
-          `${this.api}/pueblo/cobrador/${this.$store.getters.usuario.usuario.id}`,
-          this.token
-        )
+        .get(`${this.api}/pueblo`, this.token)
         .then((resp) => {
           this.rutas = resp.data;
         })
@@ -215,10 +212,7 @@ export default {
     },
     async getCobroRutas() {
       await axios
-        .get(
-          `${this.api}/cobro-ruta/cobrador/${this.$store.getters.usuario.usuario.id}`,
-          this.token
-        )
+        .get(`${this.api}/cobro-ruta`, this.token)
         .then((resp) => {
           this.rutasCobro = resp.data;
         })

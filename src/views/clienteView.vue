@@ -601,7 +601,7 @@ export default {
               Swal.fire({
                 icon: "error",
                 title: "Eliminar cliente",
-                text: "No se puede eliminar el cliente, tiene préstamos asociados",
+                text: "No se puede eliminar el cliente, tiene ventas asociadas",
                 showConfirmButton: false,
                 timer: 1600,
               });

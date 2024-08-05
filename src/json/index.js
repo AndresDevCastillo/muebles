@@ -11,6 +11,11 @@ const menu = [{
                 href: '/inicio/cobro'
             },
             {
+                icon: 'mdi mdi-cash-marker',
+                title: 'Cobro por Rutas',
+                href: '/inicio/cobro-rutas'
+            },
+            {
                 icon: 'mdi mdi-table-furniture',
                 title: 'Productos',
                 href: '/inicio/productos'
