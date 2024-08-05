@@ -62,53 +62,49 @@
           <!-- eslint-disable-next-line vue/valid-v-slot -->
 
           <template v-slot:item.actions="{ item }">
-            <v-icon
-              size="large"
-              class="me-2"
-              @click="abonarFunction(Object.assign({}, item))"
-            >
-              mdi-cash
-            </v-icon>
-            <v-btn
-              v-if="
-                !item.completado &&
-                (item.producto.length != 0 || item.ruta != 'Sin ruta') &&
-                item.ubicacionMap.lat == null
-              "
-              @click="dialogActualizarUbicacion(item._id)"
-              class="elevation-0 me-2"
-              text
-              icon
-              dark
-              density="compact"
-            >
-              <v-icon size="large">mdi mdi-home-map-marker</v-icon>
-              <v-tooltip activator="parent" location="top"
-                >Actualizar ubicación</v-tooltip
+            <v-row class="ga-2" no-gutters>
+              <v-icon
+                size="large"
+                @click="abonarFunction(Object.assign({}, item))"
               >
-            </v-btn>
-            <v-btn
-              v-if="item.ubicacionMap.lat != null"
-              class="elevation-0 me-2"
-              :href="`https://www.google.com/maps?q=${item.ubicacionMap.lat},${item.ubicacionMap.lng}`"
-              target="_blank"
-              icon
-              dark
-              density="compact"
-              text
-            >
-              <v-icon size="large">mdi mdi-home-map-marker</v-icon>
-              <v-tooltip activator="parent" location="top"
-                >Ver ubicación</v-tooltip
+                mdi-cash
+              </v-icon>
+              <v-btn
+                v-if="!item.completado"
+                @click="dialogActualizarUbicacion(item._id)"
+                class="elevation-0"
+                text
+                icon
+                dark
+                density="compact"
               >
-            </v-btn>
-            <v-icon
-              size="large"
-              class="me-2"
-              @click="verPrestamoFunction(Object.assign({}, item))"
-            >
-              mdi-eye
-            </v-icon>
+                <v-icon size="large">mdi mdi-map-marker-plus</v-icon>
+                <v-tooltip activator="parent" location="top"
+                  >Actualizar ubicación</v-tooltip
+                >
+              </v-btn>
+              <v-btn
+                v-if="item.ubicacionMap.lat != null"
+                class="elevation-0"
+                :href="`https://www.google.com/maps?q=${item.ubicacionMap.lat},${item.ubicacionMap.lng}`"
+                target="_blank"
+                icon
+                dark
+                density="compact"
+                text
+              >
+                <v-icon size="large">mdi mdi-home-map-marker</v-icon>
+                <v-tooltip activator="parent" location="top"
+                  >Ver ubicación</v-tooltip
+                >
+              </v-btn>
+              <v-icon
+                size="large"
+                @click="verPrestamoFunction(Object.assign({}, item))"
+              >
+                mdi-eye
+              </v-icon>
+            </v-row>
           </template>
         </v-data-table>
         <v-data-table

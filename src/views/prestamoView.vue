@@ -71,7 +71,7 @@
       <!-- eslint-disable-next-line vue/valid-v-slot -->
 
       <template v-slot:item.actions="{ item }">
-        <v-row justify="space-between" class="g-3 align-center">
+        <v-row class="g-3 align-center">
           <v-icon
             size="small"
             class="me-2 mb-2"
@@ -98,19 +98,15 @@
             mdi mdi-cash-plus
           </v-icon>
           <v-btn
-            v-if="
-              !item.completado &&
-              (item.producto.length != 0 || item.ruta != 'Sin ruta') &&
-              item.ubicacionMap.lat == null
-            "
+            v-if="!item.completado"
             @click="dialogActualizarUbicacion(item._id)"
-            class="elevation-0"
+            class="elevation-0 me-1"
             text
             icon
             dark
             density="compact"
           >
-            <v-icon size="small">mdi mdi-home-map-marker</v-icon>
+            <v-icon size="small">mdi mdi-map-marker-plus</v-icon>
             <v-tooltip activator="parent" location="top"
               >Actualizar ubicación</v-tooltip
             >
