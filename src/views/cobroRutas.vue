@@ -30,24 +30,25 @@
         <v-row
           class="flex-column"
           align="center"
+          justify="center"
           no-gutters
           v-if="prestamos.length > 0"
         >
           <h1 class="my-2 text-center w-100">Ordena tus cobros</h1>
-          <v-btn color="info" @click="marcarPendiente"
+          <v-btn color="red" @click="limpiarEstados"
+            >Limpiar todos los estados</v-btn
+          >
+          <v-btn color="info" class="mt-1" @click="marcarPendiente"
             >Marcar todos como Pendiente</v-btn
           >
-          <v-col cols="4">
-            <v-btn
-              block
-              class="mt-4"
-              @click="guardarOrdenCobros"
-              :disabled="btnOrden"
-              color="success"
-            >
-              Actualizar orden cobros
-            </v-btn>
-          </v-col>
+          <v-btn
+            class="mt-5"
+            @click="guardarOrdenCobros"
+            :disabled="btnOrden"
+            color="success"
+          >
+            Actualizar orden cobros
+          </v-btn>
           <VueDraggable
             v-model="prestamos"
             class="w-100"
@@ -62,18 +63,18 @@
             >
               <li
                 v-for="(prestamo, index) in prestamos"
-                class="d-flex ga-2 justify-space-between align-center mx-2 my-2 v-list-item v-theme--light v-list-item--density-default elevation-12 rounded-0 v-list-item--variant-text"
+                class="d-flex ga-2 cobro justify-space-between align-center mx-2 my-2 v-list-item v-theme--light v-list-item--density-default elevation-12 rounded-0 v-list-item--variant-text"
                 :key="index"
               >
-                <div class="contenido d-flex ga-4">
+                <div class="contenido d-flex flex-wrap" style="max-width: 50%">
                   <div class="icon">
-                    <v-icon
-                      class="cursor-pointer"
-                      icon="mdi mdi-drag handle"
-                    ></v-icon>
+                    <v-icon class="cursor-pointer" icon="mdi mdi-drag handle" />
                   </div>
-                  <div class="descripcion v-list-item-title">
-                    <p>
+                  <div
+                    class="descripcion v-list-item-title"
+                    style="white-space: break-spaces"
+                  >
+                    <p class="text-break">
                       {{ index + 1 }} - {{ prestamo.nombres }}
                       {{ prestamo.apellidos }}
                       <span class="ml-4"
@@ -83,17 +84,42 @@
                     </p>
                   </div>
                 </div>
-                <div class="estados">
-                  <v-radio-group
-                    v-model="prestamo.estado"
-                    inline
-                    :hide-details="true"
-                  >
-                    <v-radio label="Pendiente" value="Pendiente" />
-                    <v-radio label="Aplazado" value="Aplazado" />
-                    <v-radio label="Finalizado" value="Finalizado" />
-                  </v-radio-group>
-                </div>
+                <v-row
+                  align="center"
+                  justify="end"
+                  class="d-flex estados flex-wrap"
+                  no-gutters
+                  style="max-width: max-content"
+                >
+                  <v-btn class="elevation-0" text icon density="compact">
+                    <v-icon
+                      size="large"
+                      @click="abonarFunction(Object.assign({}, prestamo))"
+                    >
+                      mdi-cash
+                    </v-icon>
+                    <v-tooltip activator="parent" location="top">
+                      Abonar
+                    </v-tooltip>
+                  </v-btn>
+                  <v-col cols="auto">
+                    <v-radio-group
+                      v-model="prestamo.estado"
+                      inline
+                      :hide-details="true"
+                      @change="
+                        actualizarEstadoCobro(
+                          prestamo.estado,
+                          prestamo.prestamo_id
+                        )
+                      "
+                    >
+                      <v-radio label="Pendiente" value="Pendiente" />
+                      <v-radio label="Aplazado" value="Aplazado" />
+                      <v-radio label="Finalizado" value="Finalizado" />
+                    </v-radio-group>
+                  </v-col>
+                </v-row>
               </li>
             </TransitionGroup>
           </VueDraggable>
@@ -160,6 +186,62 @@
         </v-row>
       </v-card-text>
     </v-card>
+    <v-dialog v-model="dialogAbonar" persistent width="700">
+      <v-card>
+        <v-card-text>
+          <v-container>
+            <v-form ref="formAbono">
+              <v-row>
+                <v-col cols="12">
+                  <v-text-field
+                    label="Documento"
+                    type="text"
+                    required
+                    variant="outlined"
+                    v-model="cedulaTemp"
+                    disabled
+                  />
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    type="number"
+                    label="Monto"
+                    :placeholder="
+                      montoSugerido
+                        ? 'El monto sugerido es ' +
+                          montoSugerido.toLocaleString()
+                        : 'Ingrese un monto'
+                    "
+                    min="1"
+                    variant="outlined"
+                    v-model="formAbono.abono"
+                    :rules="cantidadRules"
+                  />
+                </v-col>
+              </v-row>
+            </v-form>
+          </v-container>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn
+            color="red-darken-1"
+            variant="tonal"
+            @click="dialogAbonar = false"
+          >
+            Cerrar
+          </v-btn>
+
+          <v-btn
+            color="green-darken-1"
+            variant="tonal"
+            :disabled="disableBtn"
+            @click="abonar"
+          >
+            Crear
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 <script>
@@ -175,18 +257,69 @@ export default {
         Authorization: null,
       },
     },
+    dialogAbonar: false,
+    disableBtn: false,
     ruta: null,
     isDragging: false,
     rutas: [],
     rutasCobro: [],
     prestamos: [],
     btnOrden: false,
+    cedulaTemp: null,
+    montoSugerido: null,
+    formAbono: {
+      id: null,
+      abono: null,
+    },
+    cantidadRules: [
+      (v) => !!v || "Campo requerido",
+      (v) => parseInt(v) > 0 || "Ingrese una cantidad mayor a 0",
+    ],
   }),
   methods: {
     marcarPendiente() {
       this.prestamos = this.prestamos.map((prestamo) => {
         return { ...prestamo, estado: "Pendiente" };
       });
+    },
+    abonarFunction(item) {
+      this.formAbono.id = item._id;
+      this.cedulaTemp = item.documento;
+      this.montoSugerido = item.cuota_sugerida;
+      this.dialogAbonar = true;
+    },
+    async abonar() {
+      const { valid } = await this.$refs.formAbono.validate();
+      if (valid) {
+        this.disableBtn = true;
+        this.dialogAbonar = false;
+        this.formAbono.abono = parseInt(this.formAbono.abono);
+        await axios
+          .post(`${this.api}/prestamo/cobrar`, this.formAbono, this.token)
+          .then(() => {
+            return Swal.fire({
+              icon: "success",
+              title: "Exitoso",
+              text: "Abonado correctamente!",
+              showConfirmButton: false,
+              timer: 1500,
+            });
+          })
+          .catch((error) => {
+            console.log(error);
+            return Swal.fire({
+              icon: "error",
+              title: "No se pudo abonar",
+              showConfirmButton: false,
+              timer: 1500,
+            });
+          });
+        this.formAbono = {
+          id: null,
+          abono: null,
+        };
+        this.disableBtn = false;
+      }
     },
     async getRutasAndClientes() {
       await axios
@@ -243,6 +376,7 @@ export default {
                 ...prestamo.cliente,
                 producto: prestamo.producto,
                 prestamo_id: prestamo._id,
+                cuota_sugerida: prestamo.cuota_sugerida,
                 estado: prestamo.estado ? prestamo.estado : null,
               };
             });
@@ -315,6 +449,113 @@ export default {
           showConfirmButton: false,
           timer: 1600,
         });
+      }
+    },
+    async actualizarEstadoCobro(estado = null, prestamo_id = null) {
+      if (estado && prestamo_id) {
+        await axios
+          .put(
+            `${this.api}/cobro-ruta/actualizar/especifica`,
+            {
+              estado: estado,
+              prestamo: prestamo_id,
+              ruta: this.ruta,
+            },
+            this.token
+          )
+          .then((resp) => {
+            Swal.fire({
+              icon: resp.data.error ? "error" : "success",
+              title: "Actualizar estado",
+              text: resp.data.message,
+              showConfirmButton: false,
+              timer: resp.data.error ? 1700 : 1600,
+            });
+          })
+          .catch((error) => {
+            switch (error.response.status) {
+              case 401:
+                Session.expiredSession();
+                break;
+              case 500:
+                Swal.fire({
+                  icon: "error",
+                  title: "Actualizar estado",
+                  text: "Sucedió un problema actualizando",
+                  showConfirmButton: false,
+                  timer: 1500,
+                });
+                break;
+              default:
+                Swal.fire({
+                  icon: "error",
+                  title: "No se pudo actualizar el estado",
+                  showConfirmButton: false,
+                  timer: 1500,
+                });
+                break;
+            }
+          });
+      }
+    },
+    async limpiarEstados() {
+      if (this.ruta) {
+        Swal.fire({
+          icon: "info",
+          title: "¿Seguro de qué quiere limpiar todos los estados de la ruta?",
+          showDenyButton: true,
+          denyButtonText: "No, cancelar",
+          confirmButtonText: "Sí, limpiar",
+          confirmButtonColor: "#3085d6",
+          denyButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+        })
+          .then(async (result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+              await axios
+                .put(
+                  `${this.api}/cobro-ruta/limpiar-estados/${this.ruta}`,
+                  {},
+                  this.token
+                )
+                .then(() => {
+                  Swal.fire({
+                    icon: "success",
+                    title: "Se limpiaron los estados correctamente",
+                    timer: 1500,
+                    showConfirmButton: false,
+                  });
+                  this.buscarPrestamosRuta();
+                  this.getCobroRutas();
+                });
+            }
+          })
+          .catch((error) => {
+            switch (error.response.status) {
+              case 401:
+                Session.expiredSession();
+                break;
+              case 500:
+                Swal.fire({
+                  icon: "error",
+                  title: "Limpiar estados",
+                  text: "Sucedió un error limpiando los estados",
+                  showConfirmButton: false,
+                  timer: 1600,
+                });
+                break;
+              default:
+                Swal.fire({
+                  icon: "info",
+                  title: "Limpiar estados",
+                  text: "No se pudo limpiar los estados",
+                  showConfirmButton: false,
+                  timer: 1600,
+                });
+                break;
+            }
+          });
       }
     },
   },
@@ -396,5 +637,20 @@ export default {
 }
 .list-group-item::marker {
   content: "";
+}
+
+@media (max-width: 886px) {
+  .cobro {
+    flex-direction: column;
+    margin-top: 20px !important;
+  }
+
+  .cobro > * {
+    max-width: 100% !important;
+    width: 100%;
+  }
+  .cobro > .estados {
+    justify-content: start;
+  }
 }
 </style>
