@@ -52,7 +52,7 @@
           <VueDraggable
             v-model="prestamos"
             class="w-100 px-4 mt-2"
-            style="height: 450px; overflow: auto;"
+            style="height: 450px; overflow: auto"
             animation="200"
             target=".prestamos-target"
           >
@@ -419,54 +419,45 @@ export default {
       }
     },
     async guardarOrdenCobros() {
-      if (this.prestamos.every((prest) => prest.estado != null)) {
-        this.$emit("loadingSweet", "Guardando, espera un momento...");
-        this.btnOrden = true;
-        const paquete = {
-          ruta: this.ruta,
-          orden_cobro: this.prestamos.map((prest) => {
-            return {
-              prestamo: prest.prestamo_id,
-              estado: prest.estado,
-            };
-          }),
-        };
-        await axios
-          .post(`${this.api}/cobro-ruta/guardar`, paquete, this.token)
-          .then(async () => {
-            Swal.fire({
-              icon: "success",
-              text: "Orden de cobros guardada exitosamente",
-              showConfirmButton: false,
-              timer: 1600,
-            });
-            await this.getCobroRutas();
-          })
-          .catch((error) => {
-            switch (error.response.status) {
-              case 401:
-                Session.expiredSession();
-                break;
-              default:
-                Swal.fire({
-                  icon: "error",
-                  text: "No se pudo guardar la orden de cobros",
-                  showConfirmButton: false,
-                  timer: 1600,
-                });
-                break;
-            }
+      this.$emit("loadingSweet", "Guardando, espera un momento...");
+      this.btnOrden = true;
+      const paquete = {
+        ruta: this.ruta,
+        orden_cobro: this.prestamos.map((prest) => {
+          return {
+            prestamo: prest.prestamo_id,
+            estado: prest.estado,
+          };
+        }),
+      };
+      await axios
+        .post(`${this.api}/cobro-ruta/guardar`, paquete, this.token)
+        .then(async () => {
+          Swal.fire({
+            icon: "success",
+            text: "Orden de cobros guardada exitosamente",
+            showConfirmButton: false,
+            timer: 1600,
           });
-        this.$emit("closeSweet");
-        this.btnOrden = false;
-      } else {
-        Swal.fire({
-          icon: "error",
-          text: "Debe seleccionar todos los estados",
-          showConfirmButton: false,
-          timer: 1600,
+          await this.getCobroRutas();
+        })
+        .catch((error) => {
+          switch (error.response.status) {
+            case 401:
+              Session.expiredSession();
+              break;
+            default:
+              Swal.fire({
+                icon: "error",
+                text: "No se pudo guardar la orden de cobros",
+                showConfirmButton: false,
+                timer: 1600,
+              });
+              break;
+          }
         });
-      }
+      this.$emit("closeSweet");
+      this.btnOrden = false;
     },
     async actualizarEstadoCobro(estado = null, prestamo_id = null) {
       if (estado && prestamo_id) {
