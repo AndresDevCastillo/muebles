@@ -15,7 +15,7 @@
         <v-row no-gutters justify="center">
           <v-col cols="12" md="5" sm="8">
             <v-form ref="formRutas">
-              <v-autocomplete
+              <v-select
                 label="Tus rutas"
                 v-model="ruta"
                 :items="rutas"
@@ -51,7 +51,7 @@
           </v-btn>
           <VueDraggable
             v-model="prestamos"
-            class="w-100"
+            class="w-100 px-4 mt-2"
             style="height: 450px; overflow: auto;"
             animation="200"
             target=".prestamos-target"
