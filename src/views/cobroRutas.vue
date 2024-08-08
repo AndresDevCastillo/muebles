@@ -52,6 +52,7 @@
           <VueDraggable
             v-model="prestamos"
             class="w-100"
+            style="height: 450px; overflow: auto;"
             animation="200"
             target=".prestamos-target"
           >
