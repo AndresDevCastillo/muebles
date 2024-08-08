@@ -71,16 +71,16 @@
                     <v-icon class="cursor-pointer" icon="mdi mdi-drag handle" />
                   </div>
                   <div
-                    class="descripcion v-list-item-title"
+                    class="descripcion v-list-item-title text-truncate"
                     style="white-space: break-spaces"
                   >
-                    <p class="text-break">
+                    <p class="text-truncate">
                       {{ index + 1 }} - {{ prestamo.nombres }}
                       {{ prestamo.apellidos }}
-                      <span class="ml-4"
-                        ><strong>Producto: </strong>
-                        {{ prestamo.producto }}</span
-                      >
+                      <span class="ml-4 text-truncate user-select-none">
+                        <strong>Producto: </strong>
+                        {{ prestamo.producto }}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -102,8 +102,23 @@
                       Abonar
                     </v-tooltip>
                   </v-btn>
-                  <v-col cols="auto">
+                  <v-col cols="auto" class="col-select">
+                    <v-select
+                      class="showSelect ml-1"
+                      v-model="prestamo.estado"
+                      label="Estado"
+                      density="compact"
+                      :hide-details="true"
+                      :items="estados"
+                      @update:modelValue="
+                        actualizarEstadoCobro(
+                          prestamo.estado,
+                          prestamo.prestamo_id
+                        )
+                      "
+                    />
                     <v-radio-group
+                      class="showRadio"
                       v-model="prestamo.estado"
                       inline
                       :hide-details="true"
@@ -275,6 +290,7 @@ export default {
       (v) => !!v || "Campo requerido",
       (v) => parseInt(v) > 0 || "Ingrese una cantidad mayor a 0",
     ],
+    estados: ["Pendiente", "Aplazado", "Finalizado"],
   }),
   methods: {
     marcarPendiente() {
@@ -586,6 +602,16 @@ export default {
 };
 </script>
 <style>
+html,
+body {
+  resize: none;
+  touch-action: pan-x pan-y;
+}
+
+.user-select-none {
+  user-select: none !important;
+}
+
 .custom-btn {
   box-sizing: border-box;
   background: white;
@@ -639,18 +665,41 @@ export default {
   content: "";
 }
 
+.showSelect {
+  display: none !important;
+}
+
+.showRadio {
+  display: block;
+}
+
 @media (max-width: 886px) {
   .cobro {
     flex-direction: column;
+    justify-content: start;
     margin-top: 20px !important;
   }
 
   .cobro > * {
     max-width: 100% !important;
     width: 100%;
+    justify-content: start !important;
   }
   .cobro > .estados {
     justify-content: start;
+  }
+}
+
+@media (max-width: 500px) {
+  .col-select {
+    width: 90% !important;
+  }
+  .showSelect {
+    display: block !important;
+  }
+
+  .showRadio {
+    display: none !important;
   }
 }
 </style>
