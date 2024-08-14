@@ -48,10 +48,11 @@
       <v-card-text>
         <v-data-table
           :headers="headers"
-          :items="cobros"
-          :sort-by="[{ key: 'ruta', order: 'asc' }]"
+          :items.sync="cobros"
+          :loading="loadingTable"
           class="elevation-1"
-          :search="searchPrestamo"
+          item-value="_id"
+          :search.sync="searchPrestamo"
         >
           <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template v-slot:item.mora="{ value }">
@@ -535,6 +536,7 @@ export default {
   components: { nuevoCliente },
   data: () => ({
     api: import.meta.env.VITE_APP_API_URL,
+    loadingTable: false,
     disableBtn: false,
     fechaAbonoApi: [],
     cobros: [],
@@ -620,7 +622,7 @@ export default {
       { title: "Documento", key: "cliente.documento" },
       { title: "Nombre", key: "cliente.nombres" },
       { title: "Apellido", key: "cliente.apellidos" },
-      { title: "Ruta", key: "cliente.direccion.nombre" },
+      { title: "Ruta", key: "ruta" },
       { title: "Producto", key: "producto" },
       { title: "Cuotas", key: "cuotas" },
       { title: "Atrasado", key: "mora" },
@@ -667,7 +669,6 @@ export default {
 
       return `${year}-${month}-${day} | ${hours}:${minutes}:${seconds}`;
     },
-
     async cambiarUbicacion() {
       if (
         this.actualizarUbicacion.venta != null &&
@@ -721,6 +722,7 @@ export default {
       await this.getClientes();
     },
     async obtenerCobros() {
+      this.loadingTable = true;
       await axios
         .get(`${this.api}/prestamo/cobrar`, {
           headers: {
@@ -746,6 +748,7 @@ export default {
               break;
           }
         });
+      this.loadingTable = false;
     },
     verPrestamoFunction(item) {
       this.verPrestamo = item;

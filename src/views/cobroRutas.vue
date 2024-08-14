@@ -300,7 +300,7 @@ export default {
       });
     },
     abonarFunction(item) {
-      this.formAbono.id = item._id;
+      this.formAbono.id = item.prestamo_id;
       this.cedulaTemp = item.documento;
       this.montoSugerido = item.cuota_sugerida;
       this.dialogAbonar = true;
