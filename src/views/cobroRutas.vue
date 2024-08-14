@@ -472,12 +472,13 @@ export default {
             this.token
           )
           .then((resp) => {
+            this.getCobroRutas();
             Swal.fire({
               icon: resp.data.error ? "error" : "success",
               title: "Actualizar estado",
               text: resp.data.message,
               showConfirmButton: false,
-              timer: resp.data.error ? 1700 : 1600,
+              timer: resp.data.error ? 1850 : 1600,
             });
           })
           .catch((error) => {

@@ -622,7 +622,7 @@ export default {
       { title: "Documento", key: "cliente.documento" },
       { title: "Nombre", key: "cliente.nombres" },
       { title: "Apellido", key: "cliente.apellidos" },
-      { title: "Ruta", key: "ruta" },
+      { title: "Ruta", key: "cliente.direccion.nombre" },
       { title: "Producto", key: "producto" },
       { title: "Cuotas", key: "cuotas" },
       { title: "Atrasado", key: "mora" },
