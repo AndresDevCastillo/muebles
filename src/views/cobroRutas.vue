@@ -88,7 +88,7 @@
                 <v-row
                   align="center"
                   justify="end"
-                  class="d-flex estados flex-wrap"
+                  class="d-flex estados flex-wrap ga-2"
                   no-gutters
                   style="max-width: max-content"
                 >
@@ -103,6 +103,12 @@
                       Abonar
                     </v-tooltip>
                   </v-btn>
+                  <v-icon
+                    size="large"
+                    @click="verPrestamoFunction(Object.assign({}, prestamo))"
+                  >
+                    mdi mdi-eye
+                  </v-icon>
                   <v-col cols="auto" class="col-select">
                     <v-select
                       class="showSelect ml-1"
@@ -182,6 +188,22 @@
                           >Ver ubicación</v-tooltip
                         >
                       </v-btn>
+                      <v-btn
+                        class="elevation-0 me-2"
+                        icon
+                        text
+                        dark
+                        density="compact"
+                        @click="
+                          verPrestamoFunction(
+                            Object.assign({}, cobro.prestamo),
+                            false
+                          )
+                        "
+                      >
+                        <v-icon size="large">mdi mdi-eye</v-icon>
+                      </v-btn>
+
                       <v-chip
                         variant="flat"
                         :color="
@@ -258,6 +280,141 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="dialogVerCobro" persistent width="700">
+      <v-card>
+        <v-card-text>
+          <v-container>
+            <v-form>
+              <v-row>
+                <v-progress-linear v-model="skill" color="green" height="25">
+                  <template v-slot:default="{ value }">
+                    <strong>{{ Math.ceil(value) }}%</strong>
+                  </template>
+                </v-progress-linear>
+                <v-col cols="12">
+                  <v-text-field
+                    label="Documento"
+                    type="text"
+                    required
+                    variant="outlined"
+                    v-model="verPrestamo.cliente.documento"
+                    disabled
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    variant="outlined"
+                    label="Nombre"
+                    disabled
+                    required
+                    v-model="verPrestamo.cliente.nombres"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    variant="outlined"
+                    label="Apellido"
+                    disabled
+                    required
+                    v-model="verPrestamo.cliente.apellidos"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    variant="outlined"
+                    label="Ruta"
+                    disabled
+                    required
+                    v-model="verPrestamo.cliente.direccion.nombre"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    variant="outlined"
+                    label="Producto"
+                    disabled
+                    required
+                    v-model="verPrestamo.producto"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    variant="outlined"
+                    label="Fecha de Inicio"
+                    disabled
+                    required
+                    v-model="verPrestamo.fecha_inicio"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    variant="outlined"
+                    label="N° Cuotas"
+                    disabled
+                    required
+                    v-model="verPrestamo.cuotas"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    variant="outlined"
+                    label="Cuotas atrasadas"
+                    disabled
+                    required
+                    v-model="verPrestamo.cuotas_atrasadas"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    variant="outlined"
+                    label="Total"
+                    disabled
+                    required
+                    v-model="verPrestamo.total"
+                  ></v-text-field>
+                </v-col>
+                <v-card-text v-if="verPrestamo.cuotas !== 0">
+                  <div class="font-weight-bold ms-1 mb-2">
+                    Restante : ${{
+                      calcularRestante(verPrestamo.abono, verPrestamo.total)
+                    }}
+                  </div>
+                  <div class="font-weight-bold ms-1 mb-2">
+                    Abonado : ${{ calcularAbono(verPrestamo.abono) }}
+                  </div>
+                  <v-timeline density="compact" align="start">
+                    <v-timeline-item
+                      v-for="monto in verPrestamo.abono"
+                      :key="monto"
+                      dot-color="green"
+                      size="x-small"
+                    >
+                      <div class="mb-4">
+                        <div class="font-weight-normal">
+                          <strong>
+                            Abono: ${{ monto.monto.toLocaleString() }}
+                          </strong>
+                        </div>
+                        <div>{{ formatDate(monto.fecha) }}</div>
+                      </div>
+                    </v-timeline-item>
+                  </v-timeline>
+                </v-card-text>
+              </v-row>
+            </v-form>
+          </v-container>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn
+            color="red-darken-1"
+            variant="tonal"
+            @click="dialogVerCobro = false"
+          >
+            Cerrar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 <script>
@@ -274,12 +431,43 @@ export default {
       },
     },
     dialogAbonar: false,
+    dialogVerCobro: false,
     disableBtn: false,
     ruta: null,
     isDragging: false,
     rutas: [],
     rutasCobro: [],
     prestamos: [],
+    verPrestamo: {
+      abono: null,
+      mora: null,
+      _id: null,
+      cliente: {
+        _id: null,
+        documento: null,
+        nombres: null,
+        apellidos: null,
+        telefono: null,
+        correo: null,
+        direccion: { nombre: null },
+        mora: null,
+        __v: null,
+      },
+      ruta: null,
+      producto: null,
+      fecha_inicio: null,
+      cuotas: null,
+      pago_fechas: [
+        {
+          fecha: null,
+          monto: null,
+        },
+      ],
+      cuotas_atrasadas: null,
+      completado: null,
+      total: null,
+    },
+    ventas_generales: [],
     btnOrden: false,
     cedulaTemp: null,
     montoSugerido: null,
@@ -304,6 +492,65 @@ export default {
       this.cedulaTemp = item.documento;
       this.montoSugerido = item.cuota_sugerida;
       this.dialogAbonar = true;
+    },
+    verPrestamoFunction(item, origenDrag = true) {
+      if (origenDrag) {
+        this.verPrestamo = this.ventas_generales.find(
+          (venta) => venta._id == item.prestamo_id
+        );
+
+        this.verPrestamo.cliente.direccion = this.rutas.find(
+          (ruta) => ruta._id == this.verPrestamo.cliente.direccion
+        );
+        this.verPrestamo.fecha_inicio = this.formatDate(
+          this.verPrestamo.fecha_inicio
+        );
+      } else {
+        for (let i = 0; i < this.rutasCobro.length; i++) {
+          const venta = this.rutasCobro[i].orden_cobro.find(
+            (venta) => venta.prestamo._id == item._id
+          );
+
+          if (venta != undefined) {
+            this.verPrestamo = venta.prestamo;
+            break;
+          }
+        }
+
+        this.verPrestamo.cliente.direccion = this.rutas.find(
+          (ruta) => ruta._id == this.verPrestamo.cliente.direccion
+        );
+        this.verPrestamo.fecha_inicio = this.formatDate(
+          this.verPrestamo.fecha_inicio
+        );
+      }
+
+      this.dialogVerCobro = true;
+    },
+    formatDate(value) {
+      const date = new Date(value);
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      const day = date.getDate().toString().padStart(2, "0");
+      const hours = date.getHours().toString().padStart(2, "0");
+      const minutes = date.getMinutes().toString().padStart(2, "0");
+      const seconds = date.getSeconds().toString().padStart(2, "0");
+
+      return `${year}-${month}-${day} | ${hours}:${minutes}:${seconds}`;
+    },
+    calcularAbono(abono) {
+      let abonoTotal = 0;
+      abono.forEach((abono) => {
+        abonoTotal += abono.monto;
+      });
+      return abonoTotal.toLocaleString();
+    },
+    calcularRestante(abono, total) {
+      let abonoTotal = 0;
+      abono.forEach((abono) => {
+        abonoTotal += abono.monto;
+      });
+      return (total - abonoTotal).toLocaleString();
     },
     async abonar() {
       const { valid } = await this.$refs.formAbono.validate();
@@ -388,6 +635,7 @@ export default {
         await axios
           .get(`${this.api}/cobro-ruta/${this.ruta}`, this.token)
           .then((resp) => {
+            this.ventas_generales = resp.data;
             this.prestamos = resp.data.flatMap((prestamo) => {
               return {
                 ...prestamo.cliente,
@@ -590,6 +838,16 @@ export default {
         disabled: false,
         ghostClass: "ghost",
       };
+    },
+    skill() {
+      let abonado = 0;
+      this.verPrestamo.abono.forEach((abono) => {
+        abonado += abono.monto;
+      });
+      if (this.verPrestamo.cuotas == 0) {
+        return 100;
+      }
+      return (abonado * 100) / this.verPrestamo.total;
     },
   },
 };
