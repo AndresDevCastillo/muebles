@@ -131,6 +131,9 @@
             </v-chip>
           </template>
         </v-data-table>
+        <v-col lg="12" md="12" sm="12">
+          <canvas class="mb-6" id="graficaAbonoRutas"></canvas>
+        </v-col>
         <v-data-table
           :headers="headersAbonoHoy"
           :items="abonosFechaEspecifica"
@@ -528,6 +531,7 @@
 
 <script>
 import Session from "@/validation/session";
+import Chart from "chart.js/auto";
 import nuevoCliente from "@/components/nuevoCliente.vue";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -540,6 +544,7 @@ export default {
     disableBtn: false,
     fechaAbonoApi: [],
     cobros: [],
+    cobroRutaGrafica: null,
     abonosHoy: [],
     abonosFechaEspecifica: [],
     valid: false,
@@ -732,6 +737,39 @@ export default {
         .then((resp) => {
           this.cobros = resp.data[0];
           this.abonosHoy = resp.data[1];
+          const data_cobro_ruta = resp.data[2];
+          let ctx = document.getElementById("graficaAbonoRutas");
+          const cobro_ruta_bar = {
+            type: "bar",
+            data: {
+              labels: data_cobro_ruta.labels,
+              datasets: [
+                {
+                  label: "Abonos",
+                  data: data_cobro_ruta.data,
+                  borderWidth: 1,
+                  backgroundColor: this.colores,
+                },
+              ],
+            },
+            options: {
+              plugins: {
+                title: {
+                  display: true,
+                  text: "Abonos Por Ruta",
+                },
+                legend: {
+                  display: false,
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                },
+              },
+            },
+          };
+          this.cobroRutaGrafica = new Chart(ctx, cobro_ruta_bar);
         })
         .catch((error) => {
           switch (error.response.status) {
