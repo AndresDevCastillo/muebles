@@ -103,12 +103,6 @@
                       Abonar
                     </v-tooltip>
                   </v-btn>
-                  <v-icon
-                    size="large"
-                    @click="verPrestamoFunction(Object.assign({}, prestamo))"
-                  >
-                    mdi mdi-eye
-                  </v-icon>
                   <v-col cols="auto" class="col-select">
                     <v-select
                       class="showSelect ml-1"
@@ -146,6 +140,7 @@
             </TransitionGroup>
           </VueDraggable>
         </v-row>
+
         <v-row no-gutters class="flex-column">
           <h1 class="my-2 text-center w-100">Tus rutas de cobro</h1>
           <v-expansion-panels class="my-4 w-100" variant="popout" multiple>
@@ -162,7 +157,22 @@
               </v-expansion-panel-title>
               <v-expansion-panel-text>
                 <v-list density="compact" lines="two">
-                  <v-list-subheader>CLIENTES</v-list-subheader>
+                  <v-list-subheader
+                    >CLIENTES
+                    <v-row no-gutters>
+                      <v-checkbox
+                        v-for="(estado, index) in estadoCobro"
+                        :key="index"
+                        v-model="ruta.filtro"
+                        :hide-details="true"
+                        :label="estado.title"
+                        :value="estado.value"
+                        @update:modelValue="
+                          filtrarCobrosRuta(ruta.filtro, ruta.ruta._id)
+                        "
+                      />
+                    </v-row>
+                  </v-list-subheader>
                   <v-list-item
                     v-for="(cobro, index) in ruta.orden_cobro"
                     :key="index"
@@ -171,8 +181,59 @@
                     }`"
                     :subtitle="cobro.prestamo.producto"
                     color="primary"
+                    class="cobro-item"
                   >
                     <template v-slot:append>
+                      <v-btn class="elevation-0" text icon density="compact">
+                        <v-icon
+                          size="large"
+                          @click="
+                            abonarFunction(
+                              Object.assign({}, cobro.prestamo),
+                              true
+                            )
+                          "
+                        >
+                          mdi-cash
+                        </v-icon>
+                        <v-tooltip activator="parent" location="top">
+                          Abonar
+                        </v-tooltip>
+                      </v-btn>
+                      <v-col cols="auto" class="col-select">
+                        <v-select
+                          class="showSelect ml-1"
+                          v-model="cobro.estado"
+                          label="Estado"
+                          density="compact"
+                          :hide-details="true"
+                          :items="estados"
+                          @update:modelValue="
+                            actualizarEstadoCobro(
+                              cobro.estado,
+                              cobro.prestamo._id,
+                              ruta.ruta._id
+                            )
+                          "
+                        />
+                        <v-radio-group
+                          class="showRadio"
+                          v-model="cobro.estado"
+                          inline
+                          :hide-details="true"
+                          @change="
+                            actualizarEstadoCobro(
+                              cobro.estado,
+                              cobro.prestamo._id,
+                              ruta.ruta._id
+                            )
+                          "
+                        >
+                          <v-radio label="Pendiente" value="Pendiente" />
+                          <v-radio label="Aplazado" value="Aplazado" />
+                          <v-radio label="Finalizado" value="Finalizado" />
+                        </v-radio-group>
+                      </v-col>
                       <v-btn
                         v-if="cobro.prestamo.ubicacionMap.lat != null"
                         class="elevation-0 me-2"
@@ -206,14 +267,10 @@
 
                       <v-chip
                         variant="flat"
-                        :color="
-                          cobro.estado == 'Pendiente'
-                            ? 'primary'
-                            : cobro.estado == 'Aplazado'
-                            ? 'orange'
-                            : 'green'
-                        "
-                        >{{ cobro.estado }}</v-chip
+                        :color="getColorEstado(cobro.estado)"
+                        >{{
+                          cobro.estado == null ? "Sin estado" : cobro.estado
+                        }}</v-chip
                       >
                     </template>
                   </v-list-item>
@@ -425,6 +482,13 @@ export default {
   name: "rutasCobrador",
   data: () => ({
     api: import.meta.env.VITE_APP_API_URL,
+    estadoCobro: [
+      { title: "Sin estado", value: null },
+      { title: "Pendiente", value: "Pendiente" },
+      { title: "Aplazado", value: "Aplazado" },
+      { title: "Finalizado", value: "Finalizado" },
+    ],
+    estadosMostrar: [],
     token: {
       headers: {
         Authorization: null,
@@ -437,6 +501,7 @@ export default {
     isDragging: false,
     rutas: [],
     rutasCobro: [],
+    rutasCobroCopia: [],
     prestamos: [],
     verPrestamo: {
       abono: null,
@@ -487,10 +552,19 @@ export default {
         return { ...prestamo, estado: "Pendiente" };
       });
     },
-    abonarFunction(item) {
-      this.formAbono.id = item.prestamo_id;
-      this.cedulaTemp = item.documento;
-      this.montoSugerido = item.cuota_sugerida;
+    abonarFunction(item, originRutasPreview = false) {
+      console.log(item, originRutasPreview);
+
+      if (originRutasPreview) {
+        this.formAbono.id = item._id;
+        this.cedulaTemp = item.cliente.documento;
+        this.montoSugerido = item.cuota_sugerida;
+      } else {
+        this.formAbono.id = item.prestamo_id;
+        this.cedulaTemp = item.documento;
+        this.montoSugerido = item.cuota_sugerida;
+      }
+
       this.dialogAbonar = true;
     },
     verPrestamoFunction(item, origenDrag = true) {
@@ -552,6 +626,35 @@ export default {
       });
       return (total - abonoTotal).toLocaleString();
     },
+    filtrarCobrosRuta(filtro = [], id_ruta) {
+      let indexRuta = this.rutasCobroCopia.findIndex(
+        (ruta) => ruta.ruta._id == id_ruta
+      );
+      if (filtro.length > 0) {
+        if (indexRuta != -1) {
+          this.rutasCobro[indexRuta].orden_cobro = this.rutasCobroCopia[
+            indexRuta
+          ].orden_cobro.filter((orden) => filtro.includes(orden.estado));
+        }
+      } else {
+        this.rutasCobro[indexRuta].orden_cobro = [];
+      }
+    },
+    getColorEstado(estado) {
+      let color = "red";
+      switch (estado) {
+        case "Pendiente":
+          color = "primary";
+          break;
+        case "Aplazado":
+          color = "orange";
+          break;
+        case "Finalizado":
+          color = "green";
+          break;
+      }
+      return color;
+    },
     async abonar() {
       const { valid } = await this.$refs.formAbono.validate();
       if (valid) {
@@ -561,6 +664,7 @@ export default {
         await axios
           .post(`${this.api}/prestamo/cobrar`, this.formAbono, this.token)
           .then(() => {
+            this.getCobroRutas();
             return Swal.fire({
               icon: "success",
               title: "Exitoso",
@@ -611,7 +715,11 @@ export default {
       await axios
         .get(`${this.api}/cobro-ruta`, this.token)
         .then((resp) => {
-          this.rutasCobro = resp.data;
+          this.rutasCobro = resp.data.map((ruta) => {
+            return { ...ruta, filtro: [null, ...this.estados] };
+          });
+
+          this.rutasCobroCopia = resp.data;
         })
         .catch((error) => {
           switch (error.response.status) {
@@ -707,7 +815,11 @@ export default {
       this.$emit("closeSweet");
       this.btnOrden = false;
     },
-    async actualizarEstadoCobro(estado = null, prestamo_id = null) {
+    async actualizarEstadoCobro(
+      estado = null,
+      prestamo_id = null,
+      id_ruta = null
+    ) {
       if (estado && prestamo_id) {
         await axios
           .put(
@@ -715,7 +827,7 @@ export default {
             {
               estado: estado,
               prestamo: prestamo_id,
-              ruta: this.ruta,
+              ruta: id_ruta == null ? this.ruta : id_ruta,
             },
             this.token
           )
@@ -938,6 +1050,26 @@ body {
   }
   .cobro > .estados {
     justify-content: start;
+  }
+}
+
+@media (max-width: 870px) {
+  .cobro-item {
+    display: flex !important;
+    flex-direction: column;
+  }
+
+  .cobro-item > * {
+    max-width: 100% !important;
+    width: 100%;
+  }
+
+  .cobro-item > .v-list-item__append {
+    flex-wrap: wrap;
+  }
+
+  .cobro-item > .v-list-item__content > * {
+    white-space: break-spaces !important;
   }
 }
 
