@@ -176,162 +176,176 @@
 				</v-row>
 
 				<v-row no-gutters class="flex-column">
-					<v-card flat class="w-100 px-0 py-0">
-						<v-card-title class="d-flex align-center pe-2">
-							&nbsp; Tus rutas de cobro
-
-							<v-spacer></v-spacer>
-
-							<v-text-field
-								v-model="search"
-								density="compact"
-								label="Buscar..."
-								prepend-inner-icon="mdi-magnify"
-								variant="solo-filled"
-								flat
-								hide-details
-								single-line
-							></v-text-field>
-						</v-card-title>
-
-						<v-divider></v-divider>
-						<v-card-text class="px-0 py-0">
-							<v-data-table
-								v-model:search="search"
-								:items="rutasCobroTable"
-								:headers="headers"
-								fixed-header
-							>
-								<template v-slot:item.ruta="{ item }">
-									<strong
-										>{{ item.ruta.nombre }} -
-										{{ item.ruta.ciudad }}</strong
-									>
-								</template>
-								<template
-									v-slot:item.prestamo.cliente="{ item }"
+					<h1 class="my-2 text-center w-100">Tus rutas de cobro</h1>
+					<v-expansion-panels
+						class="my-4 w-100"
+						variant="popout"
+						multiple
+					>
+						<v-expansion-panel
+							v-for="(ruta, index) in rutasCobro"
+							:key="index"
+							class="w-100"
+						>
+							<v-expansion-panel-title>
+								<strong>
+									{{ ruta.ruta.nombre }} -
+									{{ ruta.ruta.ciudad }} -
+									{{ ruta.ruta.departamento }}
+								</strong>
+							</v-expansion-panel-title>
+							<v-expansion-panel-text>
+								<v-data-table
+									v-model:search="searchTable[index]"
+									:items="ruta.orden_cobro"
+									:headers="headers"
+									fixed-header
+									class="elevation-0 table-ventas"
 								>
-									{{ item.prestamo.cliente.nombres }}
-									{{ item.prestamo.cliente.apellidos }}
-								</template>
-								<template v-slot:item.estado="{ item }">
-									<v-chip
-										variant="flat"
-										:color="getColorEstado(item.estado)"
+									<template v-slot:top>
+										<v-row align="center" no-gutters>
+											<h3>Ventas</h3>
+
+											<v-spacer></v-spacer>
+
+											<v-text-field
+												v-model="searchTable[index]"
+												density="compact"
+												label="Buscar..."
+												prepend-inner-icon="mdi-magnify"
+												variant="solo-filled"
+												flat
+												hide-details
+												single-line
+											></v-text-field>
+										</v-row>
+									</template>
+									<template
+										v-slot:item.prestamo.cliente="{ item }"
 									>
-										{{
-											item.estado == null
-												? "Sin estado"
-												: item.estado
-										}}
-									</v-chip>
-								</template>
-								<template v-slot:item.actions="{ item }">
-									<div class="px-0 w-100">
-										<v-btn
-											class="elevation-0"
-											text
-											icon
-											density="compact"
+										{{ item.prestamo.cliente.nombres }}
+										{{ item.prestamo.cliente.apellidos }}
+									</template>
+									<template v-slot:item.estado="{ item }">
+										<v-chip
+											variant="flat"
+											:color="getColorEstado(item.estado)"
 										>
-											<v-icon
-												size="large"
+											{{
+												item.estado == null
+													? "Sin estado"
+													: item.estado
+											}}
+										</v-chip>
+									</template>
+									<template v-slot:item.actions="{ item }">
+										<div class="px-0 w-100">
+											<v-btn
+												class="elevation-0"
+												text
+												icon
+												density="compact"
+											>
+												<v-icon
+													size="large"
+													@click="
+														abonarFunction(
+															Object.assign(
+																{},
+																item.prestamo
+															),
+															true
+														)
+													"
+												>
+													mdi-cash
+												</v-icon>
+												<v-tooltip
+													activator="parent"
+													location="top"
+												>
+													Abonar
+												</v-tooltip>
+											</v-btn>
+											<v-btn
+												v-if="
+													item.prestamo.ubicacionMap
+														.lat != null
+												"
+												class="elevation-0 me-2"
+												:href="`https://www.google.com/maps?q=${item.prestamo.ubicacionMap.lat},${item.prestamo.ubicacionMap.lng}`"
+												target="_blank"
+												icon
+												dark
+												density="compact"
+												text
+											>
+												<v-icon size="large"
+													>mdi
+													mdi-home-map-marker</v-icon
+												>
+												<v-tooltip
+													activator="parent"
+													location="top"
+													>Ver ubicación</v-tooltip
+												>
+											</v-btn>
+											<v-btn
+												class="elevation-0 me-2"
+												icon
+												text
+												dark
+												density="compact"
 												@click="
-													abonarFunction(
+													verPrestamoFunction(
 														Object.assign(
 															{},
 															item.prestamo
 														),
-														true
+														false
 													)
 												"
 											>
-												mdi-cash
-											</v-icon>
-											<v-tooltip
-												activator="parent"
-												location="top"
+												<v-icon size="large">
+													mdi mdi-eye
+												</v-icon>
+											</v-btn>
+											<v-col
+												cols="auto"
+												class="px-0 py-0"
 											>
-												Abonar
-											</v-tooltip>
-										</v-btn>
-										<v-btn
-											v-if="
-												item.prestamo.ubicacionMap
-													.lat != null
-											"
-											class="elevation-0 me-2"
-											:href="`https://www.google.com/maps?q=${item.prestamo.ubicacionMap.lat},${item.prestamo.ubicacionMap.lng}`"
-											target="_blank"
-											icon
-											dark
-											density="compact"
-											text
-										>
-											<v-icon size="large"
-												>mdi mdi-home-map-marker</v-icon
-											>
-											<v-tooltip
-												activator="parent"
-												location="top"
-												>Ver ubicación</v-tooltip
-											>
-										</v-btn>
-										<v-btn
-											class="elevation-0 me-2"
-											icon
-											text
-											dark
-											density="compact"
-											@click="
-												verPrestamoFunction(
-													Object.assign(
-														{},
-														item.prestamo
-													),
-													false
-												)
-											"
-										>
-											<v-icon size="large"
-												>mdi mdi-eye</v-icon
-											>
-										</v-btn>
-										<v-col
-											cols="auto"
-											class="px-0 py-0"
-										>
-											<v-radio-group
-												v-model="item.estado"
-												inline
-												:hide-details="true"
-												@change="
-													actualizarEstadoCobro(
-														item.estado,
-														item.prestamo._id,
-														item.ruta._id
-													)
-												"
-											>
-												<v-radio
-													label="Pendiente"
-													value="Pendiente"
-												/>
-												<v-radio
-													label="Aplazado"
-													value="Aplazado"
-												/>
-												<v-radio
-													label="Finalizado"
-													value="Finalizado"
-												/>
-											</v-radio-group>
-										</v-col>
-									</div>
-								</template>
-							</v-data-table>
-						</v-card-text>
-					</v-card>
+												<v-radio-group
+													v-model="item.estado"
+													inline
+													:hide-details="true"
+													@change="
+														actualizarEstadoCobro(
+															item.estado,
+															item.prestamo._id,
+															ruta.ruta._id
+														)
+													"
+												>
+													<v-radio
+														label="Pendiente"
+														value="Pendiente"
+													/>
+													<v-radio
+														label="Aplazado"
+														value="Aplazado"
+													/>
+													<v-radio
+														label="Finalizado"
+														value="Finalizado"
+													/>
+												</v-radio-group>
+											</v-col>
+										</div>
+									</template>
+								</v-data-table>
+							</v-expansion-panel-text>
+						</v-expansion-panel>
+					</v-expansion-panels>
 				</v-row>
 			</v-card-text>
 		</v-card>
@@ -553,7 +567,7 @@ export default {
 	name: "rutasCobrador",
 	data: () => ({
 		api: import.meta.env.VITE_APP_API_URL,
-		search: null,
+		searchTable: [],
 		estadoCobro: [
 			{ title: "Sin estado", value: null },
 			{ title: "Pendiente", value: "Pendiente" },
@@ -620,15 +634,9 @@ export default {
 		estados: ["Pendiente", "Aplazado", "Finalizado"],
 		headers: [
 			{
-				key: "ruta",
-				title: "Ruta",
-				nowrap: true,
-				width: "max-content !important",
-			},
-			{
 				key: "prestamo.cliente",
 				title: "Cliente",
-        nowrap: true,
+				nowrap: true,
 				width: "max-content !important",
 			},
 			{
@@ -648,7 +656,7 @@ export default {
 				title: "Acciones",
 				nowrap: true,
 				width: "max-content !important",
-        minWidth:"380px",
+				minWidth: "380px",
 				sortable: false,
 			},
 		],
@@ -830,16 +838,9 @@ export default {
 					});
 
 					this.rutasCobroCopia = resp.data;
-					this.rutasCobro.forEach((rut) => {
-						const ordenes_cobro = rut.orden_cobro.map((orden) => {
-							delete orden.prestamo.ruta; //Ruta dónde se registro la venta
-							return {
-								...orden,
-								ruta: rut.ruta, //Ruta del cliente
-							};
-						});
-						this.rutasCobroTable.push(...ordenes_cobro);
-					});
+					this.searchTable = new Array(this.rutasCobro.length).fill(
+						null
+					);
 				})
 				.catch((error) => {
 					switch (error.response.status) {
@@ -1129,6 +1130,10 @@ body {
 .no-move {
 	transition: transform 0s;
 }
+
+/* .table-ventas {
+	max-height: 850px !important;
+} */
 
 .ghost {
 	opacity: 0.5;
