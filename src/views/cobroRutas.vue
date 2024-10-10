@@ -220,12 +220,6 @@
 											></v-text-field>
 										</v-row>
 									</template>
-									<template
-										v-slot:item.prestamo.cliente="{ item }"
-									>
-										{{ item.prestamo.cliente.nombres }}
-										{{ item.prestamo.cliente.apellidos }}
-									</template>
 									<template v-slot:item.estado="{ item }">
 										<v-chip
 											variant="flat"
@@ -638,6 +632,8 @@ export default {
 				title: "Cliente",
 				nowrap: true,
 				width: "max-content !important",
+				value: (item) =>
+					`${item.prestamo.cliente.nombres} ${item.prestamo.cliente.apellidos}`,
 			},
 			{
 				key: "prestamo.producto",
