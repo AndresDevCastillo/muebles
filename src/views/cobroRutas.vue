@@ -336,6 +336,26 @@
 											</v-col>
 										</div>
 									</template>
+									<template v-slot:footer.prepend>
+										<v-row align="center" no-gutters class="w-100 flex-wrap">
+											<v-checkbox
+												v-for="(
+													estado, index
+												) in estadoCobro"
+												:key="index"
+												v-model="ruta.filtro"
+												:hide-details="true"
+												:label="estado.title"
+												:value="estado.value"
+												@update:modelValue="
+													filtrarCobrosRuta(
+														ruta.filtro,
+														ruta.ruta._id
+													)
+												"
+											/>
+										</v-row>
+									</template>
 								</v-data-table>
 							</v-expansion-panel-text>
 						</v-expansion-panel>
