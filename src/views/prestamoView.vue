@@ -364,23 +364,47 @@
                       calcularRestante(verPrestamo.abono, verPrestamo.total)
                     }}
                   </div>
-                  <div class="font-weight-bold ms-1 mb-2">
-                    Abonado : ${{ calcularAbono(verPrestamo.abono) }}
+                    <div class="font-weight-bold ms-1 mb-2">
+                      Abonado : ${{ calcularAbono(verPrestamo.abono) }}
+                    </div>
+                    <v-timeline density="compact" align="start">
+                      <v-timeline-item
+                        v-for="monto, index in verPrestamo.abono"
+                        :key="monto"
+                        dot-color="green"
+                        size="x-small"
+                      >
+                        <div class="d-flex">
+                          <div class="mb-4 mr-4 ">
+                          <div class="font-weight-normal">
+                            <strong>
+                              Abono: ${{ monto.monto.toLocaleString() }}
+                            </strong> 
+                            
+                          </div>
+                          <div>{{ formatDate(monto.fecha) }}</div>
+                        </div>
+                        <v-btn color="red-darken-1" @click="eliminarAbono(verPrestamo._id, index )"  icon="mdi-delete-outline"></v-btn>
+                        </div>
+                      </v-timeline-item>
+                    </v-timeline>
+                    <div class="font-weight-bold ms-1 mb-2">
+                    Historial de Acciones
                   </div>
                   <v-timeline density="compact" align="start">
                     <v-timeline-item
-                      v-for="monto in verPrestamo.abono"
-                      :key="monto"
-                      dot-color="green"
+                      v-for="historial, index in verPrestamo.historial"
+                      :key="index"
+                      dot-color="blue"
                       size="x-small"
                     >
-                      <div class="mb-4">
+                        <div class="mb-4">
                         <div class="font-weight-normal">
                           <strong>
-                            Abono: ${{ monto.monto.toLocaleString() }}
-                          </strong>
+                            {{historial.author  }}: {{ historial.action}}
+                          </strong> 
                         </div>
-                        <div>{{ formatDate(monto.fecha) }}</div>
+                        <div>{{ formatDate(historial.created) }}</div>
                       </div>
                     </v-timeline-item>
                   </v-timeline>
@@ -615,7 +639,7 @@
               <!-- eslint-disable-next-line vue/valid-v-slot -->
 
               <template v-slot:item.actions="{ index }">
-                <v-icon size="small" @click="eliminarAbono(index)">
+                <v-icon size="small" @click="eliminarAbonoTabla(index)">
                   mdi-delete
                 </v-icon>
               </template>
@@ -783,7 +807,7 @@
             <v-row justify="center" class="pa-4 mt-3">
               <v-btn
                 color="yellow"
-                :disabled="disableBtnAbonos"
+                :disabled="abonarVentaAntigua.btnAbonar"
                 @click="guardarAbonoVenta"
               >
                 Abonar a la venta
@@ -971,6 +995,7 @@ export default {
       venta: null,
       monto: 0,
       fecha: null,
+      btnAbonar: false,
     },
     fVentaAntigua: [],
     actualizarVentaAntigua: {
@@ -1078,6 +1103,7 @@ export default {
           (this.abonarVentaAntigua.fecha.getDate() < 10 ? "0" : "") +
           this.abonarVentaAntigua.fecha.getDate()
         }`;
+        this.abonarVentaAntigua.btnAbonar = true;
         const paquete = {
           venta: this.abonarVentaAntigua.venta,
           monto: parseInt(this.abonarVentaAntigua.monto),
@@ -1118,6 +1144,7 @@ export default {
                 break;
             }
           });
+          this.abonarVentaAntigua.btnAbonar = false;
       }
     },
     async cambiarUbicacion() {
@@ -1282,7 +1309,7 @@ export default {
           });
       }
     },
-    eliminarAbono(index) {
+    eliminarAbonoTabla(index) {
       this.abonar.abonos.splice(index, 1);
       this.abonosTabla.splice(index, 1);
       this.disableBtnAbonos = this.abonar.abonos.length == 0;
@@ -1890,6 +1917,34 @@ export default {
           }
         });
     },
+
+    async eliminarAbono(idPrestamo, indice){
+      Swal.fire({
+        title: "Estas seguro de eliminar el abono?",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        confirmButtonText: "Eliminar",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          this.dialogVePrestamo = false;
+          await axios
+              .delete(`${this.api}/prestamo/${idPrestamo}/cobro/${indice}`, {
+                headers: {
+                  Authorization: `Bearer ${this.token}`,
+                },
+              })
+              .then(async () => {
+                await this.actualizarTodo();  
+                Swal.fire({
+                  icon: "success",
+                  title: "Se elimino correctamente",
+                  timer: 1500,
+                  showConfirmButton: false,
+                });
+              });
+        } 
+      });
+    },
     verPrestamoFunction(item) {
       this.verPrestamo = item;
       this.verPrestamo.fecha_inicio = this.formatDate(
@@ -1903,9 +1958,12 @@ export default {
       return fechasDate;
     },
     async actualizarTodo() {
+      this.$emit("loadingSweet");
+      await this.getRutas();
       await this.getClientes();
       await this.getProductosInventario();
       await this.getPrestamos();
+      this.$emit("closeSweet");
     },
     async getRutas() {
       await axios
