@@ -8,6 +8,8 @@
             <h1 class="px-3">Ventas</h1>
           </v-row>
         </v-col>
+      </v-row>
+      <v-row justify="space-between" justify-sm="start" class="px-6 my-4">
         <v-col
           sm="4"
           md="4"
@@ -36,6 +38,14 @@
             prepend-icon="mdi mdi-cash-sync"
             @click="dialogAbonar = true"
             >Venta antigua</v-btn
+          >
+        </v-col>
+        <v-col sm="4" md="3" lg="2" cols="auto">
+          <v-btn
+            color="red"
+            prepend-icon="mdi mdi-cash-sync"
+            @click="dialogVendedores = true"
+            >Vendedores</v-btn
           >
         </v-col>
       </v-row>
@@ -141,6 +151,10 @@
       :dialogCliente="dialogCliente"
       @cerrarDialog="dialogCliente = false"
       @actualizarTodo="actualizarTodo"
+    />
+    <modalVendedores
+    :dialogVendedores="dialogVendedores"
+    @cerrarDialog="dialogVendedores = false"
     />
     <v-dialog v-model="dialogPrestamo" persistent width="700">
       <v-card>
@@ -913,9 +927,11 @@ import Session from "@/validation/session";
 import Swal from "sweetalert2";
 import axios from "axios";
 import nuevoCliente from "@/components/nuevoCliente.vue";
+import modalVendedores from "../components/modalVendedores.vue";
+
 export default {
   name: "prestamoVista",
-  components: { nuevoCliente },
+  components: { nuevoCliente, modalVendedores },
   data: () => ({
     token: null,
     api: import.meta.env.VITE_APP_API_URL,
@@ -923,6 +939,7 @@ export default {
     disableBtn: false,
     dialogoChangeRoute: false,
     disableBtnAbonos: false,
+    dialogVendedores: false,
     dialogPrestamo: false,
     dialogCliente: false,
     dialogVePrestamo: null,
