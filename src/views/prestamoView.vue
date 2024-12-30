@@ -10,63 +10,26 @@
         </v-col>
       </v-row>
       <v-row justify="space-between" justify-sm="start" class="px-6 my-4">
-        <v-col
-          sm="4"
-          md="4"
-          lg="6"
-          cols="auto"
-          class="text-sm-start text-md-end"
-        >
-          <v-btn
-            prepend-icon="mdi-plus"
-            color="green"
-            @click="dialogCliente = true"
-            >Agregar cliente</v-btn
-          >
+        <v-col sm="4" md="4" lg="6" cols="auto" class="text-sm-start text-md-end">
+          <v-btn prepend-icon="mdi-plus" color="green" @click="dialogCliente = true">Agregar cliente</v-btn>
         </v-col>
         <v-col sm="3" md="2" lg="2" cols="auto">
-          <v-btn
-            color="blue"
-            prepend-icon="mdi mdi-plus"
-            @click="dialogPrestamo = true"
-            >Crear venta</v-btn
-          >
+          <v-btn color="blue" prepend-icon="mdi mdi-plus" @click="dialogPrestamo = true">Crear venta</v-btn>
         </v-col>
         <v-col sm="4" md="3" lg="2" cols="auto">
-          <v-btn
-            color="yellow"
-            prepend-icon="mdi mdi-cash-sync"
-            @click="dialogAbonar = true"
-            >Venta antigua</v-btn
-          >
+          <v-btn color="yellow" prepend-icon="mdi mdi-cash-sync" @click="dialogAbonar = true">Venta antigua</v-btn>
         </v-col>
         <v-col sm="4" md="3" lg="2" cols="auto">
-          <v-btn
-            color="red"
-            prepend-icon="mdi mdi-cash-sync"
-            @click="dialogVendedores = true"
-            >Vendedores</v-btn
-          >
+          <v-btn color="red" prepend-icon="mdi mdi-cash-sync" @click="dialogVendedores = true">Vendedores</v-btn>
         </v-col>
       </v-row>
     </v-card-title>
     <v-col md="6" sm="12">
-      <v-text-field
-        v-model="searchPrestamo"
-        append-inner-icon="mdi-magnify"
-        label="Buscar"
-        variant="outlined"
-        hide-details
-      ></v-text-field>
+      <v-text-field v-model="searchPrestamo" append-inner-icon="mdi-magnify" label="Buscar" variant="outlined"
+        hide-details></v-text-field>
     </v-col>
-    <v-data-table
-      :headers="headers"
-      :items="prestamos"
-      :sort-by="[{ key: 'mora', order: 'asc' }]"
-      class="elevation-1"
-      :search="searchPrestamo"
-      no-data-text="Sin ventas"
-    >
+    <v-data-table :headers="headers" :items="prestamos" :sort-by="[{ key: 'mora', order: 'asc' }]" class="elevation-1"
+      :search="searchPrestamo" no-data-text="Sin ventas">
       <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template v-slot:item.completado="{ value }">
         {{ value ? "Completado" : "Activo" }}
@@ -82,80 +45,38 @@
 
       <template v-slot:item.actions="{ item }">
         <v-row class="g-3 align-center">
-          <v-icon
-            size="small"
-            class="me-2 mb-2"
-            @click="verPrestamoFunction(Object.assign({}, item))"
-          >
+          <v-icon size="small" class="me-2 mb-2" @click="verPrestamoFunction(Object.assign({}, item))">
             mdi-eye
           </v-icon>
-          <v-icon
-            v-if="!item.completado"
-            class="me-2 mb-2"
-            size="small"
-            @click="dialogAbonarVentaAntigua(item._id)"
-            >mdi mdi-cash-refund</v-icon
-          >
-          <v-icon
-            v-if="
+          <v-icon v-if="!item.completado" class="me-2 mb-2" size="small" @click="dialogAbonarVentaAntigua(item._id)">mdi
+            mdi-cash-refund</v-icon>
+          <v-icon v-if="
               !item.completado &&
               (item.producto.length == 0 || item.ruta == 'Sin ruta')
-            "
-            size="small"
-            class="me-2 mb-2"
-            @click="dialogActualizarVenta(Object.assign({}, item))"
-          >
+            " size="small" class="me-2 mb-2" @click="dialogActualizarVenta(Object.assign({}, item))">
             mdi mdi-cash-plus
           </v-icon>
-          <v-btn
-            v-if="!item.completado"
-            @click="dialogActualizarUbicacion(item._id)"
-            class="elevation-0 me-1"
-            text
-            icon
-            dark
-            density="compact"
-          >
+          <v-btn v-if="!item.completado" @click="dialogActualizarUbicacion(item._id)" class="elevation-0 me-1" text icon
+            dark density="compact">
             <v-icon size="small">mdi mdi-map-marker-plus</v-icon>
-            <v-tooltip activator="parent" location="top"
-              >Actualizar ubicación</v-tooltip
-            >
+            <v-tooltip activator="parent" location="top">Actualizar ubicación</v-tooltip>
           </v-btn>
-          <v-btn
-            v-if="item.ubicacionMap.lat != null"
-            class="elevation-0"
-            :href="`https://www.google.com/maps?q=${item.ubicacionMap.lat},${item.ubicacionMap.lng}`"
-            target="_blank"
-            icon
-            dark
-            density="compact"
-            text
-          >
+          <v-btn v-if="item.ubicacionMap.lat != null" class="elevation-0"
+            :href="`https://www.google.com/maps?q=${item.ubicacionMap.lat},${item.ubicacionMap.lng}`" target="_blank"
+            icon dark density="compact" text>
             <v-icon size="small">mdi mdi-home-map-marker</v-icon>
-            <v-tooltip activator="parent" location="top"
-              >Ver ubicación</v-tooltip
-            >
+            <v-tooltip activator="parent" location="top">Ver ubicación</v-tooltip>
           </v-btn>
 
-          <v-icon
-            size="small"
-            class="me-2 mb-2"
-            @click="eliminarPrestamo(item._id)"
-          >
+          <v-icon size="small" class="me-2 mb-2" @click="eliminarPrestamo(item._id)">
             mdi-delete
           </v-icon>
         </v-row>
       </template>
     </v-data-table>
-    <nuevoCliente
-      :dialogCliente="dialogCliente"
-      @cerrarDialog="dialogCliente = false"
-      @actualizarTodo="actualizarTodo"
-    />
-    <modalVendedores
-    :dialogVendedores="dialogVendedores"
-    @cerrarDialog="dialogVendedores = false"
-    />
+    <nuevoCliente :dialogCliente="dialogCliente" @cerrarDialog="dialogCliente = false"
+      @actualizarTodo="actualizarTodo" />
+    <modalVendedores :dialogVendedores="dialogVendedores" @cerrarDialog="dialogVendedores = false" />
     <v-dialog v-model="dialogPrestamo" persistent width="700">
       <v-card>
         <v-card-title> Nueva venta </v-card-title>
@@ -163,117 +84,57 @@
           <v-form v-model="valid" ref="formPrestamo">
             <v-row>
               <v-col cols="12">
-                <v-autocomplete
-                  label="Nombre del cliente"
-                  no-data-text="Sin clientes disponible para venta"
-                  return-object
-                  :items="clientes"
-                  :item-title="
+                <v-autocomplete label="Nombre del cliente" no-data-text="Sin clientes disponible para venta"
+                  return-object :items="clientes" :item-title="
                     (item) => {
                       return `${item.nombres} ${item.apellidos}`;
                     }
-                  "
-                  variant="outlined"
-                  v-model="form.cliente"
-                  :rules="campoRules"
-                ></v-autocomplete>
+                  " variant="outlined" v-model="form.cliente" :rules="campoRules"></v-autocomplete>
               </v-col>
               <v-col md="6" cols="12">
-                <v-autocomplete
-                  label="Producto"
-                  return-object
-                  no-data-text="Sin productos registrados"
-                  item-value="producto._id"
-                  :items="productos"
-                  item-title="producto.nombre"
-                  variant="outlined"
-                  v-model="form.producto"
-                  :rules="campoRules"
-                ></v-autocomplete>
+                <v-autocomplete label="Producto" return-object no-data-text="Sin productos registrados"
+                  item-value="producto._id" :items="productos" item-title="producto.nombre" variant="outlined"
+                  v-model="form.producto" :rules="campoRules"></v-autocomplete>
               </v-col>
               <v-col md="6" cols="12">
-                <v-text-field
-                  type="number"
-                  label="Cantidad"
-                  placeholder="Ingrese cantidad del producto"
-                  min="1"
-                  variant="outlined"
-                  v-model="form.cantidad"
-                  :rules="cantidadRules"
-                ></v-text-field>
+                <v-text-field type="number" label="Cantidad" placeholder="Ingrese cantidad del producto" min="1"
+                  variant="outlined" v-model="form.cantidad" :rules="cantidadRules"></v-text-field>
               </v-col>
               <v-col :cols="cols2[0]">
-                <v-select
-                  label="Forma de pago"
-                  :items="formasPago"
-                  item-value="index"
-                  item-title="forma"
-                  placeholder="Escoja forma de pago"
-                  variant="outlined"
-                  v-model="formaPago"
-                  :rules="campoRules"
-                ></v-select>
+                <v-select label="Forma de pago" :items="formasPago" item-value="index" item-title="forma"
+                  placeholder="Escoja forma de pago" variant="outlined" v-model="formaPago"
+                  :rules="campoRules"></v-select>
               </v-col>
               <v-col :cols="cols2[1]" v-if="formaPago == 2">
-                <v-text-field
-                  type="number"
-                  label="Cuotas"
-                  placeholder="Ingrese cantidad de cuotas"
-                  min="1"
-                  variant="outlined"
-                  v-model="form.cuotas"
-                  :rules="cantidadRules"
-                ></v-text-field>
+                <v-text-field type="number" label="Cuotas" placeholder="Ingrese cantidad de cuotas" min="1"
+                  variant="outlined" v-model="form.cuotas" :rules="cantidadRules"></v-text-field>
               </v-col>
               <v-col cols="12" v-if="formaPago == 2">
                 <v-chip color="green">
                   Fechas seleccionadas:
-                  {{ form.pago_fechas.length }}</v-chip
-                >
+                  {{ form.pago_fechas.length }}</v-chip>
               </v-col>
               <v-col cols="12" v-if="formaPago == 2">
-                <VueDatePicker
-                  format="yyyy-MM-dd"
-                  :rules="campoRules"
-                  :enable-time-picker="false"
-                  cancelText="Cancelar"
-                  locale="es"
-                  selectText="Seleccionar"
-                  v-model="form.pago_fechas"
-                  multi-dates
-                  :min-date="new Date()"
-                  placeholder="Selecciona fechas de pago"
-                  teleport-center
-                  @cleared="form.pago_fechas = []"
-                />
+                <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false" cancelText="Cancelar"
+                  locale="es" selectText="Seleccionar" v-model="form.pago_fechas" multi-dates :min-date="new Date()"
+                  placeholder="Selecciona fechas de pago" teleport-center @cleared="form.pago_fechas = []" />
               </v-col>
               <v-col cols="12">
                 <h6 class="mb-3 text-h6">Marca la ubicación de cobro</h6>
-                <MapsComponent
-                  @ubicacion="
+                <MapsComponent @ubicacion="
                     (ubi) => {
                       form.ubicacionMap = ubi;
                     }
-                  "
-                />
+                  " />
               </v-col>
             </v-row>
           </v-form>
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn
-            color="red-darken-1"
-            variant="tonal"
-            @click="dialogPrestamo = false"
-          >
+          <v-btn color="red-darken-1" variant="tonal" @click="dialogPrestamo = false">
             Cerrar
           </v-btn>
-          <v-btn
-            color="green-darken-1"
-            variant="tonal"
-            :disabled="disableBtn"
-            @click="guardar"
-          >
+          <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtn" @click="guardar">
             Crear
           </v-btn>
         </v-card-actions>
@@ -291,132 +152,83 @@
                   </template>
                 </v-progress-linear>
                 <v-col cols="12">
-                  <v-text-field
-                    label="Documento"
-                    type="text"
-                    required
-                    variant="outlined"
-                    v-model="verPrestamo.cliente.documento"
-                    disabled
-                  ></v-text-field>
+                  <v-text-field label="Documento" type="text" required variant="outlined"
+                    v-model="verPrestamo.cliente.documento" disabled></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
-                  <v-text-field
-                    variant="outlined"
-                    label="Nombre"
-                    disabled
-                    required
-                    v-model="verPrestamo.cliente.nombres"
-                  ></v-text-field>
+                  <v-text-field variant="outlined" label="Nombre" disabled required
+                    v-model="verPrestamo.cliente.nombres"></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
-                  <v-text-field
-                    variant="outlined"
-                    label="Apellido"
-                    disabled
-                    required
-                    v-model="verPrestamo.cliente.apellidos"
-                  ></v-text-field>
+                  <v-text-field variant="outlined" label="Apellido" disabled required
+                    v-model="verPrestamo.cliente.apellidos"></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
-                  <v-text-field
-                    variant="outlined"
-                    label="Ruta"
-                    disabled
-                    required
-                    v-model="verPrestamo.cliente.direccion.nombre"
-                  ></v-text-field>
+                  <v-text-field variant="outlined" label="Ruta" disabled required
+                    v-model="verPrestamo.cliente.direccion.nombre"></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
-                  <v-text-field
-                    variant="outlined"
-                    label="Producto"
-                    disabled
-                    required
-                    v-model="verPrestamo.producto"
-                  ></v-text-field>
+                  <v-text-field variant="outlined" label="Producto" disabled required
+                    v-model="verPrestamo.producto"></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
-                  <v-text-field
-                    variant="outlined"
-                    label="Fecha de Inicio"
-                    disabled
-                    required
-                    v-model="verPrestamo.fecha_inicio"
-                  ></v-text-field>
+                  <v-text-field variant="outlined" label="Fecha de Inicio" disabled required
+                    v-model="verPrestamo.fecha_inicio"></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
-                  <v-text-field
-                    variant="outlined"
-                    label="N° Cuotas"
-                    disabled
-                    required
-                    v-model="verPrestamo.cuotas"
-                  ></v-text-field>
+                  <v-text-field variant="outlined" label="N° Cuotas" disabled required
+                    v-model="verPrestamo.cuotas"></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
-                  <v-text-field
-                    variant="outlined"
-                    label="Cuotas atrasadas"
-                    disabled
-                    required
-                    v-model="verPrestamo.cuotas_atrasadas"
-                  ></v-text-field>
+                  <v-text-field variant="outlined" label="Cuotas atrasadas" disabled required
+                    v-model="verPrestamo.cuotas_atrasadas"></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
-                  <v-text-field
-                    variant="outlined"
-                    label="Total"
-                    disabled
-                    required
-                    v-model="verPrestamo.total"
-                  ></v-text-field>
+                  <v-text-field variant="outlined" label="Total" disabled required
+                    v-model="verPrestamo.total"></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field variant="outlined" label="Vendedor" disabled required
+                    v-model="verPrestamo.vendedor"></v-text-field>
                 </v-col>
                 <v-card-text v-if="verPrestamo.cuotas !== 0">
                   <div class="font-weight-bold ms-1 mb-2">
                     Restante : ${{
-                      calcularRestante(verPrestamo.abono, verPrestamo.total)
+                    calcularRestante(verPrestamo.abono, verPrestamo.total)
                     }}
                   </div>
-                    <div class="font-weight-bold ms-1 mb-2">
-                      Abonado : ${{ calcularAbono(verPrestamo.abono) }}
-                    </div>
-                    <v-timeline density="compact" align="start">
-                      <v-timeline-item
-                        v-for="monto, index in verPrestamo.abono"
-                        :key="monto"
-                        dot-color="green"
-                        size="x-small"
-                      >
-                        <div class="d-flex">
-                          <div class="mb-4 mr-4 ">
+                  <div class="font-weight-bold ms-1 mb-2">
+                    Abonado : ${{ calcularAbono(verPrestamo.abono) }}
+                  </div>
+                  <v-timeline density="compact" align="start">
+                    <v-timeline-item v-for="monto, index in verPrestamo.abono" :key="monto" dot-color="green"
+                      size="x-small">
+                      <div class="d-flex">
+                        <div class="mb-4 mr-4 ">
                           <div class="font-weight-normal">
                             <strong>
                               Abono: ${{ monto.monto.toLocaleString() }}
-                            </strong> 
-                            
+                            </strong>
+
                           </div>
                           <div>{{ formatDate(monto.fecha) }}</div>
                         </div>
-                        <v-btn color="red-darken-1" @click="eliminarAbono(verPrestamo._id, index )"  icon="mdi-delete-outline"></v-btn>
-                        </div>
-                      </v-timeline-item>
-                    </v-timeline>
-                    <div class="font-weight-bold ms-1 mb-2">
+                        <v-btn color="red-darken-1" @click="eliminarAbono(verPrestamo._id, index )"
+                          icon="mdi-delete-outline"></v-btn>
+                      </div>
+                    </v-timeline-item>
+                  </v-timeline>
+                  <div class="font-weight-bold ms-1 mb-2">
                     Historial de Acciones
                   </div>
                   <v-timeline density="compact" align="start">
-                    <v-timeline-item
-                      v-for="historial, index in verPrestamo.historial"
-                      :key="index"
-                      dot-color="blue"
-                      size="x-small"
-                    >
-                        <div class="mb-4">
+                    <v-timeline-item v-for="historial, index in verPrestamo.historial" :key="index" dot-color="blue"
+                      size="x-small">
+                      <div class="mb-4">
                         <div class="font-weight-normal">
                           <strong>
-                            {{historial.author  }}: {{ historial.action}}
-                          </strong> 
+                            {{historial.author }}: {{ historial.action}}
+                          </strong>
                         </div>
                         <div>{{ formatDate(historial.created) }}</div>
                       </div>
@@ -428,11 +240,7 @@
           </v-container>
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn
-            color="red-darken-1"
-            variant="tonal"
-            @click="dialogVePrestamo = false"
-          >
+          <v-btn color="red-darken-1" variant="tonal" @click="dialogVePrestamo = false">
             Cerrar
           </v-btn>
         </v-card-actions>
@@ -446,203 +254,91 @@
             <v-form ref="formAbono">
               <v-row>
                 <v-col md="6" lg="6" sm="12" cols="12">
-                  <v-autocomplete
-                    v-model="abonar.ruta"
-                    :items="rutas"
-                    item-title="nombre"
-                    item-value="_id"
-                    :rules="campoRules"
-                    label="Barrio"
-                    variant="outlined"
-                  ></v-autocomplete>
+                  <v-autocomplete v-model="abonar.ruta" :items="rutas" item-title="nombre" item-value="_id"
+                    :rules="campoRules" label="Barrio" variant="outlined"></v-autocomplete>
                 </v-col>
                 <v-col md="6" lg="6" sm="12" cols="12">
-                  <v-text-field
-                    v-model="abonar.direccionResidencia"
-                    :rules="campoRules"
-                    label="Dirección"
-                    variant="outlined"
-                  ></v-text-field>
+                  <v-text-field v-model="abonar.direccionResidencia" :rules="campoRules" label="Dirección"
+                    variant="outlined"></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-text-field
-                    v-model="abonar.nombres"
-                    :rules="campoRules"
-                    label="Nombres cliente"
-                    variant="outlined"
-                  ></v-text-field>
+                  <v-text-field v-model="abonar.nombres" :rules="campoRules" label="Nombres cliente"
+                    variant="outlined"></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-text-field
-                    v-model="abonar.apellidos"
-                    :rules="campoRules"
-                    label="Apellidos"
-                    variant="outlined"
-                  ></v-text-field>
+                  <v-text-field v-model="abonar.apellidos" :rules="campoRules" label="Apellidos"
+                    variant="outlined"></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-text-field
-                    v-model="abonar.documento"
-                    hint="Sin puntos o comas (. ,)"
-                    persistent-hint
-                    :rules="cantidadRules"
-                    label="Documento"
-                    type="number"
-                    variant="outlined"
-                  ></v-text-field>
+                  <v-text-field v-model="abonar.documento" hint="Sin puntos o comas (. ,)" persistent-hint
+                    :rules="cantidadRules" label="Documento" type="number" variant="outlined"></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-text-field
-                    v-model="abonar.telefono"
-                    hint="Sin puntos o comas (. ,)"
-                    persistent-hint
-                    :rules="cantidadRules"
-                    label="Número celular"
-                    type="tel"
-                    variant="outlined"
-                  ></v-text-field>
+                  <v-text-field v-model="abonar.telefono" hint="Sin puntos o comas (. ,)" persistent-hint
+                    :rules="cantidadRules" label="Número celular" type="tel" variant="outlined"></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-text-field
-                    v-model="abonar.correo"
-                    label="Correo"
-                    type="email"
-                    variant="outlined"
-                  ></v-text-field>
+                  <v-text-field v-model="abonar.correo" label="Correo" type="email" variant="outlined"></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-autocomplete
-                    label="Producto"
-                    no-data-text="Sin productos registrados"
-                    item-value="producto.nombre"
-                    :items="productos"
-                    item-title="producto.nombre"
-                    variant="outlined"
-                    v-model="abonar.producto"
-                    :rules="campoRules"
-                  ></v-autocomplete>
+                  <v-autocomplete label="Producto" no-data-text="Sin productos registrados" item-value="producto.nombre"
+                    :items="productos" item-title="producto.nombre" variant="outlined" v-model="abonar.producto"
+                    :rules="campoRules"></v-autocomplete>
                 </v-col>
                 <v-col cols="12">
-                  <v-select
-                    v-model="formaPago"
-                    :items="formasPago"
-                    item-title="forma"
-                    item-value="index"
-                    :rules="campoRules"
-                    label="Forma de pago"
-                    variant="outlined"
-                  ></v-select>
+                  <v-select v-model="formaPago" :items="formasPago" item-title="forma" item-value="index"
+                    :rules="campoRules" label="Forma de pago" variant="outlined"></v-select>
                 </v-col>
                 <v-col cols="12">
-                  <VueDatePicker
-                    format="yyyy-MM-dd"
-                    :rules="campoRules"
-                    :enable-time-picker="false"
-                    cancelText="Cancelar"
-                    locale="es"
-                    selectText="Seleccionar"
-                    v-model="fVenta"
-                    placeholder="Selecciona fecha de venta"
-                    teleport-center
-                    @cleared="fVenta = null"
-                  />
+                  <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false"
+                    cancelText="Cancelar" locale="es" selectText="Seleccionar" v-model="fVenta"
+                    placeholder="Selecciona fecha de venta" teleport-center @cleared="fVenta = null" />
                 </v-col>
                 <v-row v-if="formaPago != 1" class="pa-3">
                   <v-col cols="12">
-                    <v-text-field
-                      v-model="abonar.cuotas"
-                      hint="Sin puntos o comas (. ,)"
-                      persistent-hint
-                      :rules="cantidadRules"
-                      label="Cantidad de cuotas"
-                      type="number"
-                      variant="outlined"
-                    ></v-text-field>
+                    <v-text-field v-model="abonar.cuotas" hint="Sin puntos o comas (. ,)" persistent-hint
+                      :rules="cantidadRules" label="Cantidad de cuotas" type="number" variant="outlined"></v-text-field>
                   </v-col>
                   <v-col cols="12">
                     <v-chip color="green">
                       Fechas seleccionadas:
-                      {{ abonar.pago_fechas.length }}</v-chip
-                    >
+                      {{ abonar.pago_fechas.length }}</v-chip>
                   </v-col>
                   <v-col cols="12">
-                    <VueDatePicker
-                      format="yyyy-MM-dd"
-                      :rules="campoRules"
-                      :enable-time-picker="false"
-                      cancelText="Cancelar"
-                      locale="es"
-                      selectText="Seleccionar"
-                      v-model="abonar.pago_fechas"
-                      multi-dates
-                      :min-date="new Date()"
-                      placeholder="Selecciona fechas de pago"
-                      teleport-center
-                      @cleared="abonar.pago_fechas = []"
-                    />
+                    <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false"
+                      cancelText="Cancelar" locale="es" selectText="Seleccionar" v-model="abonar.pago_fechas"
+                      multi-dates :min-date="new Date()" placeholder="Selecciona fechas de pago" teleport-center
+                      @cleared="abonar.pago_fechas = []" />
                   </v-col>
                 </v-row>
                 <v-col cols="12">
-                  <v-text-field
-                    v-model="abonar.total"
-                    hint="Sin puntos o comas (. ,)"
-                    persistent-hint
-                    :rules="cantidadRules"
-                    label="Total venta"
-                    type="number"
-                    variant="outlined"
-                  ></v-text-field>
+                  <v-text-field v-model="abonar.total" hint="Sin puntos o comas (. ,)" persistent-hint
+                    :rules="cantidadRules" label="Total venta" type="number" variant="outlined"></v-text-field>
                 </v-col>
               </v-row>
               <div v-if="formaPago == 2" class="mt-9">
                 <v-row>
                   <v-col md="6" lg="6" sm="12" cols="12">
-                    <v-text-field
-                      v-model="abonoAdd"
-                      hint="Sin puntos o comas (. ,)"
-                      persistent-hint
-                      density="compact"
-                      :rules="cantidadRules"
-                      label="Monto"
-                      placeholder="Ingrese monto a abonar"
-                      type="number"
-                      variant="outlined"
-                    ></v-text-field>
+                    <v-text-field v-model="abonoAdd" hint="Sin puntos o comas (. ,)" persistent-hint density="compact"
+                      :rules="cantidadRules" label="Monto" placeholder="Ingrese monto a abonar" type="number"
+                      variant="outlined"></v-text-field>
                   </v-col>
                   <v-col md="6" lg="6" sm="12" cols="12">
-                    <VueDatePicker
-                      format="yyyy-MM-dd"
-                      :rules="campoRules"
-                      :enable-time-picker="false"
-                      cancelText="Cancelar"
-                      locale="es"
-                      selectText="Seleccionar"
-                      v-model="fechaAdd"
-                      :min-date="new Date(fVenta)"
-                      placeholder="Selecciona fecha del abono"
-                      teleport-center
-                      @cleared="fechaAdd = null"
-                    />
+                    <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false"
+                      cancelText="Cancelar" locale="es" selectText="Seleccionar" v-model="fechaAdd"
+                      :min-date="new Date(fVenta)" placeholder="Selecciona fecha del abono" teleport-center
+                      @cleared="fechaAdd = null" />
                   </v-col>
                 </v-row>
                 <v-row justify="center">
-                  <v-btn
-                    color="blue"
-                    prepend-icon="mdi mdi-plus"
-                    @click="agregarAbono"
-                  >
+                  <v-btn color="blue" prepend-icon="mdi mdi-plus" @click="agregarAbono">
                     Agregar abono
                   </v-btn>
                 </v-row>
               </div>
             </v-form>
-            <v-data-table
-              v-if="formaPago == 2"
-              :headers="headersAbonos"
-              :items="abonosTabla"
-              class="elevation-3 pa-3 mt-5"
-              no-data-text="Sin abonos"
-            >
+            <v-data-table v-if="formaPago == 2" :headers="headersAbonos" :items="abonosTabla"
+              class="elevation-3 pa-3 mt-5" no-data-text="Sin abonos">
               <template v-slot:top>
                 <v-row justify="end" class="pa-2">
                   <v-col cols="4">
@@ -659,22 +355,14 @@
               </template>
             </v-data-table>
             <v-row justify="center" class="pa-4 mt-3">
-              <v-btn
-                color="green"
-                :disabled="disableBtnAbonos"
-                @click="guardarAbonos"
-              >
+              <v-btn color="green" :disabled="disableBtnAbonos" @click="guardarAbonos">
                 Guardar venta
               </v-btn>
             </v-row>
           </v-container>
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn
-            color="red-darken-1"
-            variant="tonal"
-            @click="dialogAbonar = false"
-          >
+          <v-btn color="red-darken-1" variant="tonal" @click="dialogAbonar = false">
             Cancelar
           </v-btn>
         </v-card-actions>
@@ -688,98 +376,56 @@
             <v-form ref="formVentaAntigua">
               <v-row>
                 <v-col md="12" lg="12" sm="12" cols="12">
-                  <v-autocomplete
-                    v-model="actualizarVentaAntigua.ruta"
-                    :items="rutas"
-                    item-title="nombre"
-                    item-value="nombre"
-                    :rules="campoRules"
-                    label="Barrio"
-                    variant="outlined"
-                  ></v-autocomplete>
+                  <v-autocomplete v-model="actualizarVentaAntigua.ruta" :items="rutas" item-title="nombre"
+                    item-value="nombre" :rules="campoRules" label="Barrio" variant="outlined"></v-autocomplete>
                 </v-col>
                 <v-col cols="12">
                   <h6 class="mb-3 text-h6">Marca la ubicación de cobro</h6>
-                  <MapsComponent
-                    :ubicacionAnterior="actualizarVentaAntigua.ubicacionMap"
-                    :centroMap="actualizarVentaAntigua.ubicacionMap"
-                    @ubicacion="
+                  <MapsComponent :ubicacionAnterior="actualizarVentaAntigua.ubicacionMap"
+                    :centroMap="actualizarVentaAntigua.ubicacionMap" @ubicacion="
                       (ubi) => {
                         actualizarVentaAntigua.ubicacionMap = ubi;
                       }
-                    "
-                  />
+                    " />
                 </v-col>
                 <v-col cols="12">
-                  <v-autocomplete
-                    label="Producto"
-                    no-data-text="Sin productos registrados"
-                    item-value="producto.nombre"
-                    :items="productos"
-                    item-title="producto.nombre"
-                    variant="outlined"
-                    v-model="actualizarVentaAntigua.producto"
-                    :rules="campoRules"
-                  ></v-autocomplete>
+                  <v-autocomplete label="Producto" no-data-text="Sin productos registrados" item-value="producto.nombre"
+                    :items="productos" item-title="producto.nombre" variant="outlined"
+                    v-model="actualizarVentaAntigua.producto" :rules="campoRules"></v-autocomplete>
                 </v-col>
                 <v-row v-if="actualizarVentaAntigua.resta > 0" class="pa-3">
                   <v-col cols="12">
                     <div class="font-weight-bold ms-1 mb-2">
                       Resta por pagar: ${{
-                        actualizarVentaAntigua.resta.toLocaleString()
+                      actualizarVentaAntigua.resta.toLocaleString()
                       }}
                     </div>
-                    <v-text-field
-                      type="number"
-                      min="1"
-                      label="Cuotas"
-                      variant="outlined"
-                      v-model="actualizarVentaAntigua.cuotas"
-                      :rules="cantidadRules"
-                    ></v-text-field>
+                    <v-text-field type="number" min="1" label="Cuotas" variant="outlined"
+                      v-model="actualizarVentaAntigua.cuotas" :rules="cantidadRules"></v-text-field>
                   </v-col>
                   <v-col cols="12">
                     <v-chip color="green">
                       Fechas seleccionadas:
-                      {{ actualizarVentaAntigua.fechas_pago.length }}</v-chip
-                    >
+                      {{ actualizarVentaAntigua.fechas_pago.length }}</v-chip>
                   </v-col>
                   <v-col cols="12">
-                    <VueDatePicker
-                      format="yyyy-MM-dd"
-                      :rules="campoRules"
-                      :enable-time-picker="false"
-                      cancelText="Cancelar"
-                      locale="es"
-                      selectText="Seleccionar"
-                      :min-date="new Date()"
-                      multi-dates
-                      v-model="actualizarVentaAntigua.fechas_pago"
-                      placeholder="Selecciona fechas de pago"
-                      teleport-center
-                      @cleared="actualizarVentaAntigua.fechas_pago = []"
-                    />
+                    <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false"
+                      cancelText="Cancelar" locale="es" selectText="Seleccionar" :min-date="new Date()" multi-dates
+                      v-model="actualizarVentaAntigua.fechas_pago" placeholder="Selecciona fechas de pago"
+                      teleport-center @cleared="actualizarVentaAntigua.fechas_pago = []" />
                   </v-col>
                 </v-row>
               </v-row>
             </v-form>
             <v-row justify="center" class="pa-4 mt-3">
-              <v-btn
-                color="yellow"
-                :disabled="disableBtnAbonos"
-                @click="actualizarVenta"
-              >
+              <v-btn color="yellow" :disabled="disableBtnAbonos" @click="actualizarVenta">
                 Actualizar venta
               </v-btn>
             </v-row>
           </v-container>
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn
-            color="red-darken-1"
-            variant="tonal"
-            @click="dialogVentaAntigua = false"
-          >
+          <v-btn color="red-darken-1" variant="tonal" @click="dialogVentaAntigua = false">
             Cancelar
           </v-btn>
         </v-card-actions>
@@ -793,48 +439,25 @@
             <v-form ref="formAbonarVentaAntigua">
               <v-row>
                 <v-col cols="12">
-                  <v-text-field
-                    type="number"
-                    min="1"
-                    label="Monto"
-                    variant="outlined"
-                    v-model="abonarVentaAntigua.monto"
-                    :rules="cantidadRules"
-                  ></v-text-field>
+                  <v-text-field type="number" min="1" label="Monto" variant="outlined"
+                    v-model="abonarVentaAntigua.monto" :rules="cantidadRules"></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <VueDatePicker
-                    format="yyyy-MM-dd"
-                    :rules="campoRules"
-                    :enable-time-picker="false"
-                    cancelText="Cancelar"
-                    locale="es"
-                    selectText="Seleccionar"
-                    v-model="abonarVentaAntigua.fecha"
-                    placeholder="Selecciona fecha de pago"
-                    teleport-center
-                    @cleared="abonarVentaAntigua.fecha = null"
-                  />
+                  <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false"
+                    cancelText="Cancelar" locale="es" selectText="Seleccionar" v-model="abonarVentaAntigua.fecha"
+                    placeholder="Selecciona fecha de pago" teleport-center @cleared="abonarVentaAntigua.fecha = null" />
                 </v-col>
               </v-row>
             </v-form>
             <v-row justify="center" class="pa-4 mt-3">
-              <v-btn
-                color="yellow"
-                :disabled="abonarVentaAntigua.btnAbonar"
-                @click="guardarAbonoVenta"
-              >
+              <v-btn color="yellow" :disabled="abonarVentaAntigua.btnAbonar" @click="guardarAbonoVenta">
                 Abonar a la venta
               </v-btn>
             </v-row>
           </v-container>
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn
-            color="red-darken-1"
-            variant="tonal"
-            @click="dialogAbonarVenta = false"
-          >
+          <v-btn color="red-darken-1" variant="tonal" @click="dialogAbonarVenta = false">
             Cancelar
           </v-btn>
         </v-card-actions>
@@ -847,38 +470,21 @@
           <v-form ref="formPrestamo">
             <v-row>
               <v-col cols="12">
-                <v-autocomplete
-                  label="Nombre del cliente"
-                  no-data-text="Sin clientes disponible para venta"
-                  return-object
-                  :items="clientes"
-                  :item-title="
+                <v-autocomplete label="Nombre del cliente" no-data-text="Sin clientes disponible para venta"
+                  return-object :items="clientes" :item-title="
                     (item) => {
                       return `${item.nombres} ${item.apellidos}`;
                     }
-                  "
-                  variant="outlined"
-                  v-model="form.cliente"
-                  :rules="campoRules"
-                ></v-autocomplete>
+                  " variant="outlined" v-model="form.cliente" :rules="campoRules"></v-autocomplete>
               </v-col>
             </v-row>
           </v-form>
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn
-            color="red-darken-1"
-            variant="tonal"
-            @click="dialogoChangeRoute = false"
-          >
+          <v-btn color="red-darken-1" variant="tonal" @click="dialogoChangeRoute = false">
             Cerrar
           </v-btn>
-          <v-btn
-            color="green-darken-1"
-            variant="tonal"
-            :disabled="disableBtn"
-            @click="changeRoute"
-          >
+          <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtn" @click="changeRoute">
             Crear
           </v-btn>
         </v-card-actions>
@@ -890,30 +496,18 @@
         <v-card-text>
           <v-col cols="12">
             <h6 class="mb-3 text-h6">Marca la ubicación de cobro</h6>
-            <MapsComponent
-              :centroMap="actualizarUbicacion.ubicacionMap"
-              @ubicacion="
+            <MapsComponent :centroMap="actualizarUbicacion.ubicacionMap" @ubicacion="
                 (ubi) => {
                   actualizarUbicacion.ubicacionMap = ubi;
                 }
-              "
-            />
+              " />
           </v-col>
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn
-            color="red-darken-1"
-            variant="tonal"
-            @click="dialogUbicacion = false"
-          >
+          <v-btn color="red-darken-1" variant="tonal" @click="dialogUbicacion = false">
             Cerrar
           </v-btn>
-          <v-btn
-            color="green-darken-1"
-            variant="tonal"
-            :disabled="disableBtn"
-            @click="cambiarUbicacion"
-          >
+          <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtn" @click="cambiarUbicacion">
             Cambiar ubicación
           </v-btn>
         </v-card-actions>
