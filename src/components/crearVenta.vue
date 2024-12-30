@@ -12,7 +12,14 @@
                                     :item-title="(item) => {
                                         return `${item.nombres} ${item.apellidos}`;
                                     }
-                                        " variant="outlined" v-model="form.cliente" :rules="campoRules"></v-autocomplete>
+                                        " variant="outlined" v-model="form.cliente"
+                                    :rules="campoRules"></v-autocomplete>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-autocomplete :items="vendedores" variant="outlined" label="Vendedor" required
+                                    v-model="form.vendedor" item-title="nombre" item-value="nombre"
+                                    :rules="[(v) => !!v || 'Seleccione un vendedor']"
+                                    no-data-text="No hay vendedores"></v-autocomplete>
                             </v-col>
                             <v-col md="6" cols="12">
                                 <v-autocomplete label="Producto" return-object no-data-text="Sin productos registrados"
@@ -91,6 +98,7 @@ export default {
                 ruta: null,
                 producto: null,
                 fecha_inicio: "",
+                vendedor: null,
                 cantidad: 1,
                 cuotas: 1,
                 pago_fechas: [],
@@ -120,7 +128,7 @@ export default {
             this.getVendedores();
             this.getClientes();
             this.getProductosInventario();
-            this.$emit("cerrarDialog");
+            this.$emit("actualizarTodo");
         },
         async getVendedores() {
             await axios
@@ -258,6 +266,7 @@ export default {
                         cliente: this.form.cliente._id, //`${this.form.cliente.nombres} ${this.form.cliente.apellidos}`,
                         ruta: this.form.cliente.direccion.nombre,
                         producto: this.form.producto.producto.nombre, //ObjectId del inventario
+                        vendedor: this.form.vendedor,
                         inventario: this.form.producto._id,
                         fecha_inicio: new Date().toISOString(),
                         cantidad: this.form.cantidad,
@@ -328,6 +337,7 @@ export default {
         await this.getVendedores();
         await this.getClientes();
         await this.getProductosInventario();
+        await this.getVendedores(); 
     }
 };
 </script>
