@@ -14,7 +14,7 @@
           <v-btn prepend-icon="mdi-plus" color="green" @click="dialogCliente = true">Agregar cliente</v-btn>
         </v-col>
         <v-col sm="3" md="2" lg="2" cols="auto">
-          <v-btn color="blue" prepend-icon="mdi mdi-plus" @click="dialogPrestamo = true">Crear venta</v-btn>
+          <v-btn color="blue" prepend-icon="mdi mdi-plus" @click="dialogCrearVenta = true">Crear venta</v-btn>
         </v-col>
         <v-col sm="4" md="3" lg="2" cols="auto">
           <v-btn color="yellow" prepend-icon="mdi mdi-cash-sync" @click="dialogAbonar = true">Venta antigua</v-btn>
@@ -34,15 +34,15 @@
       <template v-slot:item.completado="{ value }">
         {{ value ? "Completado" : "Activo" }}
       </template>
-      <!-- eslint-disable-next-line vue/valid-v-slot -->
 
+      <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template v-slot:item.mora="{ value }">
         <v-chip :color="value ? 'red' : 'green'">
           {{ value ? "Atrasado" : "No" }}
         </v-chip>
       </template>
-      <!-- eslint-disable-next-line vue/valid-v-slot -->
 
+      <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template v-slot:item.actions="{ item }">
         <v-row class="g-3 align-center">
           <v-icon size="small" class="me-2 mb-2" @click="verPrestamoFunction(Object.assign({}, item))">
@@ -51,9 +51,9 @@
           <v-icon v-if="!item.completado" class="me-2 mb-2" size="small" @click="dialogAbonarVentaAntigua(item._id)">mdi
             mdi-cash-refund</v-icon>
           <v-icon v-if="
-              !item.completado &&
-              (item.producto.length == 0 || item.ruta == 'Sin ruta')
-            " size="small" class="me-2 mb-2" @click="dialogActualizarVenta(Object.assign({}, item))">
+            !item.completado &&
+            (item.producto.length == 0 || item.ruta == 'Sin ruta')
+          " size="small" class="me-2 mb-2" @click="dialogActualizarVenta(Object.assign({}, item))">
             mdi mdi-cash-plus
           </v-icon>
           <v-btn v-if="!item.completado" @click="dialogActualizarUbicacion(item._id)" class="elevation-0 me-1" text icon
@@ -77,69 +77,8 @@
     <nuevoCliente :dialogCliente="dialogCliente" @cerrarDialog="dialogCliente = false"
       @actualizarTodo="actualizarTodo" />
     <modalVendedores :dialogVendedores="dialogVendedores" @cerrarDialog="dialogVendedores = false" />
-    <v-dialog v-model="dialogPrestamo" persistent width="700">
-      <v-card>
-        <v-card-title> Nueva venta </v-card-title>
-        <v-card-text>
-          <v-form v-model="valid" ref="formPrestamo">
-            <v-row>
-              <v-col cols="12">
-                <v-autocomplete label="Nombre del cliente" no-data-text="Sin clientes disponible para venta"
-                  return-object :items="clientes" :item-title="
-                    (item) => {
-                      return `${item.nombres} ${item.apellidos}`;
-                    }
-                  " variant="outlined" v-model="form.cliente" :rules="campoRules"></v-autocomplete>
-              </v-col>
-              <v-col md="6" cols="12">
-                <v-autocomplete label="Producto" return-object no-data-text="Sin productos registrados"
-                  item-value="producto._id" :items="productos" item-title="producto.nombre" variant="outlined"
-                  v-model="form.producto" :rules="campoRules"></v-autocomplete>
-              </v-col>
-              <v-col md="6" cols="12">
-                <v-text-field type="number" label="Cantidad" placeholder="Ingrese cantidad del producto" min="1"
-                  variant="outlined" v-model="form.cantidad" :rules="cantidadRules"></v-text-field>
-              </v-col>
-              <v-col :cols="cols2[0]">
-                <v-select label="Forma de pago" :items="formasPago" item-value="index" item-title="forma"
-                  placeholder="Escoja forma de pago" variant="outlined" v-model="formaPago"
-                  :rules="campoRules"></v-select>
-              </v-col>
-              <v-col :cols="cols2[1]" v-if="formaPago == 2">
-                <v-text-field type="number" label="Cuotas" placeholder="Ingrese cantidad de cuotas" min="1"
-                  variant="outlined" v-model="form.cuotas" :rules="cantidadRules"></v-text-field>
-              </v-col>
-              <v-col cols="12" v-if="formaPago == 2">
-                <v-chip color="green">
-                  Fechas seleccionadas:
-                  {{ form.pago_fechas.length }}</v-chip>
-              </v-col>
-              <v-col cols="12" v-if="formaPago == 2">
-                <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false" cancelText="Cancelar"
-                  locale="es" selectText="Seleccionar" v-model="form.pago_fechas" multi-dates :min-date="new Date()"
-                  placeholder="Selecciona fechas de pago" teleport-center @cleared="form.pago_fechas = []" />
-              </v-col>
-              <v-col cols="12">
-                <h6 class="mb-3 text-h6">Marca la ubicación de cobro</h6>
-                <MapsComponent @ubicacion="
-                    (ubi) => {
-                      form.ubicacionMap = ubi;
-                    }
-                  " />
-              </v-col>
-            </v-row>
-          </v-form>
-        </v-card-text>
-        <v-card-actions class="justify-end">
-          <v-btn color="red-darken-1" variant="tonal" @click="dialogPrestamo = false">
-            Cerrar
-          </v-btn>
-          <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtn" @click="guardar">
-            Crear
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <crearVenta :dialogCrearVenta="dialogCrearVenta" @cerrarDialog="dialogCrearVenta = false"
+      @actualizarTodo="actualizarTodo" />
     <v-dialog v-model="dialogVePrestamo" persistent width="700">
       <v-card>
         <v-card-text>
@@ -213,7 +152,7 @@
                           </div>
                           <div>{{ formatDate(monto.fecha) }}</div>
                         </div>
-                        <v-btn color="red-darken-1" @click="eliminarAbono(verPrestamo._id, index )"
+                        <v-btn color="red-darken-1" @click="eliminarAbono(verPrestamo._id, index)"
                           icon="mdi-delete-outline"></v-btn>
                       </div>
                     </v-timeline-item>
@@ -227,7 +166,7 @@
                       <div class="mb-4">
                         <div class="font-weight-normal">
                           <strong>
-                            {{historial.author }}: {{ historial.action}}
+                            {{ historial.author }}: {{ historial.action }}
                           </strong>
                         </div>
                         <div>{{ formatDate(historial.created) }}</div>
@@ -496,8 +435,7 @@
         <v-card-text>
           <v-col cols="12">
             <h6 class="mb-3 text-h6">Marca la ubicación de cobro</h6>
-            <MapsComponent :centroMap="actualizarUbicacion.ubicacionMap" @ubicacion="
-                (ubi) => {
+            <MapsComponent :centroMap="actualizarUbicacion.ubicacionMap" @ubicacion="(ubi) => {
                   actualizarUbicacion.ubicacionMap = ubi;
                 }
               " />
@@ -521,11 +459,12 @@ import Session from "@/validation/session";
 import Swal from "sweetalert2";
 import axios from "axios";
 import nuevoCliente from "@/components/nuevoCliente.vue";
-import modalVendedores from "../components/modalVendedores.vue";
+import modalVendedores from "@/components/modalVendedores.vue";
+import crearVenta from "@/components/crearVenta.vue";
 
 export default {
   name: "prestamoVista",
-  components: { nuevoCliente, modalVendedores },
+  components: { nuevoCliente, modalVendedores, crearVenta },
   data: () => ({
     token: null,
     api: import.meta.env.VITE_APP_API_URL,
@@ -534,7 +473,7 @@ export default {
     dialogoChangeRoute: false,
     disableBtnAbonos: false,
     dialogVendedores: false,
-    dialogPrestamo: false,
+    dialogCrearVenta: false,
     dialogCliente: false,
     dialogVePrestamo: null,
     dialogAbonar: false,
@@ -657,6 +596,7 @@ export default {
     clientes: [],
     productos: [],
     prestamos: [],
+    vendedores: [],
     searchPrestamo: null,
     diasSemana: [
       "Domingo",
@@ -707,13 +647,11 @@ export default {
         this.abonarVentaAntigua.venta &&
         this.abonarVentaAntigua.fecha
       ) {
-        const f = `${this.abonarVentaAntigua.fecha.getFullYear()}-${
-          (this.abonarVentaAntigua.fecha.getMonth() + 1 < 10 ? "0" : "") +
+        const f = `${this.abonarVentaAntigua.fecha.getFullYear()}-${(this.abonarVentaAntigua.fecha.getMonth() + 1 < 10 ? "0" : "") +
           (this.abonarVentaAntigua.fecha.getMonth() + 1)
-        }-${
-          (this.abonarVentaAntigua.fecha.getDate() < 10 ? "0" : "") +
+          }-${(this.abonarVentaAntigua.fecha.getDate() < 10 ? "0" : "") +
           this.abonarVentaAntigua.fecha.getDate()
-        }`;
+          }`;
         this.abonarVentaAntigua.btnAbonar = true;
         const paquete = {
           venta: this.abonarVentaAntigua.venta,
@@ -755,7 +693,7 @@ export default {
                 break;
             }
           });
-          this.abonarVentaAntigua.btnAbonar = false;
+        this.abonarVentaAntigua.btnAbonar = false;
       }
     },
     async cambiarUbicacion() {
@@ -837,7 +775,7 @@ export default {
         } else if (
           this.actualizarVentaAntigua.resta != 0 &&
           this.actualizarVentaAntigua.fechas_pago.length !=
-            this.actualizarVentaAntigua.cuotas
+          this.actualizarVentaAntigua.cuotas
         ) {
           return Swal.fire({
             icon: "warning",
@@ -864,20 +802,18 @@ export default {
         if (this.actualizarVentaAntigua.resta > 0) {
           const montoSugerido = Math.ceil(
             this.actualizarVentaAntigua.resta /
-              this.actualizarVentaAntigua.cuotas
+            this.actualizarVentaAntigua.cuotas
           );
           paquete.fechas_pago = this.ordenarFechas(
             this.actualizarVentaAntigua.fechas_pago
           );
           paquete.fechas_pago = paquete.fechas_pago.map((pago) => {
             return {
-              fecha: `${pago.getFullYear()}-${
-                (parseInt(pago.getMonth()) + 1 < 10 ? "0" : "") +
+              fecha: `${pago.getFullYear()}-${(parseInt(pago.getMonth()) + 1 < 10 ? "0" : "") +
                 (parseInt(pago.getMonth()) + 1)
-              }-${
-                (parseInt(pago.getDate()) < 10 ? "0" : "") +
+                }-${(parseInt(pago.getDate()) < 10 ? "0" : "") +
                 parseInt(pago.getDate())
-              }T00:00:00-05:00`,
+                }T00:00:00-05:00`,
               monto: montoSugerido,
             };
           });
@@ -930,8 +866,7 @@ export default {
         if (this.abonoAdd > 0 && this.fechaAdd) {
           this.disableBtnAbonos = false;
           const nFecha = new Date(
-            `${this.fechaAdd.getFullYear()}-${
-              this.fechaAdd.getMonth() + 1
+            `${this.fechaAdd.getFullYear()}-${this.fechaAdd.getMonth() + 1
             }-${this.fechaAdd.getDate()}`
           );
           this.abonosTabla.push({
@@ -965,8 +900,7 @@ export default {
               const mS = Math.ceil((this.abonar.total - this.totalAbonos) / c);
               this.abonar.pago_fechas = this.abonar.pago_fechas.map((fecha) => {
                 const f = new Date(
-                  `${fecha.getFullYear()}-${
-                    fecha.getMonth() + 1
+                  `${fecha.getFullYear()}-${fecha.getMonth() + 1
                   }-${fecha.getDate()}`
                 );
                 return {
@@ -1304,10 +1238,9 @@ export default {
                 fechaPagos.length < cuotas
               ) {
                 fechaPagos.push({
-                  fecha: `${fechaActual.getFullYear()}-${
-                    (fechaActual.getMonth() + 1 < 10 ? "0" : null) +
+                  fecha: `${fechaActual.getFullYear()}-${(fechaActual.getMonth() + 1 < 10 ? "0" : null) +
                     parseInt(fechaActual.getMonth() + 1)
-                  }-${(mes.dia < 10 ? "0" : null) + mes.dia}`,
+                    }-${(mes.dia < 10 ? "0" : null) + mes.dia}`,
                 });
               }
               return false;
@@ -1332,10 +1265,9 @@ export default {
                 fechaPagos.length < cuotas
               ) {
                 fechaPagos.push({
-                  fecha: `${fechaActual.getFullYear()}-${
-                    (fechaActual.getMonth() + 1 < 10 ? "0" : null) +
+                  fecha: `${fechaActual.getFullYear()}-${(fechaActual.getMonth() + 1 < 10 ? "0" : null) +
                     parseInt(fechaActual.getMonth() + 1)
-                  }-${(mes.dia < 10 ? "0" : null) + mes.dia}`,
+                    }-${(mes.dia < 10 ? "0" : null) + mes.dia}`,
                 });
               }
               return false;
@@ -1351,12 +1283,10 @@ export default {
           //No es domingo
           if (fechaActual.getDay() != 0) {
             fechaPagos.push({
-              fecha: `${fechaActual.getFullYear()}-${
-                (fechaActual.getMonth() + 1 < 10 ? "0" : null) +
+              fecha: `${fechaActual.getFullYear()}-${(fechaActual.getMonth() + 1 < 10 ? "0" : null) +
                 parseInt(fechaActual.getMonth() + 1)
-              }-${
-                (fechaActual.getDate() < 10 ? "0" : "") + fechaActual.getDate()
-              }`,
+                }-${(fechaActual.getDate() < 10 ? "0" : "") + fechaActual.getDate()
+                }`,
             });
             switch (frecuenciaCobro.toLowerCase()) {
               case "diario":
@@ -1371,117 +1301,6 @@ export default {
         }
       }
       return fechaPagos;
-    },
-    async guardar() {
-      const { valid } = await this.$refs.formPrestamo.validate();
-      if (valid) {
-        if (
-          this.form.ubicacionMap.lat == null ||
-          this.form.ubicacionMap.lng == null
-        ) {
-          Swal.fire({
-            icon: "error",
-            title: "Ubicación",
-            text: "Debe seleccionar una ubicación en el mapa",
-            showConfirmButton: false,
-            timer: 1600,
-          });
-          return;
-        }
-        this.form.cantidad = parseInt(this.form.cantidad);
-        this.form.cuotas = parseInt(this.form.cuotas);
-        let total,
-          pagos = [];
-        if (
-          this.formaPago == 2 &&
-          this.form.pago_fechas.length != this.form.cuotas
-        ) {
-          return Swal.fire({
-            icon: "warning",
-            text: "Las fechas de pago deben ser iguales a la cantidad de cuotas",
-            showConfirmButton: false,
-            timer: 1690,
-          });
-        }
-        if (this.form.cantidad <= this.form.producto.existencias) {
-          this.disableBtn = true;
-          if (this.form.pago_fechas.length > 1) {
-            this.form.pago_fechas = this.ordenarFechas(this.form.pago_fechas);
-          }
-          if (parseInt(this.formaPago) == 1) {
-            total =
-              this.form.cantidad * this.form.producto.producto.valor_contado;
-            this.form.cuotas = 0;
-          } else {
-            total =
-              this.form.cantidad * this.form.producto.producto.valor_credito;
-            const cuotaBase = Math.ceil(total / this.form.cuotas); //Redondeo hacia arriba
-            const valorCuota = Math.floor(cuotaBase / 100) * 100; //Redondeo hacia abajo, con parte entera de 100
-            const restVal = Math.round(
-              (cuotaBase - valorCuota) * this.form.cuotas
-            ); //Diferencia, con redondeo al más cercano
-            pagos = this.form.pago_fechas.map((pago, index) => {
-              return index == 0
-                ? { fecha: pago, monto: valorCuota + restVal }
-                : { fecha: pago, monto: valorCuota };
-            });
-          }
-          const paquete = {
-            cliente: this.form.cliente._id, //`${this.form.cliente.nombres} ${this.form.cliente.apellidos}`,
-            ruta: this.form.cliente.direccion.nombre,
-            producto: this.form.producto.producto.nombre, //ObjectId del inventario
-            inventario: this.form.producto._id,
-            fecha_inicio: new Date().toISOString(),
-            cantidad: this.form.cantidad,
-            cuotas: this.form.cuotas,
-            pago_fechas: pagos,
-            total: total,
-            ubicacionMap: this.form.ubicacionMap,
-          };
-          await axios
-            .post(`${this.api}/prestamo/crear`, paquete, {
-              headers: {
-                Authorization: `Bearer ${this.token}`,
-              },
-            })
-            .then(() => {
-              this.form.pago_fechas = [];
-              this.$refs.formPrestamo.reset();
-              Swal.fire({
-                icon: "success",
-                text: "Venta registrada correctamente",
-                showConfirmButton: false,
-                timer: 1710,
-              });
-              this.dialogPrestamo = false;
-            })
-            .catch((error) => {
-              switch (error.response.status) {
-                case 401:
-                  Session.expiredSession();
-                  break;
-                default:
-                  Swal.fire({
-                    icon: "info",
-                    text: "No se pudo crear la venta",
-                    showConfirmButton: false,
-                    timer: 1710,
-                  });
-                  break;
-              }
-            });
-        } else {
-          this.disableBtn = false;
-          return Swal.fire({
-            icon: "warning",
-            text: `No hay suficientes ${this.form.producto.producto.nombre}, sólo hay ${this.form.producto.existencias}`,
-            showConfirmButton: false,
-            timer: 1600,
-          });
-        }
-      }
-      this.disableBtn = false;
-      await this.actualizarTodo();
     },
     async eliminarPrestamo(id) {
       Swal.fire({
@@ -1602,17 +1421,34 @@ export default {
           }
         });
     },
+    async getVendedores() {
+      await axios
+        .get(`${this.api}/vendedor`, {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        })
+        .then((resp) => {
+          this.vendedores = resp.data;
+        })
+        .catch((error) => {
+          switch (error.response.status) {
+            case 401:
+              Session.expiredSession();
+              break;
+            default:
+              Swal.fire({
+                icon: "info",
+                text: "No se pudo obtener los clientes",
+                showConfirmButton: false,
+                timer: 1600,
+              });
+              break;
+          }
+        });
+    },
   },
   computed: {
-    cols2() {
-      //Para que los input del modal sean responsive
-      const { xxl, xl, lg, md } = this.$vuetify.display;
-      let resp = [12, 12];
-      if (xxl || xl || lg || md) {
-        resp = [6, 6];
-      }
-      return resp;
-    },
     skill() {
       let abonado = 0;
       this.verPrestamo.abono.forEach((abono) => {
