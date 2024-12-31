@@ -55,9 +55,12 @@
         </v-col>
       </v-card-title>
       <v-card-text>
+      <v-container fluid class="d-flex">
+        <v-checkbox v-for="estado in estados" v-model="selectedEstados" :key="estado" :label="estado" :value="estado"></v-checkbox>
+      </v-container>
         <v-data-table
           :headers="headers"
-          :items="clientes"
+          :items="filteredClientes"
           :sort-by="[{ key: 'nombres', order: 'asc' }]"
           class="elevation-1"
           :search="searchCliente"
@@ -578,6 +581,7 @@ export default {
       "Finalizado",
       "Retirado",
     ],
+    selectedEstados: [],
     formClienteEditar: {
       id: null,
       documento: null,
@@ -897,6 +901,14 @@ export default {
         default:
           return "blue";
       }
+    },
+  },
+  computed: {
+    filteredClientes() {
+      if (this.selectedEstados.length === 0) {
+        return this.clientes;
+      }
+      return this.clientes.filter(cliente => this.selectedEstados.includes(cliente.estado));
     },
   },
   async created() {
