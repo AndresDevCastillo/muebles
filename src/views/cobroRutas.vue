@@ -22,7 +22,7 @@
 				</v-row>
 				<v-row class="flex-column" align="center" justify="center" no-gutters v-if="prestamos.length > 0">
 					<h1 class="my-2 text-center w-100">Ordena tus cobros</h1>
-					<v-btn color="red" @click="limpiarEstados">Limpiar todos los estados</v-btn>
+					<v-btn color="red" @click="limpiarEstados(ruta)">Limpiar todos los estados</v-btn>
 					<v-btn color="info" class="mt-1" @click="marcarPendiente">Marcar todos como Pendiente</v-btn>
 					<v-btn class="mt-5" @click="guardarOrdenCobros" :disabled="btnOrden" color="success">
 						Actualizar orden cobros
@@ -127,7 +127,8 @@
 									</template>
 									<template v-slot:item.actions="{ item }">
 										<div class="px-0 w-100">
-											<v-btn class="elevation-0" text icon density="compact">
+											<div class="d-flex flex-wrap ga-5">
+												<v-btn class="elevation-0" text icon density="compact">
 												<v-icon size="large" @click="
 													abonarFunction(
 														Object.assign(
@@ -143,6 +144,21 @@
 													Abonar
 												</v-tooltip>
 											</v-btn>
+											<v-btn 
+												class="elevation-0" 
+												text 
+												icon 
+												density="compact" 
+												:href="`tel:${item.prestamo.cliente.telefono}`"
+												>
+												<v-icon size="large">
+													mdi-phone
+												</v-icon>
+												<v-tooltip activator="parent" location="top">
+													{{ item.prestamo.cliente.telefono }}
+												</v-tooltip>
+												</v-btn>
+
 											<v-btn v-if="
 												item.prestamo.ubicacionMap
 													.lat != null
@@ -165,6 +181,7 @@
 													mdi mdi-eye
 												</v-icon>
 											</v-btn>
+											</div>
 											<v-col cols="auto" class="px-0 py-0">
 												<v-radio-group v-model="item.estado" inline :hide-details="true"
 													@change="
@@ -180,9 +197,9 @@
 												</v-radio-group>
 											</v-col>
 										</div>
-									</template>
+									</template>				
 									<template v-slot:footer.prepend>
-										<v-row align="center" no-gutters class="w-100 flex-wrap">
+										<v-row align="center" no-gutters class="w-100 flex-wrap ga-3">
 											<v-checkbox v-for="(
 													estado, index
 												) in estadoCobro" :key="index" v-model="ruta.filtro" :hide-details="true" :label="estado.title"
@@ -192,7 +209,9 @@
 														ruta.ruta._id
 													)
 													" />
+													<v-btn color="red" @click="limpiarEstados(ruta.ruta._id)">Limpiar todos los estados</v-btn>
 										</v-row>
+										
 									</template>
 								</v-data-table>
 							</v-expansion-panel-text>
@@ -315,12 +334,24 @@ export default {
 		estados: ["Pendiente", "Aplazado", "Finalizado"],
 		headers: [
 			{
+				key: "prestamo.cliente.documento",
+				title: "Documento",
+				nowrap: true,
+				width: "max-content !important",
+			},
+			{
 				key: "prestamo.cliente",
 				title: "Cliente",
 				nowrap: true,
 				width: "max-content !important",
 				value: (item) =>
 					`${item.prestamo.cliente.nombres} ${item.prestamo.cliente.apellidos}`,
+			},
+			{
+				key: "prestamo.cliente.telefono",
+				title: "Teléfono",
+				nowrap: true,
+				width: "max-content !important",
 			},
 			{
 				key: "prestamo.producto",
@@ -659,8 +690,8 @@ export default {
 					});
 			}
 		},
-		async limpiarEstados() {
-			if (this.ruta) {
+		async limpiarEstados(ruta) {
+			if (ruta) {
 				Swal.fire({
 					icon: "info",
 					title: "¿Seguro de qué quiere limpiar todos los estados de la ruta?",
@@ -676,7 +707,7 @@ export default {
 						if (result.isConfirmed) {
 							await axios
 								.put(
-									`${this.api}/cobro-ruta/limpiar-estados/${this.ruta}`,
+									`${this.api}/cobro-ruta/limpiar-estados/${ruta}`,
 									{},
 									this.token
 								)
