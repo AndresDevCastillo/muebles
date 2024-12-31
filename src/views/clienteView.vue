@@ -193,6 +193,9 @@
             <v-form>
               <v-row>
                 <v-col cols="12">
+                <h3>Información del cliente</h3>
+              </v-col>
+                <v-col cols="12">
                   <v-text-field
                     label="Documento"
                     type="number"
@@ -360,6 +363,38 @@
                   ></v-text-field>
                 </v-col>
               </v-row>
+              <v-col cols="12">
+                <h3>Referencias del cliente</h3>
+              </v-col>
+              <v-row  v-for="referencia in verCliente.referencias" :key="referencia.nombre">
+                  <v-col cols="12" sm="12">
+                    <v-text-field
+                      variant="outlined"
+                      label="Nombre"
+                      required
+                      v-model="referencia.nombre"
+                      disabled
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-text-field
+                      variant="outlined"
+                      label="Telefono"
+                      required
+                      v-model="referencia.telefono"
+                      disabled
+                    ></v-text-field>
+                  </v-col>
+                   <v-col cols="12" sm="6">
+                    <v-text-field
+                      variant="outlined"
+                      label="Telefono"
+                      required
+                      v-model="referencia.parentesco"
+                      disabled
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
             </v-form>
           </v-container>
         </v-card-text>

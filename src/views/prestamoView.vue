@@ -85,7 +85,6 @@
           <v-container>
             <v-form>
               <v-row>
-                {{ verPrestamo }}
                 <v-progress-linear v-model="skill" color="green" height="25">
                   <template v-slot:default="{ value }">
                     <strong>{{ Math.ceil(value) }}%</strong>

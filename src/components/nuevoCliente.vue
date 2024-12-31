@@ -42,6 +42,34 @@
                   v-model="formCliente.direccionResidencia" placeholder="Dirección de la vivienda"
                   :rules="campoRules"></v-text-field>
               </v-col>
+               <v-col cols="12">
+                <h3>Referencias del Cliente</h3>
+              </v-col>
+               <v-col cols="12" sm="12">
+                <v-text-field label="Nombre Completo"  type="text"  variant="outlined" v-model="tempReferencia.nombre"
+                  ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field label="Teléfono" type="text"  variant="outlined" v-model="tempReferencia.telefono"
+                  ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                 <v-select label="Parentesco" :items="parentescoList" 
+                  placeholder="Escoja el parentesco" variant="outlined" v-model="tempReferencia.parentesco"
+                  ></v-select>
+              </v-col>
+              <v-btn color="green-darken-1" variant="tonal" :disabled="disableBtn" @click="añadirReferencia">
+                Añadir Referencia
+              </v-btn>
+              <v-col cols="12">
+                <v-data-table :headers="headersReferencias" :items="formCliente.referencias" class="elevation-1">
+                  <template v-slot:item.actions="{ item, index }">
+                    <v-icon size="small" @click="removeReferencia(index)">
+                      mdi-delete
+                    </v-icon>
+                  </template>
+                </v-data-table>
+              </v-col>
               <v-col cols="12">
                 <h6 class="mb-3 text-h6">Marca la ubicación de cobro</h6>
                 <MapsComponent @ubicacion="
@@ -56,7 +84,7 @@
               </v-col>
               <v-col md="6" cols="12">
                 <v-autocomplete label="Producto" return-object no-data-text="Sin productos registrados"
-                  item-value="producto._id" :items="productos" item-title="producto.nombre" variant="outlined"
+                  item-value="_id" :items="productos" item-title="producto.nombre" variant="outlined"
                   v-model="formCliente.venta.producto" :rules="campoRules"></v-autocomplete>
               </v-col>
               <v-col md="6" cols="12">
@@ -146,6 +174,7 @@ export default {
       direccion: null,
       vendedor: null,
       direccionResidencia: null,
+      referencias: [],
       venta: {
         producto: null,
         cantidad: 1,
@@ -159,8 +188,59 @@ export default {
         },
       },
     },
+    tempReferencia: {
+      nombre: null,
+      telefono: null,
+      parentesco: null,
+    },
+    parentescoList: [
+      'Padre',
+      'Madre',
+      'Hermano',
+      'Hermana',
+      'Tío',
+      'Tía',
+      'Primo',
+      'Prima',
+      'Amigo',
+      'Amiga',
+      'Pareja',
+      'Hijo',
+      'Hija',
+      'Abuelo',
+      'Abuela'
+    ],
+    headersReferencias: [
+      { title: "Nombre Completo", key: "nombre" },
+      { title: "Teléfono", key: "telefono" },
+      { title: "Parentesco", key: "parentesco" },
+    { title: "Actions", key: "actions" },
+    ]
   }),
   methods: {
+    removeReferencia(index) {
+      this.formCliente.referencias.splice(index, 1); 
+    },
+    añadirReferencia(){
+      if(this.tempReferencia.nombre == null || this.tempReferencia.telefono == null || this.tempReferencia.parentesco == null){
+          return Swal.fire({
+            icon: "warning",
+            text: "Debe llenar todos los campos de la referencia",
+            showConfirmButton: false,
+            timer: 1600,
+          });
+      }
+        this.formCliente.referencias.push({
+          nombre: this.tempReferencia.nombre,
+          telefono: this.tempReferencia.telefono,
+          parentesco: this.tempReferencia.parentesco
+        });
+        this.tempReferencia = {
+          nombre: null,
+          telefono: null,
+          parentesco: null,
+        };
+    },
     async getProductosInventario() {
       await axios
         .get(`${this.api}/inventario/existe`, {
@@ -229,6 +309,14 @@ export default {
           });
           return;
         }
+        if(this.formCliente.referencias.length == 0){
+          return Swal.fire({
+            icon: "warning",
+            text: "Debe añadir al menos una referencia",
+            showConfirmButton: false,
+            timer: 1600,
+          });
+        }
         this.formCliente.venta.cantidad = parseInt(
           this.formCliente.venta.cantidad
         );
@@ -289,6 +377,7 @@ export default {
             correo: this.formCliente.correo,
             direccion: this.formCliente.direccion,
             direccionResidencia: this.formCliente.direccionResidencia,
+            referencias: this.formCliente.referencias,
             venta: {
               inventario: this.formCliente.venta.producto._id,
               producto: this.formCliente.venta.producto.producto.nombre,
