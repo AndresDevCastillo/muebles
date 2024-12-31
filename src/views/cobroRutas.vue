@@ -2,11 +2,7 @@
 	<div class="rutas">
 		<v-card class="ma-3 text-break">
 			<v-card-title>
-				<v-row
-					justify="space-between"
-					justify-sm="start"
-					class="px-6 my-4"
-				>
+				<v-row justify="space-between" justify-sm="start" class="px-6 my-4">
 					<v-col cols="auto">
 						<v-row class="align-center">
 							<v-icon size="x-large" icon="mdi mdi-cash-marker" />
@@ -19,154 +15,74 @@
 				<v-row no-gutters justify="center">
 					<v-col cols="12" md="5" sm="8">
 						<v-form ref="formRutas">
-							<v-select
-								label="Tus rutas"
-								v-model="ruta"
-								:items="rutas"
-								item-title="nombre"
-								item-value="_id"
-								@update:modelValue="buscarPrestamosRuta"
-								clearable
-							/>
+							<v-select label="Tus rutas" v-model="ruta" :items="rutas" item-title="nombre"
+								item-value="_id" @update:modelValue="buscarPrestamosRuta" clearable />
 						</v-form>
 					</v-col>
 				</v-row>
-				<v-row
-					class="flex-column"
-					align="center"
-					justify="center"
-					no-gutters
-					v-if="prestamos.length > 0"
-				>
+				<v-row class="flex-column" align="center" justify="center" no-gutters v-if="prestamos.length > 0">
 					<h1 class="my-2 text-center w-100">Ordena tus cobros</h1>
-					<v-btn color="red" @click="limpiarEstados"
-						>Limpiar todos los estados</v-btn
-					>
-					<v-btn color="info" class="mt-1" @click="marcarPendiente"
-						>Marcar todos como Pendiente</v-btn
-					>
-					<v-btn
-						class="mt-5"
-						@click="guardarOrdenCobros"
-						:disabled="btnOrden"
-						color="success"
-					>
+					<v-btn color="red" @click="limpiarEstados">Limpiar todos los estados</v-btn>
+					<v-btn color="info" class="mt-1" @click="marcarPendiente">Marcar todos como Pendiente</v-btn>
+					<v-btn class="mt-5" @click="guardarOrdenCobros" :disabled="btnOrden" color="success">
 						Actualizar orden cobros
 					</v-btn>
-					<VueDraggable
-						v-model="prestamos"
-						class="w-100 px-4 mt-2"
-						style="height: 450px; overflow: auto"
-						animation="200"
-						target=".prestamos-target"
-					>
-						<TransitionGroup
-							type="transition"
-							tag="ul"
-							name="slide-fade"
-							class="prestamos-target w-100 v-list v-list--one-line"
-						>
-							<li
-								v-for="(prestamo, index) in prestamos"
+					<VueDraggable v-model="prestamos" class="w-100 px-4 mt-2" style="height: 450px; overflow: auto"
+						animation="200" target=".prestamos-target">
+						<TransitionGroup type="transition" tag="ul" name="slide-fade"
+							class="prestamos-target w-100 v-list v-list--one-line">
+							<li v-for="(prestamo, index) in prestamos"
 								class="d-flex ga-2 cobro justify-space-between align-center mx-2 my-2 v-list-item v-theme--light v-list-item--density-default elevation-12 rounded-0 v-list-item--variant-text"
-								:key="index"
-							>
-								<div
-									class="contenido d-flex flex-wrap"
-									style="max-width: 50%"
-								>
+								:key="index">
+								<div class="contenido d-flex flex-wrap" style="max-width: 50%">
 									<div class="icon">
-										<v-icon
-											class="cursor-pointer"
-											icon="mdi mdi-drag handle"
-										/>
+										<v-icon class="cursor-pointer" icon="mdi mdi-drag handle" />
 									</div>
-									<div
-										class="descripcion v-list-item-title text-truncate"
-										style="white-space: break-spaces"
-									>
+									<div class="descripcion v-list-item-title text-truncate"
+										style="white-space: break-spaces">
 										<p class="text-truncate">
 											{{ index + 1 }} -
 											{{ prestamo.nombres }}
 											{{ prestamo.apellidos }}
-											<span
-												class="ml-4 text-truncate user-select-none"
-											>
+											<span class="ml-4 text-truncate user-select-none">
 												<strong>Producto: </strong>
 												{{ prestamo.producto }}
 											</span>
 										</p>
 									</div>
 								</div>
-								<v-row
-									align="center"
-									justify="end"
-									class="d-flex estados flex-wrap ga-2"
-									no-gutters
-									style="max-width: max-content"
-								>
-									<v-btn
-										class="elevation-0"
-										text
-										icon
-										density="compact"
-									>
-										<v-icon
-											size="large"
-											@click="
-												abonarFunction(
-													Object.assign({}, prestamo)
-												)
-											"
-										>
+								<v-row align="center" justify="end" class="d-flex estados flex-wrap ga-2" no-gutters
+									style="max-width: max-content">
+									<v-btn class="elevation-0" text icon density="compact">
+										<v-icon size="large" @click="
+											abonarFunction(
+												Object.assign({}, prestamo)
+											)
+											">
 											mdi-cash
 										</v-icon>
-										<v-tooltip
-											activator="parent"
-											location="top"
-										>
+										<v-tooltip activator="parent" location="top">
 											Abonar
 										</v-tooltip>
 									</v-btn>
 									<v-col cols="auto" class="col-select">
-										<v-select
-											class="showSelect ml-1"
-											v-model="prestamo.estado"
-											label="Estado"
-											density="compact"
-											:hide-details="true"
-											:items="estados"
-											@update:modelValue="
+										<v-select class="showSelect ml-1" v-model="prestamo.estado" label="Estado"
+											density="compact" :hide-details="true" :items="estados" @update:modelValue="
 												actualizarEstadoCobro(
 													prestamo.estado,
 													prestamo.prestamo_id
 												)
-											"
-										/>
-										<v-radio-group
-											class="showRadio"
-											v-model="prestamo.estado"
-											inline
-											:hide-details="true"
-											@change="
+												" />
+										<v-radio-group class="showRadio" v-model="prestamo.estado" inline
+											:hide-details="true" @change="
 												actualizarEstadoCobro(
 													prestamo.estado,
 													prestamo.prestamo_id
 												)
-											"
-										>
-											<v-radio
-												label="Pendiente"
-												value="Pendiente"
-											/>
-											<v-radio
-												label="Aplazado"
-												value="Aplazado"
-											/>
-											<v-radio
-												label="Finalizado"
-												value="Finalizado"
-											/>
+												">
+											<v-radio label="Pendiente" value="Pendiente" />
+											<v-radio label="Aplazado" value="Aplazado" />
+											<v-radio label="Finalizado" value="Finalizado" />
 										</v-radio-group>
 									</v-col>
 								</v-row>
@@ -177,16 +93,8 @@
 
 				<v-row no-gutters class="flex-column">
 					<h1 class="my-2 text-center w-100">Tus rutas de cobro</h1>
-					<v-expansion-panels
-						class="my-4 w-100"
-						variant="popout"
-						multiple
-					>
-						<v-expansion-panel
-							v-for="(ruta, index) in rutasCobro"
-							:key="index"
-							class="w-100"
-						>
+					<v-expansion-panels class="my-4 w-100" variant="popout" multiple>
+						<v-expansion-panel v-for="(ruta, index) in rutasCobro" :key="index" class="w-100">
 							<v-expansion-panel-title>
 								<strong>
 									{{ ruta.ruta.nombre }} -
@@ -195,36 +103,21 @@
 								</strong>
 							</v-expansion-panel-title>
 							<v-expansion-panel-text>
-								<v-data-table
-									v-model:search="searchTable[index]"
-									:items="ruta.orden_cobro"
-									:headers="headers"
-									fixed-header
-									class="elevation-0 table-ventas"
-								>
+								<v-data-table v-model:search="searchTable[index]" :items="ruta.orden_cobro"
+									:headers="headers" fixed-header class="elevation-0 table-ventas">
 									<template v-slot:top>
 										<v-row align="center" no-gutters>
 											<h3>Ventas</h3>
 
 											<v-spacer></v-spacer>
 
-											<v-text-field
-												v-model="searchTable[index]"
-												density="compact"
-												label="Buscar..."
-												prepend-inner-icon="mdi-magnify"
-												variant="solo-filled"
-												flat
-												hide-details
-												single-line
-											></v-text-field>
+											<v-text-field v-model="searchTable[index]" density="compact"
+												label="Buscar..." prepend-inner-icon="mdi-magnify" variant="solo-filled"
+												flat hide-details single-line></v-text-field>
 										</v-row>
 									</template>
 									<template v-slot:item.estado="{ item }">
-										<v-chip
-											variant="flat"
-											:color="getColorEstado(item.estado)"
-										>
+										<v-chip variant="flat" :color="getColorEstado(item.estado)">
 											{{
 												item.estado == null
 													? "Sin estado"
@@ -234,126 +127,71 @@
 									</template>
 									<template v-slot:item.actions="{ item }">
 										<div class="px-0 w-100">
-											<v-btn
-												class="elevation-0"
-												text
-												icon
-												density="compact"
-											>
-												<v-icon
-													size="large"
-													@click="
-														abonarFunction(
-															Object.assign(
-																{},
-																item.prestamo
-															),
-															true
-														)
-													"
-												>
-													mdi-cash
-												</v-icon>
-												<v-tooltip
-													activator="parent"
-													location="top"
-												>
-													Abonar
-												</v-tooltip>
-											</v-btn>
-											<v-btn
-												v-if="
-													item.prestamo.ubicacionMap
-														.lat != null
-												"
-												class="elevation-0 me-2"
-												:href="`https://www.google.com/maps?q=${item.prestamo.ubicacionMap.lat},${item.prestamo.ubicacionMap.lng}`"
-												target="_blank"
-												icon
-												dark
-												density="compact"
-												text
-											>
-												<v-icon size="large"
-													>mdi
-													mdi-home-map-marker</v-icon
-												>
-												<v-tooltip
-													activator="parent"
-													location="top"
-													>Ver ubicación</v-tooltip
-												>
-											</v-btn>
-											<v-btn
-												class="elevation-0 me-2"
-												icon
-												text
-												dark
-												density="compact"
-												@click="
-													verPrestamoFunction(
+											<v-btn class="elevation-0" text icon density="compact">
+												<v-icon size="large" @click="
+													abonarFunction(
 														Object.assign(
 															{},
 															item.prestamo
 														),
-														false
+														true
 													)
-												"
-											>
+													">
+													mdi-cash
+												</v-icon>
+												<v-tooltip activator="parent" location="top">
+													Abonar
+												</v-tooltip>
+											</v-btn>
+											<v-btn v-if="
+												item.prestamo.ubicacionMap
+													.lat != null
+											" class="elevation-0 me-2" :href="`https://www.google.com/maps?q=${item.prestamo.ubicacionMap.lat},${item.prestamo.ubicacionMap.lng}`"
+												target="_blank" icon dark density="compact" text>
+												<v-icon size="large">mdi
+													mdi-home-map-marker</v-icon>
+												<v-tooltip activator="parent" location="top">Ver ubicación</v-tooltip>
+											</v-btn>
+											<v-btn class="elevation-0 me-2" icon text dark density="compact" @click="
+												verPrestamoFunction(
+													Object.assign(
+														{},
+														item.prestamo
+													),
+													false
+												)
+												">
 												<v-icon size="large">
 													mdi mdi-eye
 												</v-icon>
 											</v-btn>
-											<v-col
-												cols="auto"
-												class="px-0 py-0"
-											>
-												<v-radio-group
-													v-model="item.estado"
-													inline
-													:hide-details="true"
+											<v-col cols="auto" class="px-0 py-0">
+												<v-radio-group v-model="item.estado" inline :hide-details="true"
 													@change="
 														actualizarEstadoCobro(
 															item.estado,
 															item.prestamo._id,
 															ruta.ruta._id
 														)
-													"
-												>
-													<v-radio
-														label="Pendiente"
-														value="Pendiente"
-													/>
-													<v-radio
-														label="Aplazado"
-														value="Aplazado"
-													/>
-													<v-radio
-														label="Finalizado"
-														value="Finalizado"
-													/>
+														">
+													<v-radio label="Pendiente" value="Pendiente" />
+													<v-radio label="Aplazado" value="Aplazado" />
+													<v-radio label="Finalizado" value="Finalizado" />
 												</v-radio-group>
 											</v-col>
 										</div>
 									</template>
 									<template v-slot:footer.prepend>
 										<v-row align="center" no-gutters class="w-100 flex-wrap">
-											<v-checkbox
-												v-for="(
+											<v-checkbox v-for="(
 													estado, index
-												) in estadoCobro"
-												:key="index"
-												v-model="ruta.filtro"
-												:hide-details="true"
-												:label="estado.title"
-												:value="estado.value"
-												@update:modelValue="
+												) in estadoCobro" :key="index" v-model="ruta.filtro" :hide-details="true" :label="estado.title"
+												:value="estado.value" @update:modelValue="
 													filtrarCobrosRuta(
 														ruta.filtro,
 														ruta.ruta._id
 													)
-												"
-											/>
+													" />
 										</v-row>
 									</template>
 								</v-data-table>
@@ -370,215 +208,44 @@
 						<v-form ref="formAbono">
 							<v-row>
 								<v-col cols="12">
-									<v-text-field
-										label="Documento"
-										type="text"
-										required
-										variant="outlined"
-										v-model="cedulaTemp"
-										disabled
-									/>
+									<v-text-field label="Documento" type="text" required variant="outlined"
+										v-model="cedulaTemp" disabled />
 								</v-col>
 								<v-col cols="12">
-									<v-text-field
-										type="number"
-										label="Monto"
-										:placeholder="
-											montoSugerido
-												? 'El monto sugerido es ' +
-												  montoSugerido.toLocaleString()
-												: 'Ingrese un monto'
-										"
-										min="1"
-										variant="outlined"
-										v-model="formAbono.abono"
-										:rules="cantidadRules"
-									/>
+									<v-text-field type="number" label="Monto" :placeholder="montoSugerido
+											? 'El monto sugerido es ' +
+											montoSugerido.toLocaleString()
+											: 'Ingrese un monto'
+										" min="1" variant="outlined" v-model="formAbono.abono" :rules="cantidadRules" />
 								</v-col>
 							</v-row>
 						</v-form>
 					</v-container>
 				</v-card-text>
 				<v-card-actions class="justify-end">
-					<v-btn
-						color="red-darken-1"
-						variant="tonal"
-						@click="dialogAbonar = false"
-					>
+					<v-btn color="red-darken-1" variant="tonal" @click="dialogAbonar = false">
 						Cerrar
 					</v-btn>
 
-					<v-btn
-						color="green-darken-1"
-						variant="tonal"
-						:disabled="disableBtn"
-						@click="abonar"
-					>
+					<v-btn color="green-darken-1" variant="tonal" :disabled="disableBtn" @click="abonar">
 						Crear
 					</v-btn>
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
-		<v-dialog v-model="dialogVerCobro" persistent width="700">
-			<v-card>
-				<v-card-text>
-					<v-container>
-						<v-form>
-							<v-row>
-								<v-progress-linear
-									v-model="skill"
-									color="green"
-									height="25"
-								>
-									<template v-slot:default="{ value }">
-										<strong>{{ Math.ceil(value) }}%</strong>
-									</template>
-								</v-progress-linear>
-								<v-col cols="12">
-									<v-text-field
-										label="Documento"
-										type="text"
-										required
-										variant="outlined"
-										v-model="verPrestamo.cliente.documento"
-										disabled
-									></v-text-field>
-								</v-col>
-								<v-col cols="12" sm="6">
-									<v-text-field
-										variant="outlined"
-										label="Nombre"
-										disabled
-										required
-										v-model="verPrestamo.cliente.nombres"
-									></v-text-field>
-								</v-col>
-								<v-col cols="12" sm="6">
-									<v-text-field
-										variant="outlined"
-										label="Apellido"
-										disabled
-										required
-										v-model="verPrestamo.cliente.apellidos"
-									></v-text-field>
-								</v-col>
-								<v-col cols="12" sm="6">
-									<v-text-field
-										variant="outlined"
-										label="Ruta"
-										disabled
-										required
-										v-model="
-											verPrestamo.cliente.direccion.nombre
-										"
-									></v-text-field>
-								</v-col>
-								<v-col cols="12" sm="6">
-									<v-text-field
-										variant="outlined"
-										label="Producto"
-										disabled
-										required
-										v-model="verPrestamo.producto"
-									></v-text-field>
-								</v-col>
-								<v-col cols="12" sm="6">
-									<v-text-field
-										variant="outlined"
-										label="Fecha de Inicio"
-										disabled
-										required
-										v-model="verPrestamo.fecha_inicio"
-									></v-text-field>
-								</v-col>
-								<v-col cols="12" sm="6">
-									<v-text-field
-										variant="outlined"
-										label="N° Cuotas"
-										disabled
-										required
-										v-model="verPrestamo.cuotas"
-									></v-text-field>
-								</v-col>
-								<v-col cols="12" sm="6">
-									<v-text-field
-										variant="outlined"
-										label="Cuotas atrasadas"
-										disabled
-										required
-										v-model="verPrestamo.cuotas_atrasadas"
-									></v-text-field>
-								</v-col>
-								<v-col cols="12" sm="6">
-									<v-text-field
-										variant="outlined"
-										label="Total"
-										disabled
-										required
-										v-model="verPrestamo.total"
-									></v-text-field>
-								</v-col>
-								<v-card-text v-if="verPrestamo.cuotas !== 0">
-									<div class="font-weight-bold ms-1 mb-2">
-										Restante : ${{
-											calcularRestante(
-												verPrestamo.abono,
-												verPrestamo.total
-											)
-										}}
-									</div>
-									<div class="font-weight-bold ms-1 mb-2">
-										Abonado : ${{
-											calcularAbono(verPrestamo.abono)
-										}}
-									</div>
-									<v-timeline density="compact" align="start">
-										<v-timeline-item
-											v-for="monto in verPrestamo.abono"
-											:key="monto"
-											dot-color="green"
-											size="x-small"
-										>
-											<div class="mb-4">
-												<div class="font-weight-normal">
-													<strong>
-														Abono: ${{
-															monto.monto.toLocaleString()
-														}}
-													</strong>
-												</div>
-												<div>
-													{{
-														formatDate(monto.fecha)
-													}}
-												</div>
-											</div>
-										</v-timeline-item>
-									</v-timeline>
-								</v-card-text>
-							</v-row>
-						</v-form>
-					</v-container>
-				</v-card-text>
-				<v-card-actions class="justify-end">
-					<v-btn
-						color="red-darken-1"
-						variant="tonal"
-						@click="dialogVerCobro = false"
-					>
-						Cerrar
-					</v-btn>
-				</v-card-actions>
-			</v-card>
-		</v-dialog>
+		<verCobro :cobro="verPrestamo" :dialogVerCobro="dialogVerCobro" @cerrarDialog="dialogVerCobro = false" />
 	</div>
 </template>
 <script>
 import Session from "@/validation/session";
 import axios from "axios";
 import Swal from "sweetalert2";
+import verCobro from "@/components/verCobro.vue";
 export default {
 	name: "rutasCobrador",
+	components: {
+		verCobro,
+	},
 	data: () => ({
 		api: import.meta.env.VITE_APP_API_URL,
 		searchTable: [],
@@ -605,7 +272,7 @@ export default {
 		rutasCobroCopia: [],
 		prestamos: [],
 		verPrestamo: {
-			abono: null,
+			abono: [],
 			mora: null,
 			_id: null,
 			cliente: {
@@ -740,20 +407,6 @@ export default {
 			const seconds = date.getSeconds().toString().padStart(2, "0");
 
 			return `${year}-${month}-${day} | ${hours}:${minutes}:${seconds}`;
-		},
-		calcularAbono(abono) {
-			let abonoTotal = 0;
-			abono.forEach((abono) => {
-				abonoTotal += abono.monto;
-			});
-			return abonoTotal.toLocaleString();
-		},
-		calcularRestante(abono, total) {
-			let abonoTotal = 0;
-			abono.forEach((abono) => {
-				abonoTotal += abono.monto;
-			});
-			return (total - abonoTotal).toLocaleString();
 		},
 		filtrarCobrosRuta(filtro = [], id_ruta) {
 			let indexRuta = this.rutasCobroCopia.findIndex(
@@ -1090,16 +743,6 @@ export default {
 				ghostClass: "ghost",
 			};
 		},
-		skill() {
-			let abonado = 0;
-			this.verPrestamo.abono.forEach((abono) => {
-				abonado += abono.monto;
-			});
-			if (this.verPrestamo.cuotas == 0) {
-				return 100;
-			}
-			return (abonado * 100) / this.verPrestamo.total;
-		},
 	},
 };
 </script>
@@ -1132,9 +775,11 @@ body {
 	box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
 	overflow: hidden;
 }
+
 .v-list.ruta {
 	padding: 0;
 }
+
 .button {
 	margin-top: 35px;
 }
@@ -1167,6 +812,7 @@ body {
 .list-group-item i {
 	cursor: pointer;
 }
+
 .list-group-item::marker {
 	content: "";
 }
@@ -1186,12 +832,13 @@ body {
 		margin-top: 20px !important;
 	}
 
-	.cobro > * {
+	.cobro>* {
 		max-width: 100% !important;
 		width: 100%;
 		justify-content: start !important;
 	}
-	.cobro > .estados {
+
+	.cobro>.estados {
 		justify-content: start;
 	}
 }
@@ -1202,16 +849,16 @@ body {
 		flex-direction: column;
 	}
 
-	.cobro-item > * {
+	.cobro-item>* {
 		max-width: 100% !important;
 		width: 100%;
 	}
 
-	.cobro-item > .v-list-item__append {
+	.cobro-item>.v-list-item__append {
 		flex-wrap: wrap;
 	}
 
-	.cobro-item > .v-list-item__content > * {
+	.cobro-item>.v-list-item__content>* {
 		white-space: break-spaces !important;
 	}
 }
@@ -1220,6 +867,7 @@ body {
 	.col-select {
 		width: 90% !important;
 	}
+
 	.showSelect {
 		display: block !important;
 	}

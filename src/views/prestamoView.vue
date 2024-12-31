@@ -85,6 +85,7 @@
           <v-container>
             <v-form>
               <v-row>
+                {{ verPrestamo }}
                 <v-progress-linear v-model="skill" color="green" height="25">
                   <template v-slot:default="{ value }">
                     <strong>{{ Math.ceil(value) }}%</strong>
@@ -265,7 +266,7 @@
                   <v-col md="6" lg="6" sm="12" cols="12">
                     <VueDatePicker format="yyyy-MM-dd" :rules="campoRules" :enable-time-picker="false"
                       cancelText="Cancelar" locale="es" selectText="Seleccionar" v-model="fechaAdd"
-                      :min-date="new Date(fVenta)" placeholder="Selecciona fecha del abono" teleport-center
+                      :min-date="new Date(fVenta) " placeholder="Selecciona fecha del abono" teleport-center
                       @cleared="fechaAdd = null" />
                   </v-col>
                 </v-row>
@@ -1348,7 +1349,7 @@ export default {
         });
     },
 
-    async eliminarAbono(idPrestamo, indice){
+    async eliminarAbono(idPrestamo, indice) {
       Swal.fire({
         title: "Estas seguro de eliminar el abono?",
         showCancelButton: true,
@@ -1358,10 +1359,10 @@ export default {
         if (result.isConfirmed) {
           this.dialogVePrestamo = false;
           await axios
-              .delete(`${this.api}/prestamo/${idPrestamo}/cobro/${indice}`, {
-                headers: {
-                  Authorization: `Bearer ${this.token}`,
-                },
+            .delete(`${this.api}/prestamo/${idPrestamo}/cobro/${indice}`, {
+              headers: {
+                Authorization: `Bearer ${this.token}`,
+              },
               })
               .then(async () => {
                 await this.actualizarTodo();  

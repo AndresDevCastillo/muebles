@@ -33,8 +33,8 @@
               {{ value ? "Atrasado" : "No" }}
             </v-chip>
           </template>
+          
           <!-- eslint-disable-next-line vue/valid-v-slot -->
-
           <template v-slot:item.actions="{ item }">
             <v-row class="ga-2" no-gutters>
               <v-icon size="large" @click="abonarFunction(Object.assign({}, item))">
@@ -108,86 +108,8 @@
         </v-data-table>
       </v-card-text>
     </v-card>
-    <v-dialog v-model="dialogVerCobro" persistent width="700">
-      <v-card>
-        <v-card-text>
-          <v-container>
-            <v-form>
-              <v-row>
-                <v-progress-linear v-model="skill" color="green" height="25">
-                  <template v-slot:default="{ value }">
-                    <strong>{{ Math.ceil(value) }}%</strong>
-                  </template>
-                </v-progress-linear>
-                <v-col cols="12">
-                  <v-text-field label="Documento" type="text" required variant="outlined"
-                    v-model="verPrestamo.cliente.documento" disabled></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field variant="outlined" label="Nombre" disabled required
-                    v-model="verPrestamo.cliente.nombres"></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field variant="outlined" label="Apellido" disabled required
-                    v-model="verPrestamo.cliente.apellidos"></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field variant="outlined" label="Ruta" disabled required
-                    v-model="verPrestamo.cliente.direccion.nombre"></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field variant="outlined" label="Producto" disabled required
-                    v-model="verPrestamo.producto"></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field variant="outlined" label="Fecha de Inicio" disabled required
-                    v-model="verPrestamo.fecha_inicio"></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field variant="outlined" label="N° Cuotas" disabled required
-                    v-model="verPrestamo.cuotas"></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field variant="outlined" label="Cuotas atrasadas" disabled required
-                    v-model="verPrestamo.cuotas_atrasadas"></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field variant="outlined" label="Total" disabled required
-                    v-model="verPrestamo.total"></v-text-field>
-                </v-col>
-                <v-card-text v-if="verPrestamo.cuotas !== 0">
-                  <div class="font-weight-bold ms-1 mb-2">
-                    Restante : ${{
-                    calcularRestante(verPrestamo.abono, verPrestamo.total)
-                    }}
-                  </div>
-                  <div class="font-weight-bold ms-1 mb-2">
-                    Abonado : ${{ calcularAbono(verPrestamo.abono) }}
-                  </div>
-                  <v-timeline density="compact" align="start">
-                    <v-timeline-item v-for="monto in verPrestamo.abono" :key="monto" dot-color="green" size="x-small">
-                      <div class="mb-4">
-                        <div class="font-weight-normal">
-                          <strong>
-                            Abono: ${{ monto.monto.toLocaleString() }}
-                          </strong>
-                        </div>
-                        <div>{{ formatDate(monto.fecha) }}</div>
-                      </div>
-                    </v-timeline-item>
-                  </v-timeline>
-                </v-card-text>
-              </v-row>
-            </v-form>
-          </v-container>
-        </v-card-text>
-        <v-card-actions class="justify-end">
-          <v-btn color="red-darken-1" variant="tonal" @click="dialogVerCobro = false">
-            Cerrar
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+		<verCobro :cobro="verPrestamo" :dialogVerCobro="dialogVerCobro" @cerrarDialog="dialogVerCobro = false" />
+    
     <v-dialog v-model="dialogAbonar" persistent width="700">
       <v-card>
         <v-card-text>
@@ -258,9 +180,10 @@ import nuevoCliente from "@/components/nuevoCliente.vue";
 import crearVenta from "@/components/crearVenta.vue";
 import axios from "axios";
 import Swal from "sweetalert2";
+import verCobro from "@/components/verCobro.vue";
 export default {
   name: "cobroVista",
-  components: { nuevoCliente, crearVenta },
+  components: { nuevoCliente, crearVenta, verCobro },
   data: () => ({
     api: import.meta.env.VITE_APP_API_URL,
     loadingTable: false,
