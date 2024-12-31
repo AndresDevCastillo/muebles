@@ -62,7 +62,19 @@
           class="elevation-1"
           :search="searchCliente"
         >
-          <!-- eslint-disable-next-line vue/valid-v-slot -->
+        <!-- eslint-disable-next-line vue/valid-v-slot -->
+        <template v-slot:item.clasificacion="{item}">
+          <v-chip :color="getColorClasificacion(item.clasificacion)" variant="flat">
+            {{ item.clasificacion }}
+          </v-chip>
+        </template>
+        <!-- eslint-disable-next-line vue/valid-v-slot -->
+        <template v-slot:item.estado="{item}">
+          <v-chip :color="getColorEstado(item.estado)" variant="flat">
+            {{ item.estado }}
+          </v-chip>
+        </template>
+        <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template v-slot:item.actions="{ item }">
             <v-icon
               size="small"
@@ -150,7 +162,25 @@
                     :rules="nombreRules"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12">
+                <v-col cols="12" sm="6">
+                   <v-autocomplete
+                    variant="outlined"
+                    :items="clasificaciones"
+                    v-model="formClienteEditar.clasificacion"
+                    :rules="[(v) => !!v || 'Seleccione una clasificación']"
+                    no-data-text="No hay clasificaciones"
+                  ></v-autocomplete>
+                </v-col>
+                <v-col cols="12" sm="6">
+                   <v-autocomplete
+                    variant="outlined"
+                    :items="estados"
+                    v-model="formClienteEditar.estado"
+                    :rules="[(v) => !!v || 'Seleccione un estado']"
+                    no-data-text="No hay estados"
+                  ></v-autocomplete>
+                </v-col>
+                <v-col cols="12" sm="6">
                   <v-autocomplete
                     :items="rutas"
                     variant="outlined"
@@ -162,6 +192,20 @@
                     :rules="[(v) => !!v || 'Seleccione una ruta']"
                     no-data-text="No hay rutas"
                   ></v-autocomplete>
+                </v-col>
+                 <v-col
+                  cols="12"
+                  sm="12"
+                >
+                  <v-textarea
+                    label="Descripción"
+                    row-height="25"
+                    rows="3"
+                    variant="outlined"
+                    auto-grow
+                    v-model="formClienteEditar.descripcion"
+                    shaped
+                  ></v-textarea>
                 </v-col>
               </v-row>
             </v-form>
@@ -362,6 +406,42 @@
                     v-model="verCliente.direccion.mensual.semanas"
                   ></v-text-field>
                 </v-col>
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
+                  <v-text-field
+                    variant="outlined"
+                    label="Clasificación"
+                    required
+                    disabled
+                    v-model="verCliente.clasificacion"
+                  ></v-text-field>
+                </v-col>
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
+                  <v-text-field
+                    variant="outlined"
+                    label="Estado"
+                    required
+                    disabled
+                    v-model="verCliente.estado"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="12">
+                  <v-textarea
+                    label="Descripción"
+                    row-height="25"
+                    rows="3"
+                    variant="outlined"
+                    auto-grow
+                    disabled
+                    v-model="verCliente.descripcion"
+                    shaped
+                  ></v-textarea>
+                </v-col>
               </v-row>
               <v-col cols="12">
                 <h3>Referencias del cliente</h3>
@@ -484,7 +564,19 @@ export default {
       { title: "Apellido", key: "apellidos" },
       { title: "Telefono", key: "telefono" },
       { title: "Ruta", key: "direccion.nombre" },
+      { title: "Clasificación", key: "clasificacion" },
+      { title: "Estado", key: "estado" },
       { title: "Accion", key: "actions", sortable: false },
+    ],
+    clasificaciones: [
+      "Buena Paga",
+      "Regular",
+      "Mala Paga",
+    ],
+    estados: [
+      "Activo",
+      "Finalizado",
+      "Retirado",
     ],
     formClienteEditar: {
       id: null,
@@ -494,6 +586,9 @@ export default {
       telefono: null,
       correo: null,
       direccion: null,
+      clasificacion: null,
+      descripcion: null,
+      estado: null,
     },
     ubicacionVieja: {
       lat: null,
@@ -681,6 +776,9 @@ export default {
               telefono: null,
               correo: null,
               direccion: null,
+              clasificacion: null,
+              descripcion: null,
+              estado: null,
             };
             return Swal.fire({
               icon: "success",
@@ -775,6 +873,30 @@ export default {
     verClienteFunction(item) {
       this.verCliente = item;
       this.dialogClienteVer = true;
+    },
+    getColorClasificacion(clasificacion) {
+      switch (clasificacion) {
+        case "Buena Paga":
+          return "green";
+        case "Regular":
+          return "blue";
+        case "Mala Paga":
+          return "red";
+        default:
+          return "blue";
+      }
+    },
+    getColorEstado(Estado) {
+      switch (Estado) {
+        case "Activo":
+          return "green";
+        case "Finalizado":
+          return "yellow";
+        case "Retirado":
+          return "red";
+        default:
+          return "blue";
+      }
     },
   },
   async created() {
