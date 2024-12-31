@@ -47,6 +47,22 @@
 									<v-text-field variant="outlined" label="Total" disabled required
 										v-model="localVerCobro.total"></v-text-field>
 								</v-col>
+                                <v-col cols="12">
+                                    <v-textarea
+                                        label="Nota"
+                                        row-height="25"
+                                        rows="3"
+                                        variant="outlined"
+                                        auto-grow
+                                        shaped
+                                        v-model="localVerCobro.nota"
+                                        ></v-textarea>
+                                </v-col>
+                                <v-col cols="12">
+                                    <v-btn color="blue-darken-1" variant="tonal" @click="actualizarNota(localVerCobro._id, localVerCobro.nota)">
+                                    Actualizar Nota
+                                </v-btn>
+                                </v-col>
 								<v-card-text v-if="localVerCobro.cuotas !== 0">
 									<div class="font-weight-bold ms-1 mb-2">
 										Restante : ${{
@@ -95,6 +111,8 @@
     </div>
 </template>
 <script>
+import Swal from "sweetalert2";
+import axios from "axios";
 export default {
 	name: 'VerCobro',
 	props: {
@@ -108,6 +126,8 @@ export default {
 	},
 	data() {
 		return {
+            token: null,
+            api: import.meta.env.VITE_APP_API_URL,
 			localVerCobro: this.cobro ? { ...this.cobro } : { ...this.defaultCobro }
 		};
 	},
@@ -179,6 +199,36 @@ export default {
 
 			return `${year}-${month}-${day} | ${hours}:${minutes}:${seconds}`;
 		},
+        async actualizarNota(id, nota) {
+            await axios.post(`${this.api}/prestamo/actualizar-nota`, {id,nota}, {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`
+                    }
+                }).then((resp) => {
+                    if (resp.status == 201) {
+                        return Swal.fire({
+                            icon: 'success',
+                            title: 'Exitoso',
+                            text: 'nota actualizada correctamente!',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    }
+                }).catch(async error => {
+                    console.log(error);
+                    switch (error.response.status) {
+                        case 401:
+                            await Swal.fire({ icon: 'warning', title: 'Tu sesión expiro, vuelve a iniciar sesión', showConfirmButton: false, timer: 1500 });
+                            this.$store.commit('setusuario', { usuario: null, hora_login: null });
+                            this.$router.push('/');
+                            break;
+
+                        default:
+                            Swal.fire({ icon: 'error', title: 'No se actualizar nota', showConfirmButton: false, timer: 1500 });
+                            break;
+                    }
+                });
+        }
 	},
     computed: {
         skill() {
@@ -191,6 +241,9 @@ export default {
 			}
 			return (abonado * 100) / this.localVerCobro.total;
 		},
+    },
+    async mounted() {
+        this.token = this.$store.getters.usuario.usuario.access_token;
     }
 }
 </script>
