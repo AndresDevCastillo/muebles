@@ -371,6 +371,11 @@ export default {
           this.abonosHoy = resp.data[1];
           const data_cobro_ruta = resp.data[2];
           let ctx = document.getElementById("graficaAbonoRutas");
+
+          if (this.cobroRutaGrafica) {
+            this.cobroRutaGrafica.destroy();
+          }
+
           const cobro_ruta_bar = {
             type: "bar",
             data: {
@@ -404,6 +409,7 @@ export default {
           this.cobroRutaGrafica = new Chart(ctx, cobro_ruta_bar);
         })
         .catch((error) => {
+          console.log(error);
           switch (error.response.status) {
             case 401:
               Session.expiredSession();

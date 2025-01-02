@@ -3,34 +3,29 @@
     <v-card class="ma-6">
       <v-tabs v-model="tab" bg-color="primary">
         <v-tab value="Actual">Actual</v-tab>
+        <v-tab value="Rango">Rango</v-tab>
         <v-tab value="total">total</v-tab>
       </v-tabs>
       <v-card-text>
         <v-tabs-window v-model="tab">
           <v-tabs-window-item value="Actual">
             <v-row class="ma-6 mb-6">
-              <v-col cols="12"
-                ><v-card class="w-100 d-flex gananciasF">
+              <v-col cols="12"><v-card class="w-100 d-flex gananciasF">
                   <v-container>
                     <v-row dense>
                       <v-col md="4">
                         <div class="col-xxl-4 col-md-6">
-                          <div
-                            class="card revenue-card"
-                            :class="{
+                          <div class="card revenue-card" :class="{
                               'info-card-gana': hoy.total >= 0,
                               'info-card-pierde': hoy.total < 0,
-                            }"
-                          >
+                            }">
                             <div class="card-body">
                               <h5 class="card-title">
                                 Hoy <span>| {{ hoy.fecha }}</span>
                               </h5>
 
                               <div class="d-flex align-items-center">
-                                <div
-                                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                                >
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                                   <i class="bi bi-currency-dollar"></i>
                                 </div>
                                 <div class="ps-3">
@@ -39,8 +34,7 @@
                               </div>
                               <h4 class="card-title">
                                 Abono:
-                                <span> {{ hoy.abono.toLocaleString() }}</span
-                                ><br />
+                                <span> {{ hoy.abono.toLocaleString() }}</span><br />
                                 Ventas: <span> {{ hoy.ventas }}</span>
                               </h4>
                             </div>
@@ -50,13 +44,10 @@
 
                       <v-col md="4">
                         <div class="col-xxl-4 col-md-6">
-                          <div
-                            class="card info-card revenue-card"
-                            :class="{
+                          <div class="card info-card revenue-card" :class="{
                               'info-card-gana': mes.total >= 0,
                               'info-card-pierde': mes.total < 0,
-                            }"
-                          >
+                            }">
                             <div class="card-body">
                               <h5 class="card-title">
                                 Mensual
@@ -64,9 +55,7 @@
                               </h5>
 
                               <div class="d-flex align-items-center">
-                                <div
-                                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                                >
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                                   <i class="bi bi-currency-dollar"></i>
                                 </div>
                                 <div class="ps-3">
@@ -75,8 +64,7 @@
                               </div>
                               <h4 class="card-title">
                                 Abono:
-                                <span> {{ mes.abono.toLocaleString() }}</span
-                                ><br />
+                                <span> {{ mes.abono.toLocaleString() }}</span><br />
                                 Ventas: <span> {{ mes.ventas }}</span>
                               </h4>
                             </div>
@@ -86,22 +74,17 @@
 
                       <v-col md="4">
                         <div class="col-xxl-4 col-md-6">
-                          <div
-                            class="card info-card revenue-card"
-                            :class="{
+                          <div class="card info-card revenue-card" :class="{
                               'info-card-gana': yearC.total >= 0,
                               'info-card-pierde': yearC.total < 0,
-                            }"
-                          >
+                            }">
                             <div class="card-body">
                               <h5 class="card-title">
                                 Anual <span>| {{ yearC.fecha }}</span>
                               </h5>
 
                               <div class="d-flex align-items-center">
-                                <div
-                                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                                >
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                                   <i class="bi bi-currency-dollar"></i>
                                 </div>
                                 <div class="ps-3">
@@ -110,8 +93,7 @@
                               </div>
                               <h4 class="card-title">
                                 Abono:
-                                <span> {{ yearC.abono.toLocaleString() }}</span
-                                ><br />
+                                <span> {{ yearC.abono.toLocaleString() }}</span><br />
                                 Ventas: <span> {{ yearC.ventas }}</span>
                               </h4>
                             </div>
@@ -142,10 +124,40 @@
               </v-col>
             </v-row>
           </v-tabs-window-item>
+          <v-tabs-window-item value="Rango">
+            <v-row class="ma-6 mb-6">
+              <v-col cols="6">
+                <v-select label="Select" variant="outlined" :items="calendarOptions" item-title="text"
+                  item-value="value" v-model="selectedCalendarType"></v-select>
+              </v-col>
+              <v-col cols="6">
+                <VueDatePicker v-model="fechaRango" :range="selectedCalendarType === 'range'"
+                  :month-picker="selectedCalendarType === 'month'" :year-picker="selectedCalendarType === 'year'"
+                  :week-picker="selectedCalendarType === 'week'" :quarter-picker="selectedCalendarType === 'quarter'"
+                  :multi-dates="selectedCalendarType === 'multi-dates'" multi-calendars></VueDatePicker>
+              </v-col>
+              <v-col cols="12">
+                <v-btn color="green-darken-1" variant="tonal" @click="getGraficasPorRango" >
+                  Obtener
+                </v-btn>
+              </v-col>
+              <v-col cols="12">
+                <canvas class="mb-6" id="graficaPuebloRango"></canvas>
+              </v-col>
+              <v-col cols="12">
+                <canvas class="mb-6" id="graficaAbonoRutaRango"></canvas>
+              </v-col>
+              <v-col cols="12">
+                <canvas class="mb-6" id="graficaVentaVendedorRango"></canvas>
+              </v-col>
+              <v-col cols="12">
+                <canvas class="mb-6" id="graficaProductosRango"></canvas>
+              </v-col>
+            </v-row>
+          </v-tabs-window-item>
           <v-tabs-window-item value="total">
             <v-row class="ma-6 mb-6">
-              <v-col cols="12"
-                ><v-card class="w-100 d-flex gananciasF">
+              <v-col cols="12"><v-card class="w-100 d-flex gananciasF">
                   <v-container>
                     <v-row dense>
                       <v-col md="4">
@@ -154,9 +166,7 @@
                             <div class="card-body">
                               <h5 class="card-title">Abonos</h5>
                               <div class="d-flex align-items-center">
-                                <div
-                                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                                >
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                                   <i class="bi bi-currency-dollar"></i>
                                 </div>
                                 <div class="ps-3">
@@ -170,16 +180,12 @@
 
                       <v-col md="4">
                         <div class="col-xxl-4 col-md-6">
-                          <div
-                            class="card info-card revenue-card info-card-gana"
-                          >
+                          <div class="card info-card revenue-card info-card-gana">
                             <div class="card-body">
                               <h5 class="card-title">Ventas</h5>
 
                               <div class="d-flex align-items-center">
-                                <div
-                                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                                >
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                                   <i class="bi bi-currency-dollar"></i>
                                 </div>
                                 <div class="ps-3">
@@ -193,16 +199,12 @@
 
                       <v-col md="4">
                         <div class="col-xxl-4 col-md-6">
-                          <div
-                            class="card info-card revenue-card info-card-gana"
-                          >
+                          <div class="card info-card revenue-card info-card-gana">
                             <div class="card-body">
                               <h5 class="card-title">Total de Ventas</h5>
 
                               <div class="d-flex align-items-center">
-                                <div
-                                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                                >
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                                   <i class="bi bi-currency-dollar"></i>
                                 </div>
                                 <div class="ps-3">
@@ -230,35 +232,23 @@
                       <v-tabs-window-item value="ventas">
                         <v-col md="3" lg="2" sm="12" cols="auto">
                           <div class="d-flex align-center">
-                            <v-icon
-                              size="x-large"
-                              icon="mdi-store-edit"
-                            ></v-icon>
+                            <v-icon size="x-large" icon="mdi-store-edit"></v-icon>
                             <h1 class="px-3">Ventas</h1>
                           </div>
                         </v-col>
                         <v-col cols="12">
-                          <v-data-table
-                            items-per-page="13"
-                            :items="total.tablaPrestamos"
-                          />
+                          <v-data-table items-per-page="13" :items="total.tablaPrestamos" />
                         </v-col>
                       </v-tabs-window-item>
                       <v-tabs-window-item value="abonos">
                         <v-col md="3" lg="2" sm="12" cols="auto">
                           <div class="d-flex align-center">
-                            <v-icon
-                              size="x-large"
-                              icon="mdi-store-edit"
-                            ></v-icon>
+                            <v-icon size="x-large" icon="mdi-store-edit"></v-icon>
                             <h1 class="px-3">Abonos</h1>
                           </div>
                         </v-col>
                         <v-col cols="12">
-                          <v-data-table
-                            items-per-page="13"
-                            :items="total.tablaAbonos"
-                          />
+                          <v-data-table items-per-page="13" :items="total.tablaAbonos" />
                         </v-col>
                       </v-tabs-window-item>
                     </v-tabs-window>
@@ -285,6 +275,16 @@ export default {
     token: null,
     tab: null,
     tabsPrestamo: null,
+    calendarOptions: [
+      { text: "Múltiples Fechas", value: "multi-dates" },
+      { text: "Rango", value: "range" },
+      { text: "Semana", value: "week" },
+      { text: "Mes", value: "month" },
+      { text: "Cuatrimestre", value: "quarter" },
+      { text: "Año", value: "year" },
+    ],
+    selectedCalendarType: null, 
+    fechaRango: null,
     hoy: {
       fecha: "Lunes",
       total: 0,
@@ -337,6 +337,9 @@ export default {
     dataYearVenta: [],
     dataYearAbono: [],
     dataProductos: [],
+    graficaCobrosPorPueblo: null,
+    graficaVentaPorVendedor: null,
+    graficaVentaPorProducto: null,
     chart: null,
     datosCharts: null,
     colores: [
@@ -641,6 +644,152 @@ export default {
       this.chart = new Chart(ctx4, this.rutas);
       this.chart = new Chart(ctx5, this.productos);
     },
+    async getGraficasPorRango(){
+      await Axios.post(`${this.api}/prestamo/estadisticas/fechas`, this.fechasGraficaBody ,  {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      })
+        .then((resp) => {
+          if(this.graficaCobrosPorPueblo){
+            this.graficaCobrosPorPueblo.destroy();
+          }
+          const cobrosPorPueblo = resp.data.cobrosPorPueblo;
+          let ctxPuebloRango = document.getElementById("graficaPuebloRango");
+          const graficaPuebloRango = {
+            type: "bar",
+            data: {
+              labels: cobrosPorPueblo.labels,
+              datasets: [
+                {
+                  label: "Rutas",
+                  data: cobrosPorPueblo.data,
+                  borderWidth: 1,
+                  backgroundColor: this.colores,
+                },
+              ],
+            },
+            options: {
+              plugins: {
+                title: {
+                  display: true,
+                  text: "Rutas",
+                },
+                legend: {
+                  display: false,
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                },
+              },
+            },
+          };
+          this.graficaCobrosPorPueblo = new Chart(ctxPuebloRango, graficaPuebloRango);
+
+          if(this.graficaVentaPorVendedor){
+            this.graficaVentaPorVendedor.destroy();
+          }
+          const ventasPorVendedor = resp.data.ventasPorVendedor;
+          let ctxVentaVendedorRango = document.getElementById("graficaVentaVendedorRango");
+          const graficaVentaVendedorRango = {
+            type: "bar",
+            data: {
+              labels: ventasPorVendedor.labels,
+              datasets: [
+                {
+                  label: "Vendedores",
+                  data: ventasPorVendedor.data,
+                  borderWidth: 1,
+                  backgroundColor: this.colores,
+                },
+              ],
+            },
+            options: {
+              plugins: {
+                title: {
+                  display: true,
+                  text: "Ventas por Vendedor",
+                },
+                legend: {
+                  display: false,
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                },
+              },
+            },
+          };
+          this.graficaVentaPorVendedor = new Chart(ctxVentaVendedorRango, graficaVentaVendedorRango);
+
+          if(this.graficaVentaPorProducto){
+            this.graficaVentaPorProducto.destroy();
+          }
+          const ventasPorProducto = resp.data.ventasPorProducto;
+          let ctxProductosRango = document.getElementById("graficaProductosRango");
+          const graficaProductosRango = {
+            type: "bar",
+            data: {
+              labels: ventasPorProducto.labels,
+              datasets: [
+                {
+                  label: "Productos",
+                  data: ventasPorProducto.data,
+                  borderWidth: 1,
+                  backgroundColor: this.colores,
+                },
+              ],
+            },
+            options: {
+              plugins: {
+                title: {
+                  display: true,
+                  text: "Productos",
+                },
+                legend: {
+                  display: false,
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                },
+              },
+            },
+          };
+          this.graficaVentaPorProducto = new Chart(ctxProductosRango, graficaProductosRango);
+        })
+        .catch(async (error) => {
+          console.log(error);
+          switch (error.response.status) {
+            case 401:
+              await Swal.fire({
+                icon: "warning",
+                title: "Tu sesión expiro, vuelve a iniciar sesión",
+                showConfirmButton: false,
+                timer: 1500,
+              });
+              this.$store.commit("setusuario", {
+                usuario: null,
+                hora_login: null,
+              });
+              this.$router.push("/");
+              break;
+
+            default:
+              Swal.fire({
+                icon: "error",
+                title: "No se pudo obtener las graficas",
+                showConfirmButton: false,
+                timer: 1500,
+              });
+              break;
+          }
+        });
+    },
     async listarGraficaTotal() {
       await Axios.get(`${this.api}/prestamo/estadisticas/total`, {
         headers: {
@@ -682,7 +831,102 @@ export default {
       this.chart = new Chart(ctx, this.year); */
     },
   },
+  watch: {
+    selectedCalendarType() {
+      this.fechaRango = null;
+    },
+  },
+  computed: {
+    fechasGraficaBody() {
+      if (!this.fechaRango) {
+        return [];
+      }
+      const formatDate = (date, isStart) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = isStart ? '00' : '23';
+        const minutes = isStart ? '00' : '59';
+        const seconds = isStart ? '00' : '59';
+        const milliseconds = isStart ? '000' : '999';
 
+
+        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}Z`;
+      };
+
+      switch (this.selectedCalendarType) {
+        case "multi-dates":
+          return this.fechaRango.map(date => {
+            const start = new Date(date);
+            const end = new Date(date);
+            start.setHours(0, 0, 0, 0)
+            end.setHours(23, 59, 59, 999);
+            return {
+              inicio: formatDate(start, true),
+              fin: formatDate(end, false),
+            };
+          });
+        case "range": {
+          const start = new Date(this.fechaRango[0]);
+          const end = new Date(this.fechaRango[1]);
+          start.setHours(0, 0, 0, 0)
+          end.setHours(23, 59, 59, 999);
+          return [{
+            inicio: formatDate(start, true),
+            fin: formatDate(end, false),
+          }];
+        }
+        case "week": {
+          const start = new Date(this.fechaRango[0]);
+          const end = new Date(this.fechaRango[1]);
+          start.setHours(0, 0, 0, 0)
+          end.setHours(23, 59, 59, 999);
+          return [{
+            inicio: formatDate(start, true),
+            fin: formatDate(end, false),
+          }];
+        }
+        case "month": {
+          const firstDayOfMonth = new Date(this.fechaRango.year, this.fechaRango.month - 1, 1);
+          const lastDayOfMonth = new Date(this.fechaRango.year, this.fechaRango.month, 0);
+          firstDayOfMonth.setHours(0, 0, 0, 0)
+          lastDayOfMonth.setHours(23, 59, 59, 999);
+
+          return [{
+            inicio: formatDate(firstDayOfMonth, true),
+            fin: formatDate(lastDayOfMonth, false),
+          }];
+        }
+        case "quarter": {
+          const quarterStartDate = new Date(this.fechaRango);
+          const month = quarterStartDate.getMonth();
+          const quarterStartMonth = Math.floor(month / 3) * 3;
+          const quarterEndMonth = quarterStartMonth + 2;
+          const quarterStart = new Date(quarterStartDate.getFullYear(), quarterStartMonth, 1);
+          const quarterEndDate = new Date(quarterStartDate.getFullYear(), quarterEndMonth + 1, 0);
+          quarterStart.setHours(0, 0, 0, 0)
+          quarterEndDate.setHours(23, 59, 59, 999);
+
+          return [{
+            inicio: formatDate(quarterStart, true),
+            fin: formatDate(quarterEndDate, false),
+          }];
+        }
+        case "year": {
+          const firstDayOfYear = new Date(this.fechaRango, 0, 1);
+          const lastDayOfYear = new Date(this.fechaRango, 11, 31);
+          firstDayOfYear.setHours(0, 0, 0, 0)
+          lastDayOfYear.setHours(23, 59, 59, 999);
+          return [{
+            inicio: formatDate(firstDayOfYear, true),
+            fin: formatDate(lastDayOfYear, false),
+          }];
+        }
+        default:
+          return [];
+      }
+    },
+  },
   async created() {
     const invalid = await Session.expiredSession();
     if (!invalid) {

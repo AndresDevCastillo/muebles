@@ -647,16 +647,13 @@ export default {
         this.abonarVentaAntigua.venta &&
         this.abonarVentaAntigua.fecha
       ) {
-        const f = `${this.abonarVentaAntigua.fecha.getFullYear()}-${(this.abonarVentaAntigua.fecha.getMonth() + 1 < 10 ? "0" : "") +
-          (this.abonarVentaAntigua.fecha.getMonth() + 1)
-          }-${(this.abonarVentaAntigua.fecha.getDate() < 10 ? "0" : "") +
-          this.abonarVentaAntigua.fecha.getDate()
-          }`;
+        const f = new Date(this.abonarVentaAntigua.fecha);
+        console.log(typeof f);
         this.abonarVentaAntigua.btnAbonar = true;
         const paquete = {
           venta: this.abonarVentaAntigua.venta,
           monto: parseInt(this.abonarVentaAntigua.monto),
-          fecha: `${f}T00:00:00-05:00`,
+          fecha: f,
         };
         await axios
           .put(`${this.api}/prestamo/abonar/venta`, paquete, {
