@@ -137,7 +137,7 @@
                   :multi-dates="selectedCalendarType === 'multi-dates'" multi-calendars></VueDatePicker>
               </v-col>
               <v-col cols="12">
-                <v-btn color="green-darken-1" variant="tonal" @click="getGraficasPorRango" >
+                <v-btn color="green-darken-1" variant="tonal" @click="getGraficasPorRango">
                   Obtener
                 </v-btn>
               </v-col>
@@ -146,6 +146,9 @@
               </v-col>
               <v-col cols="12">
                 <canvas class="mb-6" id="graficaAbonoRutaRango"></canvas>
+              </v-col>
+              <v-col cols="12">
+                <canvas class="mb-6" id="graficaAbonoCiudadRango"></canvas>
               </v-col>
               <v-col cols="12">
                 <canvas class="mb-6" id="graficaVentaVendedorRango"></canvas>
@@ -340,6 +343,7 @@ export default {
     graficaCobrosPorPueblo: null,
     graficaVentaPorVendedor: null,
     graficaVentaPorProducto: null,
+    graficaAbonoCiudadRango: null,
     chart: null,
     datosCharts: null,
     colores: [
@@ -687,6 +691,43 @@ export default {
             },
           };
           this.graficaCobrosPorPueblo = new Chart(ctxPuebloRango, graficaPuebloRango);
+
+          if (this.graficaAbonoCiudadRango){
+            this.graficaAbonoCiudadRango.destroy();
+          }
+          const cobrosPorCiudad = resp.data.cobrosPorCiudad;
+          let ctxAbonoCiudadRango = document.getElementById("graficaAbonoCiudadRango");
+          const graficaAbonoCiudadRango = {
+            type: "bar",
+            data: {
+              labels: cobrosPorCiudad.labels,
+              datasets: [
+                {
+                  label: "Ciudades",
+                  data: cobrosPorCiudad.data,
+                  borderWidth: 1,
+                  backgroundColor: this.colores,
+                },
+              ],
+            },
+            options: {
+              plugins: {
+                title: {
+                  display: true,
+                  text: "Ciudades",
+                },
+                legend: {
+                  display: false,
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                },
+              },
+            },
+          };
+          this.graficaAbonoCiudadRango = new Chart(ctxAbonoCiudadRango, graficaAbonoCiudadRango);
 
           if(this.graficaVentaPorVendedor){
             this.graficaVentaPorVendedor.destroy();
