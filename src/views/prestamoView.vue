@@ -152,7 +152,7 @@
                           </div>
                           <div>{{ formatDate(monto.fecha) }}</div>
                         </div>
-                        <v-btn color="red-darken-1" @click="eliminarAbono(verPrestamo._id, index)"
+                        <v-btn color="red-darken-1" v-if="username == 'Brandon' || username == 'Nancy'" @click="eliminarAbono(verPrestamo._id, index)"
                           icon="mdi-delete-outline"></v-btn>
                       </div>
                     </v-timeline-item>
@@ -467,6 +467,7 @@ export default {
   components: { nuevoCliente, modalVendedores, crearVenta },
   data: () => ({
     token: null,
+    username: '',
     api: import.meta.env.VITE_APP_API_URL,
     valid: true,
     disableBtn: false,
@@ -1465,6 +1466,7 @@ export default {
   async created() {
     const invalid = await Session.expiredSession();
     if (!invalid) {
+      this.username = this.$store.getters.usuario.usuario;
       this.token = this.$store.getters.usuario.usuario.access_token;
       this.$emit("loadingSweet");
       await this.getRutas();
