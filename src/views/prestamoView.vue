@@ -143,7 +143,7 @@
                     <v-timeline-item v-for="monto, index in verPrestamo.abono" :key="monto" dot-color="green"
                       size="x-small">
                       <div class="d-flex">
-                        <div class="mb-4 mr-4 ">
+                        <div class="mb-4 mr-4 ">  
                           <div class="font-weight-normal">
                             <strong>
                               Abono: ${{ monto.monto.toLocaleString() }}
@@ -1466,7 +1466,7 @@ export default {
   async created() {
     const invalid = await Session.expiredSession();
     if (!invalid) {
-      this.username = this.$store.getters.usuario.usuario;
+      this.username = this.$store.getters.usuario.usuario.usuario;
       this.token = this.$store.getters.usuario.usuario.access_token;
       this.$emit("loadingSweet");
       await this.getRutas();
